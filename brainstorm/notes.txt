@@ -25,7 +25,7 @@ how many jobs checkpoint simultaneously?
 Panda paper: checkpoint scheduling: does it already covers the case where C/q is equal 
   everywhere and we just do checkpoint staggering (find ref)?
 
-toto
+
 
 Some related work: 
 single proc checkpoint model: http://mescal.imag.fr/membres/derrick.kondo/pubs/slim_ccgrid11.pdf
@@ -33,3 +33,19 @@ group coordinated ckpt with staggering: http://nowlab.cse.ohio-state.edu/static/
 burst buffers and ckpt model: http://ieeexplore.ieee.org/document/6846437/?arnumber=6846437&tag=1
 https://asc.llnl.gov/DOE-COE-Mtg-2016/talks/3-09_Mohror.pdf
 
+====================================================================
+2nd meeting
+
+Problem statement: 
+With multiple applications: 
+consider the group of apps Fi: fault tolerant apps
+group of apps Nj: not fault tolerant apps. 
+
+Compute the evolution of Waste (in cpuhours) for the platform when considering that some of the Ni move to Fi. 
+
+Then Waste(Nj)->Waste(Fj); but Waste(Fi) increases (due to checkpoint I/O collisions, and/or changes in Ti, the checkpoint period for Fi, so as to avoid checkpoint I/O collisions and moving away from Ti^opt).
+
+From the waste formula we expect the cost of W(Ti) to be increasing linearly with q (the number of procs in Fi) when Ti>Ti^opt. 
+
+
+We can also compute the platform waste with Wp=%ft Wopt + %nft 1/mu (Makespan/2)
