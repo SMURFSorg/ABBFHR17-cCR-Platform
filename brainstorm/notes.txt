@@ -1,0 +1,33 @@
+SMURF work meeting: 
+
+General problem: Interference I/O intra-inter from C/R; Model for platform efficiency with multiple apps
+
+Dali-opt: proba of interference -> distance to real optimal due to increase in C
+
+strategies: some app C/R, some do not: is efficiency better?
+
+new Dali: optimal freq for multiple applications considering the spread of the 
+random variable with inter-C/R
+  Step2: Dali-interopt: accounting for interference, what is new Daliopt? 
+  Step3: dali-opt + delay (to avoid interference), how far from real opt?
+  Step4: optimization against risk (favor large apps, favor apps with oldest ckpt)
+
+problem: how long each app lasts? that's difficult to estimate
+how to model w/o conditional probas?
+burst buffer impact?
+
+open question: 
+how many jobs checkpoint simultaneously? 
+  hypothesis: 1 job saturates the I/O so that's enough
+  dig: how many jobs are needed to saturate I/O with C/R ?
+    we need app traces to know I/O observed (and C/R activities w/r to memory size)
+
+Panda paper: checkpoint scheduling: does it already covers the case where C/q is equal 
+  everywhere and we just do checkpoint staggering (find ref)?
+
+Some related work: 
+single proc checkpoint model: http://mescal.imag.fr/membres/derrick.kondo/pubs/slim_ccgrid11.pdf
+group coordinated ckpt with staggering: http://nowlab.cse.ohio-state.edu/static/media/publications/abstract/gao-icpp07.pdf
+burst buffers and ckpt model: http://ieeexplore.ieee.org/document/6846437/?arnumber=6846437&tag=1
+https://asc.llnl.gov/DOE-COE-Mtg-2016/talks/3-09_Mohror.pdf
+
