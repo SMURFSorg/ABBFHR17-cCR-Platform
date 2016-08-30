@@ -25,6 +25,8 @@ how many jobs checkpoint simultaneously?
 Panda paper: checkpoint scheduling: does it already covers the case where C/q is equal 
   everywhere and we just do checkpoint staggering (find ref)?
 
+toto
+
 Some related work: 
 single proc checkpoint model: http://mescal.imag.fr/membres/derrick.kondo/pubs/slim_ccgrid11.pdf
 group coordinated ckpt with staggering: http://nowlab.cse.ohio-state.edu/static/media/publications/abstract/gao-icpp07.pdf
