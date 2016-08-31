@@ -28,13 +28,41 @@ p\frac{M}{b_{io}} & \leq \sqrt{2\frac{M}{b_{io}}\mu_{ind}}\\
 b_{io} & \geq \frac{M\times p^2}{2\mu_{ind}}
 \end{array}$$
 
-Instantiating with $M = 8GB$, $p$ varying between 1,000 and 100,000, and $\mu_{ind}$ between 20 years and 80 years, we get Figure~\ref{fig:minio}. So... There is no problem? Indeed, if the platform can checkpoint a capacity application at the Daly optimal period, there is no problem. However, projected machines cannot do so for reasonable $\mu_{ind}$. Let's illustrate this in Figure~\ref{fig:projectedmachines}.
+\begin{figure}[h!]
+  \begin{center}
+    \includegraphics[width=.6\linewidth]{biomin.png}
+  \end{center}
+  \caption{Minimal platform I/O bandwidth requirement to allow independent checkpoint intervals\label{fig:minio}}
+\end{figure}
+ 
+Instantiating with $M = 8GB$, $p$ varying between 1,000 and 100,000, and $\mu_{ind}$ between 20 years and 80 years, we get Figure~\ref{fig:minio}. So... There is no problem? Indeed, if the platform can checkpoint a capacity application at the Daly optimal period, there is no problem. Projected machines seem to be able to do so for reasonable $\mu_{ind}$. Let's illustrate this in Figures~\ref{fig:csa-fs}, \ref{fig:csa-nvram}, \ref{fig:exa}: for a few machines, with a varying $\mu_{ind}$, this figure shows the ratio between the MTBF of the system and the time it takes using this I/O system to dump 60\% of the entire memory. Machines are described below:
+
+\begin{description}
+\item[Cori] Found in Jeff Vetters slides at the scheduling workshop: Memory is 1 PB, with 1.5PB of NVRAM. 9,300 nodes, 744GB/s I/O bandwidth. As the NVRAM is large enough to store twice 60\% of the main memory, we consider two subsystems: CoriNVRAM, where the checkpoints are stored scalably on NVRAM (at 10GB/s/node), and CoriFS, where checkpoints are stored into the main filesystem (at 744GB/s/system)
+\item[Summit] Found in Jeff Vetters slides at the scheduling workshop: Memory is 1.74PB, with 2.8PB of NVRAM. 3,500 nodes, 1TB/s I/O bandwidth. As for Cori, we consider SummitNVRAM and SummitFS
+\item[Aurora] Found in Jeff Vetters slides at the scheduling workshop: Memory is 7 PB, with 'on package memory local memory and persistant memory.' This is unclear what it means, so for AuroraNVRAM, we take the option 2.3PB main, 4.6PB NVRAM, and for AuroraFS, we take 7PB main. 50,000 nodes, 1TB/s I/O bandwidth.
+\item[exa] Found in Jeff Vetters slides at the scheduling workshop: Memory is 32PB to 64PB, 100,000 to 1,000,000 nodes, I/O bandwidth between 30TB/s and 60TB/s. We consider the 8 options: exa1 (32PB, $10^5$, 30TB/s), exa2 (64PB, $10^5$, 30TB/s), exa3 (32PB, $10^6$, 30TB/s), exa4 (64PB, $10^6$, 30TB/s), exa5 (32PB, $10^5$, 60TB/s), exa6 (64PB, $10^5$, 60TB/s), exa7 (32PB, $10^6$, 60TB/s), exa8 (64PB, $10^6$, 60TB/s)
+\end{description}
 
 \begin{figure}[h!]
 \begin{center}
-  \includegraphics[width=.6\linewidth]{biomin.png}
+  \includegraphics[width=.6\linewidth]{csa-fs.png}
 \end{center}
-\caption{Minimal platform I/O bandwidth requirement to allow independent checkpoint intervals\label{fig:minio}}
+\caption{Minimal platform checkpoint time on the filesystem for Cori, Summit and Aurora, as a ratio of the machine MTBF, and function of the MTBF of a single node (in s)\label{fig:csa-fs}}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{center}
+  \includegraphics[width=.6\linewidth]{csa-nvram.png}
+\end{center}
+\caption{Minimal platform checkpoint time on their local NVRAM for Cori, Summit and Aurora, as a ratio of the machine MTBF and function of the MTBF of a single node (in s)\label{fig:csa-nvram}}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{center}
+  \includegraphics[width=.6\linewidth]{exa.png}
+\end{center}
+\caption{Minimal platform checkpoint time on the filesystem for exascale putative machines, as a ratio of the machine MTBF and function of the MTBF of a single node (in s)\label{fig:exa}}
 \end{figure}
 
 \end{document}
