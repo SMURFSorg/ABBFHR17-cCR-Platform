@@ -10,7 +10,7 @@
 
 \maketitle
 
-Consider a platform that is not well balanced to do capacity checkpointing: either because the applications are doing interfering I/O, or because the I/O is a bottleneck. Production runs can still benefit significantly from cCR techniques. For example, take a platform with the following characteristics:
+Consider a platform that is not well balanced to do capacity checkpointing: either because the applications are doing interfering I/O, or because the I/O is a bottleneck. Production runs can still benefit significantly from CR techniques. For example, take a platform with the following characteristics:
 
 \begin{center}
 \begin{tabular}{l|c|l}
@@ -22,15 +22,19 @@ Consider a platform that is not well balanced to do capacity checkpointing: eith
 \end{tabular}
 \end{center}
 
-The time to checkpoint a capacity run is $p\frac{M \rho}{\beta} = 29h20min$. The MTBF of the machine is $\frac{\mu_{ind}}{p} = 2h11min24s$. Thus, one cannot use the first order approximation of Daly to find the optimal checkpointing time and the waste of the machine at this capacity. Since failures hit more often than it is possible to checkpoint at this size, the waste would be one, as in average the application would not progress between failures.
+The time to checkpoint a capacity run is $p\frac{M \rho}{\beta} = 29h20min$. The MTBF of the machine is $\frac{\mu_{ind}}{p} = 2h11min24s$. Thus, one cannot use the first order approximation of Daly to find the optimal checkpointing time and the waste of the machine at this capacity. Since failures hit more often than it is possible to checkpoint at this size, the waste would be very close to one, because in average the application would not progress between failures (to give an example, an execution of 40 min
+followed by a checkpoint, hence 30 hours total, takes $10^{26}$ hours to complete successfully in expectation).
 
-If the machine is used at capacity for a large amount of smaller jobs, however, each application could be protected using a cCR technique. Let's consider a toy example:
+If the machine is used at capacity for a large amount of smaller jobs, however, each application could be protected using a CR technique. Let's consider a toy example:
 
 \begin{center}
 \begin{tabular}{lcl}
+  Total number of processors & $p$ & $100,000$\\\hline
+  Number of 'big' applications & $n_{b}$ & 100\\\hline
   Size of 'big' applications & $b$ & 5,000\\\hline
+  Number of 'small' applications & $n_{s}$ & 5,000\\\hline
   Size of 'small' applications & $s$ & 100\\\hline
-  Ratio of the machine used by 'big' applications & $\alpha$ & 50\%\\
+  Ratio of the machine used by 'big' applications & $\alpha = \frac{b n_{b}}{p} $ & 50\%\\
 \end{tabular}
 \end{center}
 
@@ -39,17 +43,20 @@ Then, if there was no filesystem contention/interference, and all applications c
 \begin{eqnarray}
 C(q) &=& \frac{q\rho M}{\beta}\\
 \mu(q) &=& \frac{\mu_{ind}}{q}\\
-Waste(q, T) &=& \frac{C(q)}{T} + \frac{1}{\mu(q)}\left(\frac{T}{2}+C(q)\right)\\
-Daly(q) &=& \sqrt{2\mu(q)C(q)}
+Waste(q, T) &=& \frac{C(q)}{T} + \frac{1}{\mu(q)}\left(\frac{T}{2}+R(q)\right)\\
+Daly(q) &=& \sqrt{2\mu(q)C(q)} = \frac{\rho M}{\beta}
 \end{eqnarray}
 
+We assume that $R(q) =C(q)$ for the recovery cost. Note that the period $Daly(q)=Daly$ is independent of
+$q$, because checkpoint time is linear in $q$ while MTBF is inversely proportional to $q$.
 Which would give $Waste(b, Daly(b)) = 29.2\%$, and $Waste(s, Daly(s)) = 0.5\%$, which are reasonable values applications can expect. From a platform perspective, we can define the waste of the platform, 
 
-$$Waste_{plat}(T_s, T_b) = \frac{s}{p}Waste(s, T_s) + \frac{b}{p}Waste(b, T_b)$$
+$$Waste_{plat}(T_s, T_b) = \frac{s n_{s}}{p}Waste(s, T_s) + \frac{b n_{b}}{p}Waste(b, T_b)$$
 
 In the ideal case, $Waste_{ideal} = Waste_{plat}(Daly(s), Daly(b)) = 14.8\%$.
 
-However, to achieve this performance, 'big' applications must checkpoint every $Daly(b) = 11h20min5.6s$, as well as 'small' applications ($Daly(s) = 11h20m5.6s$). Since there are $n_b = \frac{\alpha p}{b} = 10$ 'big' applications and $n_s = \frac{(1-\alpha)p}{s} = 500$ 'small' applications, and 'big' applications take $C(b) = 1h28min$ while 'small' applications take $C(s) = 16min16s$ to checkpoint on the filesystem without interference, the time it takes to checkpoint all applications once without interference is $T_{min} = n_bC(b) + n_sC(s) = C(p) >> Daly(b) = Daly(s)$.
+However, to achieve this performance, applications must checkpoint every $Daly \approx 11h20min$.
+Since there are $n_b = \frac{\alpha p}{b} = 10$ 'big' applications and $n_s = \frac{(1-\alpha)p}{s} = 500$ 'small' applications, and 'big' applications take $C(b) = 1h28min$ while 'small' applications take $C(s) = 16min16s$ to checkpoint on the filesystem without interference, the time it takes to checkpoint all applications once without interference is $T_{min} = n_bC(b) + n_sC(s) = C(p) >> Daly(b) = Daly(s)$.
 
 If we apply a simple round-robin strategy, allowing each application to checkpoint in turn, we obtain
 
@@ -64,12 +71,12 @@ Although the small applications are not really impacted by a much larger period,
 
 Based on this observation, one can decide to checkpoint more often the big applications: if every $n_bC(b)$ checkpoints of big applications we checkpoint only a tenth of the small applications, the period for big applications becomes $U = n_bC(b)+50C(s) = 16h8min$, and the period for small applications becomes $10(n_bC(b)+50C(s)) = 6 days 17h 20min$, and the platform waste $Waste_{unfair} = Waste_{plat}(U, 5U) = 17.25\%$ (1.16 times higher than the ideal waste). Thus, hindering small applications in the case of I/O interference in favor of big ones turns out positive for the global platform efficiency in that case. Note that if 'small' applications last less than 6 days, in practice, not providing resilience techniques for these applications at all can be more beneficial from the platform point of view.
 
-The goal of this paper is to find an efficient platform priority scheduling, when it is not possible to accomodate the optimal checkpointing period of all applications that run in parallel.
+The goal of this paper is to find an efficient platform priority scheduling, when it is not possible to accommodate the optimal checkpointing period of all applications that run in parallel.
 
 \pagebreak
 
 \appendix
-\section{Initial Reflexion}
+\section{Initial Thoughts}
 
 Consider a platform with $p$ computing nodes. On this platform, at a given time job scheduler assigned $n$ applications that span on $S_{i, 1 \leq i \leq n}$ processors ($\sum_{i=1}^{n}S_i = p$). If each application uses coordinated checkpoint/restart and the same Daly formula for their checkpointing interval, is it possible to schedule all of them so that two applications never interfere?
 
@@ -125,6 +132,39 @@ Instantiating with $M = 8GB$, $p$ varying between 1,000 and 100,000, and $\mu_{i
 \end{center}
 \caption{Minimal platform checkpoint time on the filesystem for exascale putative machines, as a ratio of the machine MTBF and function of the MTBF of a single node (in s)\label{fig:exa}}
 \end{figure}
+
+\clearpage
+\section{Another model}
+
+Consider $n$ applications on a platform with $p$ processors of individual MTBF $\mu$.
+ Application $A_{i}$ has $q_{i}$ processors and checkpoint time $C_{i}$. We can
+ assume that $p = \sum_{i=1}^{n} q_{i}$.
+Here we do not assume that $C_{i} = q_{i} C_{\textit{base}}$ because each application could save a different total volume of data. The MTBF of $A_{i}$ is $\mu_{i} = \frac{\mu}{q_{i}}$.
+
+We aim at building a periodic pattern of length $T$ such that each $A_{i}$ checkpoints $n_{i}$ times
+within the pattern. Thus $T  = \sum_{i=1}^{n} n_{i} C_{i}$, and the $n_{i}$ (which we assume
+to take rational values instead of integer ones) are the unknown. 
+
+Application $A_{i}$ has $n_{i}$ periods of length $w_{i}+C_{i}$, where $n_{i} (w_{i}+C_{i})=T$
+(we can assume equality, if we had idle time e would increase the work chunk $w_{i}$.
+What is the waste? The waste for $A_{i}$ is 
+$$Waste_{i} = \frac{n_{i} C_{i}}{T} + \frac{1}{\mu_{i}} (LostWork_{i} + R_{i})$$
+and for the platform, $Waste = \sum_{i=1}^{n} \frac{q_{i}}{p} Waste_{i}$.
+
+
+Assume $A_{i}$ can checkpoint without delay. Then $LostWork_{i} = \frac{1}{2} (w_{i}+C_{i}) = \frac{T}{2n_{i}}$.
+This is  optimistic, because even though we can schedule the I/O, there is little chance that checkpoints can be equally spaced for each application.
+Still, in that case we can solve and compute the $n_{i}$, at least numerically. Let $m_{i} =  \frac{n_{i} C_{i}}{T}$, we want to minimize 
+$$Waste = \frac{1}{p} \sum_{i=1}^{n} q_{i} (m_{i} +  \frac{q_{i} C_{i}}{2 \mu m_{i}})$$ 
+subject to $\sum_{i=1}^{n} m_{i} = 1$.
+
+Using Lagrange multipliers, we minimize $Waste - \gamma (\sum_{i=1}^{n} m_{i} - 1)$
+by zeroing out the $n$ partial derivates for each $m_{i}$ and $\gamma$ and obtain
+$q_{i} - \frac{q_{i}^{2} C_{i}}{2 \mu m_{i}^{2}} - \gamma = 0$ for all $i$ (and the constraint
+$\sum_{i=1}^{n} m_{i} = 1$ for $\gamma$). This leads to 
+$$m_{i} = \sqrt{\frac{q_{i}^{2} C_{i}}{2 \mu (q_{i} - \gamma)}}$$
+and we find $\gamma$ numerically from $\sum_{i=1}^{n} m_{i} = 1$.
+
 
 
 \end{document}
