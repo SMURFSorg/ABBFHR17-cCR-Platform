@@ -62,7 +62,7 @@ $$
 
 Although the small applications are not really impacted by a much larger period, big ones are impacted significantly. The platform waste using the round robin strategy in that case is $Waste_{rr} = Waste_{plat}(T_{min}, T_{min}) = 19.63\%$, 1.47 times higher than the ideal waste.
 
-Based on this observation, one can decide to checkpoint more often the big applications: if every $n_bC(b)$ checkpoints of big applications we checkpoint only a fifth of the small applications, the period for big applications becomes $U = n_bC(b)+100C(s) = 63360$, and the period for small applications becomes $5(n_bC(b)+100C(s)) = 316800$, and the platform waste $Waste_{unfair} = Waste_{plat}(U, 5U) = 15\%$ (1.12 times higher than the ideal waste). Thus, hindering small applications in the case of I/O interference in favor of big ones turns out positive for the global platform efficiency in that case.
+Based on this observation, one can decide to checkpoint more often the big applications: if every $n_bC(b)$ checkpoints of big applications we checkpoint only a fifth of the small applications, the period for big applications becomes $U = n_bC(b)+100C(s) = 17h36min$, and the period for small applications becomes $5(n_bC(b)+100C(s)) = 3 days 16h$, and the platform waste $Waste_{unfair} = Waste_{plat}(U, 5U) = 15\%$ (1.12 times higher than the ideal waste). Thus, hindering small applications in the case of I/O interference in favor of big ones turns out positive for the global platform efficiency in that case.
 
 The goal of this paper is to find an efficient platform priority scheduling, when it is not possible to accomodate the optimal checkpointing period of all applications that run in parallel.
 
