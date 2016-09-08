@@ -4,11 +4,72 @@
 
 \author{Dorian Arnold, Aurelien Bouteiller, George Bosilca,\\
  Kurt Feirrera, Thomas Herault, Yves Robert}
-\title{Coordinated Checkpointing: Platform Perspective}
+\title{Coordinated Checkpointing: Coordinating at the Platform Level}
 
 \begin{document}
 
 \maketitle
+
+Consider a platform that is not well balanced to do capacity checkpointing: either because the applications are doing interfering I/O, or because the I/O is a bottleneck. Production runs can still benefit significantly from cCR techniques. For example, take a platform with the following characteristics:
+
+\begin{center}
+\begin{tabular}{l|c|l}
+  Number of nodes & $p$             & $10^5$ \\\hline
+  Node MTBF           & $\mu_{ind}$ & 25 years\\\hline
+  Node memory      & $M$             & 32GB\\\hline
+  Checkpoint Ratio & $\rho$         & 33\%\\\hline
+  Filesystem Bandwidth & $\beta$ & 10GB/s\\
+\end{tabular}
+\end{center}
+
+The time to checkpoint a capacity run is $p\frac{M \rho}{\beta} = 29h20min$. The MTBF of the machine is $\frac{\mu_{ind}}{p} = 2h11min24s$. Thus, one cannot use the first order approximation of Daly to find the optimal checkpointing time and the waste of the machine at this capacity. Since failures hit more often than it is possible to checkpoint at this size, the waste would be one, as in average the application would not progress between failures.
+
+If the machine is used at capacity for a large amount of smaller jobs, however, each application could be protected using a cCR technique. Let's consider a toy example:
+
+\begin{center}
+\begin{tabular}{lcl}
+  Size of 'big' applications & $b$ & 5,000\\\hline
+  Size of 'small' applications & $s$ & 100\\\hline
+  Ratio of the machine used by 'big' applications & $\alpha$ & 50\%\\
+\end{tabular}
+\end{center}
+
+Then, if there was no filesystem contention/interference, and all applications could checkpoint in parallel, we could apply the Daly formulae:
+
+\begin{eqnarray}
+C(q) &=& \frac{q\rho M}{\beta}\\
+\mu(q) &=& \frac{\mu_{ind}}{q}\\
+Waste(q, T) &=& \frac{C(q)}{T} + \frac{1}{\mu(q)}\left(\frac{T}{2}+C(q)\right)\\
+Daly(q) &=& \sqrt{2\mu{q}C(q)}
+\end{eqnarray}
+
+Which would give $Waste(b, Daly(b)) = 26.1\%$, and $Waste(s, Daly(s)) = 0.5\%$, which are reasonable values applications can expect. From a platform perspective, we can define the waste of the platform, 
+
+$$Waste_{plat}(T_s, T_b) = \frac{s}{p}Waste(s, T_s) + \frac{b}{p}Waste(b, T_b)$$
+
+In the ideal case, $Waste_{ideal} = Waste_{plat}(Daly(s), Daly(b)) = 13.3\%$.
+
+However, to achieve this performance, 'big' applications must checkpoint every $Daly(b) = 12h48min5.6s$, and 'small' applications must checkpoint every $Daly(s) = 11h21m51.2s$. Since there are $n_b = \frac{\alpha p}{b} = 10$ 'big' applications and $n_s = \frac{(1-\alpha)p}{s} = 500$ 'small applications, and 'big' applications take $C(b) = 1h28min$ while 'small' applications take $C(s) = 16min16s$ to checkpoint on the filesystem without interference, the time it takes to checkpoint all applications once without interference is $T_{min} = n_bC(b) + n_sC(s) >> max(Daly(b), Daly(s))$.
+
+If we apply a simple round-robin strategy, allowing each application to checkpoint in turn, we obtain
+
+$$
+\begin{array}{rl}
+Waste(s, T_{min}) &= 0.76\%\\
+Waste(b, T_{min}) &= 38.5\%\\
+\end{array}
+$$
+
+Although the small applications are not really impacted by a much larger period, big ones are impacted significantly. The platform waste using the round robin strategy in that case is $Waste_{rr} = Waste_{plat}(T_{min}, T_{min}) = 19.63\%$, 6\% higher than the ideal waste.
+
+Based on this observation, one can decide to checkpoint more often the big applications: if every $n_bC(b)$ checkpoints of big applications we checkpoint only a fifth of the small applications, the period for big applications becomes $U = n_bC(b)+100C(s) = 63360$, and the period for small applications becomes $5(n_bC(b)+100C(s)) = 316800$, and the platform waste $Waste_{unfair} = Waste_{plat}(U, 5U) = 15\%$. Thus, hindering small applications in the case of I/O interference in favor of big ones turns out positive for the global platform efficiency in that case.
+
+The goal of this paper is to find an efficient platform priority scheduling, when it is not possible to accomodate the optimal checkpointing period of all applications that run in parallel.
+
+\pagebreak
+
+\appendix
+\section{Initial Reflexion}
 
 Consider a platform with $p$ computing nodes. On this platform, at a given time job scheduler assigned $n$ applications that span on $S_{i, 1 \leq i \leq n}$ processors ($\sum_{i=1}^{n}S_i = p$). If each application uses coordinated checkpoint/restart and the same Daly formula for their checkpointing interval, is it possible to schedule all of them so that two applications never interfere?
 
@@ -64,5 +125,6 @@ Instantiating with $M = 8GB$, $p$ varying between 1,000 and 100,000, and $\mu_{i
 \end{center}
 \caption{Minimal platform checkpoint time on the filesystem for exascale putative machines, as a ratio of the machine MTBF and function of the MTBF of a single node (in s)\label{fig:exa}}
 \end{figure}
+
 
 \end{document}
