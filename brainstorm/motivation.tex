@@ -2,7 +2,7 @@
 
 \usepackage{graphicx}
 
-\author{Dorian Arnold, Aurelien Bouteiller, George Bosilca,\\
+\author{Dorian Arnold, George Bosilca, Aurelien Bouteiller,\\
  Kurt Feirrera, Thomas Herault, Yves Robert}
 \title{Coordinated Checkpointing: Coordinating at the Platform Level}
 
@@ -146,7 +146,7 @@ within the pattern. Thus $T  = \sum_{i=1}^{n} n_{i} C_{i}$, and the $n_{i}$ (whi
 to take rational values instead of integer ones) are the unknown. 
 
 Application $A_{i}$ has $n_{i}$ periods of length $w_{i}+C_{i}$, where $n_{i} (w_{i}+C_{i})=T$
-(we can assume equality, if we had idle time e would increase the work chunk $w_{i}$.
+(we can assume equality, if we had idle time, we would increase the work chunk $w_{i}$.
 What is the waste? The waste for $A_{i}$ is 
 $$Waste_{i} = \frac{n_{i} C_{i}}{T} + \frac{1}{\mu_{i}} (LostWork_{i} + R_{i})$$
 and for the platform, $Waste = \sum_{i=1}^{n} \frac{q_{i}}{p} Waste_{i}$.
@@ -165,6 +165,47 @@ $\sum_{i=1}^{n} m_{i} = 1$ for $\gamma$). This leads to
 $$m_{i} = \sqrt{\frac{q_{i}^{2} C_{i}}{2 \mu (q_{i} - \gamma)}}$$
 and we find $\gamma$ numerically from $\sum_{i=1}^{n} m_{i} = 1$.
 
+\paragraph{With NVRAM}
+
+Assume each node is equipped with NVRAM. Checkpoints are sent to NVRAM before
+saved for real onto stable storage. Let $NV_{i}$ be the time to checkpoint on NVRAM; $C_{i}$
+still is the time to checkpoint on stable storage. We expect $NV_{i} \ll C_{i}$.
+The equations are updated as follows:
+\begin{itemize}
+\item We still have $T  = \sum_{i=1}^{n} n_{i} C_{i}$
+\item  We now have $n_{i} (w_{i}+NV_{i})=T$ instead of $n_{i} (w_{i}+C_{i})=T$, applications work more and the failure-free overhead is reduced
+\item However, the overhead due to failures is unchanged, $LostWork_{i} = \frac{T}{2n_{i}}$, 
+because we need to recover from the last checkpoint saved on stable storage (NVRAM is gone with the crash of a node)
+\end{itemize}
+The solution is similar to above.
+
+\clearpage
+\section{Meeting January 24, 2017}
+
+We had a quick meeting. Aurélien, Thomas and Yves asked a few questions to Kurt 
+about the \emph{APEX workflows} paper. Here are a few items that were discussed:
+\begin{itemize}
+\item Workflows execute several \emph{pipelines}, meaning that the same task graph
+is executed several times on different data sets. Each pipeline executes the whole
+cycle of: (i) read input data; (ii) analyze and checkpoint periodically; (iii) store results.
+\item Burst-buffers are widely used. We hope that they can allow to smooth out the requirement for
+I/O operations, which are typically bursts of heavy activity followed by periods of little I/O
+activity. In other words, if that's true, we could take the total I/O volume over the whole execution and derive an instantaneous I/O bandwidth usage for the workflow. 
+\item That would simplify a lot the analysis.
+Excluding fault-tolerance (checkpoints), input I/O and analysis I/O lead to a bandwidth fraction consumed by each workflow. Say 80\% total. We have to share what remains
+(R=20\%)  for checkpointing the workflows. 
+\item Now each workflow number $i$ has a checkpoint volume $V_{i}$ (fixed) and a checkpoint period $T_{i}$ (to be determined). It consumes 
+a fraction $b_{i} = \frac{V_{i}}{T_{i} b_{io}}$. 
+We have to ensure that $\sum_{i} b_{i} \leq R$.
+\item Other questions:
+\begin{itemize}
+\item  Some sites allow, or encourage, users to reserve I/O nodes before execution.
+Is that a general policy?
+\item What are the co-scheduling strategies, if any, at the different sites? 
+Which workflows execute concurrently?
+\end{itemize}
+
+\end{itemize}
 
 
 \end{document}
