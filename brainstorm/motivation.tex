@@ -44,19 +44,20 @@ Then, if there was no filesystem contention/interference, and all applications c
 C(q) &=& \frac{q\rho M}{\beta}\\
 \mu(q) &=& \frac{\mu_{ind}}{q}\\
 Waste(q, T) &=& \frac{C(q)}{T} + \frac{1}{\mu(q)}\left(\frac{T}{2}+R(q)\right)\\
-Daly(q) &=& \sqrt{2\mu(q)C(q)} = \frac{\rho M}{\beta}
+Daly(q) &=& \sqrt{2\mu(q)C(q)} = \sqrt{\frac{2\mu_{ind}\rho M}{\beta}}
 \end{eqnarray}
 
 We assume that $R(q) =C(q)$ for the recovery cost. Note that the period $Daly(q)=Daly$ is independent of
 $q$, because checkpoint time is linear in $q$ while MTBF is inversely proportional to $q$.
-Which would give $Waste(b, Daly(b)) = 29.2\%$, and $Waste(s, Daly(s)) = 0.5\%$, which are reasonable values applications can expect. From a platform perspective, we can define the waste of the platform, 
+
+This would give $Waste(b, Daly(b)) = 29.2\%$, and $Waste(s, Daly(s)) = 0.5\%$, which are reasonable values applications can expect. From a platform perspective, we can define the waste of the platform,
 
 $$Waste_{plat}(T_s, T_b) = \frac{s n_{s}}{p}Waste(s, T_s) + \frac{b n_{b}}{p}Waste(b, T_b)$$
 
 In the ideal case, $Waste_{ideal} = Waste_{plat}(Daly(s), Daly(b)) = 14.8\%$.
 
-However, to achieve this performance, applications must checkpoint every $Daly \approx 11h20min$.
-Since there are $n_b = \frac{\alpha p}{b} = 10$ 'big' applications and $n_s = \frac{(1-\alpha)p}{s} = 500$ 'small' applications, and 'big' applications take $C(b) = 1h28min$ while 'small' applications take $C(s) = 16min16s$ to checkpoint on the filesystem without interference, the time it takes to checkpoint all applications once without interference is $T_{min} = n_bC(b) + n_sC(s) = C(p) >> Daly(b) = Daly(s)$.
+However, to achieve this performance, applications must checkpoint every $Daly \approx 11h23min$ (with a $\mu_{ind}$ of 25 years).
+Since there are $n_b = \frac{\alpha p}{b} = 10$ 'big' applications and $n_s = \frac{(1-\alpha)p}{s} = 500$ 'small' applications, and 'big' applications take $C(b) = 1h28min$ while 'small' applications take $C(s) = 1min47s$ to checkpoint on the filesystem without interference, the time it takes to checkpoint all applications once without interference is $T_{min} = n_bC(b) + n_sC(s) = C(p) >> Daly(b) = Daly(s)$.
 
 If we apply a simple round-robin strategy, allowing each application to checkpoint in turn, we obtain
 
@@ -69,7 +70,7 @@ $$
 
 Although the small applications are not really impacted by a much larger period, big ones are impacted significantly. The platform waste using the round robin strategy in that case is $Waste_{rr} = Waste_{plat}(T_{min}, T_{min}) = 21.3\%$, 1.44 times higher than the ideal waste.
 
-Based on this observation, one can decide to checkpoint more often the big applications: if every $n_bC(b)$ checkpoints of big applications we checkpoint only a tenth of the small applications, the period for big applications becomes $U = n_bC(b)+50C(s) = 16h8min$, and the period for small applications becomes $10(n_bC(b)+50C(s)) = 6 days 17h 20min$, and the platform waste $Waste_{unfair} = Waste_{plat}(U, 5U) = 17.25\%$ (1.16 times higher than the ideal waste). Thus, hindering small applications in the case of I/O interference in favor of big ones turns out positive for the global platform efficiency in that case. Note that if 'small' applications last less than 6 days, in practice, not providing resilience techniques for these applications at all can be more beneficial from the platform point of view.
+Based on this observation, one can decide to checkpoint more often the big applications: if every $n_bC(b)$ checkpoints of big applications we checkpoint only a tenth of the small applications, the period for big applications becomes $U = n_bC(b)+50C(s) = 16h8min$, and the period for small applications becomes $10(n_bC(b)+50C(s)) = 6 days 17h 20min$, and the platform waste $Waste_{unfair} = Waste_{plat}(U, 10U) = 17.25\%$ (1.16 times higher than the ideal waste). Thus, hindering small applications in the case of I/O interference in favor of big ones turns out positive for the global platform efficiency in that case. Note that if 'small' applications last less than 6 days, in practice, not providing resilience techniques for these applications at all can be more beneficial from the platform point of view.
 
 The goal of this paper is to find an efficient platform priority scheduling, when it is not possible to accommodate the optimal checkpointing period of all applications that run in parallel.
 
