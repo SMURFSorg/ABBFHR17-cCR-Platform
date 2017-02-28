@@ -103,13 +103,14 @@ In that case we can solve and compute the $d_{i}$, at least numerically.
 Indeed, we we want to minimize 
 $Waste = \frac{1}{p} \sum_{i=1}^{n} q_{i} Waste_{i}$, 
 which is 
-$$Waste = \frac{1}{p} \sum_{i=1}^{n} q_{i} (\frac{C_{i} d_{i}}{T}+ \frac{q_{i}}{\mu} (\frac{T}{2d_{i}} + R_{i}))$$,
+$$Waste = \frac{1}{p} \sum_{i=1}^{n} q_{i} (\frac{C_{i} d_{i}}{T}+ \frac{q_{i}}{\mu} (\frac{T}{2d_{i}} + R_{i}))$$
 where $T  = \sum_{i=1}^{n} d_{i} C_{i}$.
 
 We introduce the variables $m_{i} = \frac{C_{i} d_{i}}{T}$ to rewrite the waste as
-$$Waste = \frac{1}{p} \sum_{i=1}^{n} q_{i} (m_{i}+ \frac{q_{i}C_{i}}{2 \mu m_{i}} +\frac{q_{i} R_{i}}{\mu})$$,
+$$Waste = \frac{1}{p} \sum_{i=1}^{n} q_{i} (m_{i}+ \frac{q_{i}C_{i}}{2 \mu m_{i}} +\frac{q_{i} R_{i}}{\mu})$$
 subject to $\sum_{i=1}^{n} m_{i} = 1$.
-Using the Lagrange multiplier $\gamma$, we minimize $Waste - \gamma (\sum_{i=1}^{n} m_{i} - 1)$
+Using the Lagrange multiplier $\gamma$, we minimize
+$$Waste - \gamma (\sum_{i=1}^{n} m_{i} - 1)$$
 by zeroing out the $n$ partial derivates for each $m_{i}$ and $\gamma$ and obtain
 $q_{i} - \frac{q_{i}^{2} C_{i}}{2 \mu m_{i}^{2}} - \gamma = 0$ for all $i$ (and the constraint
 $\sum_{i=1}^{n} m_{i} = 1$ for $\gamma$). This leads to 
@@ -128,7 +129,7 @@ and $n_{s}$ small jobs with $s$ processors,
 we have $n = n_{s} + n_{b}$ applications, $p =  s n_{s} + b n_{b}$ processors. We get
 $C_{s} = s C$ and $C_{b} = b C$ where $C = \frac{q\rho M}{\beta}$ is the time to checkpoint one processor. We derive that 
 $$m_{s} = \sqrt{\frac{s^{3} C}{2 \mu (s - \gamma)}}, \qquad m_{b} = \sqrt{\frac{b^{3} C}{2 \mu (b - \gamma)}}$$
-and solve numerically. We derive that
+and solve numerically for $\gamma$. We derive that
 $$d_{s} = \frac{T}{C} \frac{m_{s}}{s}, \qquad d_{b} = \frac{T}{C} \frac{m_{b}}{b}$$
 
 In the example we had arbitrarily chosen $d_{b}/d_{s}=5$.
