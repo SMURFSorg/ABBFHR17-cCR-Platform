@@ -1,6 +1,8 @@
 \documentclass{article}
 
 \usepackage{graphicx}
+\usepackage{amsmath}
+\DeclareMathOperator{\lcm}{lcm}
 
 \author{Dorian Arnold, George Bosilca, Aurelien Bouteiller,\\
  Kurt Feirrera, Thomas Herault, Yves Robert}
@@ -73,6 +75,84 @@ Although the small applications are not really impacted by a much larger period,
 Based on this observation, one can decide to checkpoint more often the big applications: if every $n_bC(b)$ checkpoints of big applications we checkpoint only a tenth of the small applications, the period for big applications becomes $U = n_bC(b)+50C(s) = 16h8min$, and the period for small applications becomes $10(n_bC(b)+50C(s)) = 6 days 17h 20min$, and the platform waste $Waste_{unfair} = Waste_{plat}(U, 10U) = 17.25\%$ (1.16 times higher than the ideal waste). Thus, hindering small applications in the case of I/O interference in favor of big ones turns out positive for the global platform efficiency in that case. Note that if 'small' applications last less than 6 days, in practice, not providing resilience techniques for these applications at all can be more beneficial from the platform point of view.
 
 The goal of this paper is to find an efficient platform priority scheduling, when it is not possible to accommodate the optimal checkpointing period of all applications that run in parallel.
+
+
+\section{General pattern (updated Feb .28, 2017, by Thomas and Yves)}
+
+Consider $n$ applications on a platform with $p$ processors of individual MTBF $\mu$.
+ Application $A_{i}$ has $q_{i}$ processors and checkpoint time $C_{i}$. We can
+ assume that $p = \sum_{i=1}^{n} q_{i}$.
+Here we do not assume that $C_{i} = q_{i} C_{\textit{base}}$ because each application could save a different total volume of data. The MTBF of $A_{i}$ is $\mu_{i} = \frac{\mu}{q_{i}}$.
+
+We aim at building a periodic pattern of length $T$ such that each $A_{i}$ checkpoints $n_{i}$ times
+within the pattern. Thus $T  = \sum_{i=1}^{n} n_{i} C_{i}$, and the $n_{i}$ (which we assume
+to take rational values instead of integer ones) are the unknown. 
+
+Application $A_{i}$ has $d_{i}$ periods of length $T_{i } = w_{i}+C_{i}$, where 
+$d_{i} T_{i} =T$
+(we can assume equality, if we had idle time, we would increase the work chunk $w_{i}$, hence $T_{i}$).
+What is the waste? The waste for $A_{i}$ is 
+$$Waste_{i} = \frac{C_{i}}{T_{i}} + \frac{1}{\mu_{i}} (LostWork_{i} + R_{i})$$
+and for the platform, $Waste = \sum_{i=1}^{n} \frac{q_{i}}{p} Waste_{i}$.
+Assume $A_{i}$ can checkpoint without delay. Then $LostWork_{i} = \frac{T_{i}}{2}$.
+This is  optimistic, because even though we can schedule the I/O, there is little chance that checkpoints can be equally spaced for each application.
+We get
+$$Waste_{i} = \frac{C_{i}}{T_{i}} + \frac{1}{\mu_{i}} (\frac{T_{i}}{2} + R_{i})
+= \frac{C_{i} d_{i}}{T}+ \frac{q_{i}}{\mu} (\frac{T}{2d_{i}} + R_{i})$$
+In that case we can solve and compute the $d_{i}$, at least numerically. 
+Indeed, we we want to minimize 
+$Waste = \frac{1}{p} \sum_{i=1}^{n} q_{i} Waste_{i}$, 
+which is 
+$$Waste = \frac{1}{p} \sum_{i=1}^{n} q_{i} (\frac{C_{i} d_{i}}{T}+ \frac{q_{i}}{\mu} (\frac{T}{2d_{i}} + R_{i}))$$,
+where $T  = \sum_{i=1}^{n} d_{i} C_{i}$.
+
+We introduce the variables $m_{i} = \frac{C_{i} d_{i}}{T}$ to rewrite the waste as
+$$Waste = \frac{1}{p} \sum_{i=1}^{n} q_{i} (m_{i}+ \frac{q_{i}C_{i}}{2 \mu m_{i}} +\frac{q_{i} R_{i}}{\mu})$$,
+subject to $\sum_{i=1}^{n} m_{i} = 1$.
+Using the Lagrange multiplier $\gamma$, we minimize $Waste - \gamma (\sum_{i=1}^{n} m_{i} - 1)$
+by zeroing out the $n$ partial derivates for each $m_{i}$ and $\gamma$ and obtain
+$q_{i} - \frac{q_{i}^{2} C_{i}}{2 \mu m_{i}^{2}} - \gamma = 0$ for all $i$ (and the constraint
+$\sum_{i=1}^{n} m_{i} = 1$ for $\gamma$). This leads to 
+$$m_{i} = \sqrt{\frac{q_{i}^{2} C_{i}}{2 \mu (q_{i} - \gamma)}}$$
+and we find $\gamma$ numerically from $\sum_{i=1}^{n} m_{i} = 1$.
+
+Once we get the $m_{i}$, we can compute $T$ to ensure that each application checkpoints an integer number of times $d_{i}$ during the period $T$. Let $m_{i} = \frac{u_{i}}{v_{i}}$
+where $u_{i}$ and $v_{i}$ are relatively prime integers, we have 
+$d_{i} = \frac{T m_{i}}{C_{i}} = T \frac{u_{i}}{v_{i} C_{i}}$
+so that choosing $T = \lcm_{1 \leq i \leq n}(v_{i} C_{i})$ ensure that application $A_{i}$ checkpoints an integer number of times during period $T$. Of course this will lead to huge values of $T$
+and we will approximate the optimal solution (by rounding the $m_{i}$'s to 
+reduce the period length.
+
+Going back to the original example with $n_{b}$ large jobs with $b$ processors
+and $n_{s}$ small jobs with $s$ processors,
+we have $n = n_{s} + n_{b}$ applications, $p =  s n_{s} + b n_{b}$ processors. We get
+$C_{s} = s C$ and $C_{b} = b C$ where $C = \frac{q\rho M}{\beta}$ is the time to checkpoint one processor. We derive that 
+$$m_{s} = \sqrt{\frac{s^{3} C}{2 \mu (s - \gamma)}}, \qquad m_{b} = \sqrt{\frac{b^{3} C}{2 \mu (b - \gamma)}}$$
+and solve numerically. We derive that
+$$d_{s} = \frac{T}{C} \frac{m_{s}}{s}, \qquad d_{b} = \frac{T}{C} \frac{m_{b}}{b}$$
+
+In the example we had arbitrarily chosen $T=10U$, $d_{s}=1$ and $d_{b}=10$.
+But with $T=10U$ we derive that the optimal solution is $d_{s}= 0.12$
+and $d_{b}=0.88$. We approximate $d_{b}=0.84$ to say that within one period,
+small jobs checkpoint once and large jobs checkpoints 7 times. This lead to a period
+$T = /...$
+
+\paragraph{With NVRAM}
+
+Assume each node is equipped with NVRAM. Checkpoints are sent to NVRAM before
+saved for real onto stable storage. Let $NV_{i}$ be the time to checkpoint on NVRAM; $C_{i}$
+still is the time to checkpoint on stable storage. We expect $NV_{i} \ll C_{i}$.
+The equations are updated as follows:
+\begin{itemize}
+\item We still have $T  = \sum_{i=1}^{n} n_{i} C_{i}$
+\item  We now have $T_{i}= w_{i}+NV_{i}$ instead of $T_{i}= w_{i}+C_{i}$
+but still $n_{i} T_{i}=T$, applications work more and the failure-free overhead is reduced
+\item However, the overhead due to failures is unchanged, 
+$LostWork_{i} = \frac{T_{i}}{2}$, 
+because we need to recover from the last checkpoint saved on stable storage (NVRAM is gone with the crash of a node)
+\end{itemize}
+The solution is similar to above.
+
 
 \pagebreak
 
