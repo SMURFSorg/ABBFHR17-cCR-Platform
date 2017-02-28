@@ -3,14 +3,45 @@
 \usepackage{graphicx}
 \usepackage{amsmath}
 \DeclareMathOperator{\lcm}{lcm}
+\usepackage{paralist}
 
 \author{Dorian Arnold, George Bosilca, Aurelien Bouteiller,\\
  Kurt Feirrera, Thomas Herault, Yves Robert}
+
 \title{Coordinated Checkpointing: Coordinating at the Platform Level}
 
 \begin{document}
 
 \maketitle
+
+\section{What we need from Kurt (Feb. 28, 2017)}
+
+We need execution \emph{scenarios}.
+Each scenario consists of the following information:
+\begin{compactitem}
+\item A platform $(p,\mu, BW_{io})$:\\
+- total number of processors $p$\\
+- individual processor MTBF $\mu$
+or platform MTBF $\mu/p$\\
+- total I/O bandwidth $BW_{io}$
+\item A set of $n$ applications that execute in steady-state mode. 
+For each application $A_{i} = (q_{i}, CS_{i}, bw_{i}$, we need:\\
+- the number of processors $q_{i}$\\
+- the checkpoint size $CS_{i}$ (in gigabytes)\\
+- the (averaged) I/O bandwidth fraction used to perform application-related I/O, 
+not counting checkpointing\\
+\end{compactitem}
+
+Note: With all this data, we can compute the checkpoint time $C_{i}$
+of each application $A_{i}$ as $C_{i} = CS_{i}/bw_{avail}$
+where $bw_{avail} = BW_{io} - \sum_{i=1}^{n} bw_{i}$.\\
+
+Note: If some parameters are missing, we will \emph{adopt} reasonable values.
+This is easy for the MTBF but more difficult for the I/O consumptions $bw_{i}$.
+Fo reach application, we could divide total IO volume by execution duration if 
+these two are known.
+
+\section{Motivation}
 
 Consider a platform that is not well balanced to do capacity checkpointing: either because the applications are doing interfering I/O, or because the I/O is a bottleneck. Production runs can still benefit significantly from CR techniques. For example, take a platform with the following characteristics:
 
@@ -77,7 +108,7 @@ Based on this observation, one can decide to checkpoint more often the big appli
 The goal of this paper is to find an efficient platform priority scheduling, when it is not possible to accommodate the optimal checkpointing period of all applications that run in parallel.
 
 
-\section{General pattern (updated Feb .28, 2017, by Thomas and Yves)}
+\section{General pattern (updated Feb. 28, 2017, by Thomas and Yves)}
 
 Consider $n$ applications on a platform with $p$ processors of individual MTBF $\mu$.
  Application $A_{i}$ has $q_{i}$ processors and checkpoint time $C_{i}$. We can
