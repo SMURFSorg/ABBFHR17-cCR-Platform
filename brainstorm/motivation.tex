@@ -24,7 +24,7 @@ Consider a platform that is not well balanced to do capacity checkpointing: eith
 \end{tabular}
 \end{center}
 
-The time to checkpoint a capacity run is $p\frac{M \rho}{\beta} = 29h20min$. The MTBF of the machine is $\frac{\mu_{ind}}{p} = 2h11min24s$. Thus, one cannot use the first order approximation of Daly to find the optimal checkpointing time and the waste of the machine at this capacity. Since failures hit more often than it is possible to checkpoint at this size, the waste would be very close to one, because in average the application would not progress between failures (to give an example, an execution of 40 min
+The time to checkpoint a capacity run is $p\frac{M \rho}{\beta} = 29.63h$. The MTBF of the machine is $\frac{\mu_{ind}}{p} = 2.19h$. Thus, one cannot use the first order approximation of Daly to find the optimal checkpointing time and the waste of the machine at this capacity. Since failures hit more often than it is possible to checkpoint at this size, the waste would be very close to one, because in average the application would not progress between failures (to give an example, an execution of 40 min
 followed by a checkpoint, hence 30 hours total, takes $10^{26}$ hours to complete successfully in expectation).
 
 If the machine is used at capacity for a large amount of smaller jobs, however, each application could be protected using a CR technique. Let's consider a toy example:
@@ -32,9 +32,9 @@ If the machine is used at capacity for a large amount of smaller jobs, however, 
 \begin{center}
 \begin{tabular}{lcl}
   Total number of processors & $p$ & $100,000$\\\hline
-  Number of 'big' applications & $n_{b}$ & 100\\\hline
+  Number of 'big' applications & $n_{b}$ & 10\\\hline
   Size of 'big' applications & $b$ & 5,000\\\hline
-  Number of 'small' applications & $n_{s}$ & 5,000\\\hline
+  Number of 'small' applications & $n_{s}$ & 500\\\hline
   Size of 'small' applications & $s$ & 100\\\hline
   Ratio of the machine used by 'big' applications & $\alpha = \frac{b n_{b}}{p} $ & 50\%\\
 \end{tabular}
@@ -56,7 +56,7 @@ This would give $Waste(b, Daly(b)) = 29.2\%$, and $Waste(s, Daly(s)) = 0.5\%$, w
 
 $$Waste_{plat}(T_s, T_b) = \frac{s n_{s}}{p}Waste(s, T_s) + \frac{b n_{b}}{p}Waste(b, T_b)$$
 
-In the ideal case, $Waste_{ideal} = Waste_{plat}(Daly(s), Daly(b)) = 14.8\%$.
+In the ideal case, $Waste_{ideal} = Waste_{plat}(Daly(s), Daly(b)) = 14.9\%$.
 
 However, to achieve this performance, applications must checkpoint every $Daly \approx 11h23min$ (with a $\mu_{ind}$ of 25 years).
 Since there are $n_b = \frac{\alpha p}{b} = 10$ 'big' applications and $n_s = \frac{(1-\alpha)p}{s} = 500$ 'small' applications, and 'big' applications take $C(b) = 1h28min$ while 'small' applications take $C(s) = 1min47s$ to checkpoint on the filesystem without interference, the time it takes to checkpoint all applications once without interference is $T_{min} = n_bC(b) + n_sC(s) = C(p) >> Daly(b) = Daly(s)$.
@@ -70,9 +70,9 @@ Waste(b, T_{min}) &= 41.8\%\\
 \end{array}
 $$
 
-Although the small applications are not really impacted by a much larger period, big ones are impacted significantly. The platform waste using the round robin strategy in that case is $Waste_{rr} = Waste_{plat}(T_{min}, T_{min}) = 21.3\%$, 1.44 times higher than the ideal waste.
+Although the small applications are not really impacted by a much larger period, big ones are impacted significantly. The platform waste using the round robin strategy in that case is $Waste_{rr} = Waste_{plat}(T_{min}, T_{min}) = 21.5\%$, $1.44$ times higher than the ideal waste.
 
-Based on this observation, one can decide to checkpoint more often the big applications: if every $n_bC(b)$ checkpoints of big applications we checkpoint only a tenth of the small applications, the period for big applications becomes $U = n_bC(b)+50C(s) = 16h8min$, and the period for small applications becomes $10(n_bC(b)+50C(s)) = 6 days 17h 20min$, and the platform waste $Waste_{unfair} = Waste_{plat}(U, 10U) = 17.25\%$ (1.16 times higher than the ideal waste). Thus, hindering small applications in the case of I/O interference in favor of big ones turns out positive for the global platform efficiency in that case. Note that if 'small' applications last less than 6 days, in practice, not providing resilience techniques for these applications at all can be more beneficial from the platform point of view.
+Based on this observation, one can decide to checkpoint more often the big applications: if every $n_bC(b)$ checkpoints of big applications we checkpoint only a tenth of the small applications, the period for big applications becomes $U = n_bC(b)+50C(s) = 16.29h$, and the period for small applications becomes $10U$, and the platform waste $Waste_{unfair} = Waste_{plat}(U, 10U) = 17.25\%$ ($31\%$ for large applications, $3.7\%$ for small applications, global waste $1.174$ times higher than the ideal waste). Thus, hindering small applications in the case of I/O interference in favor of big ones turns out positive for the global platform efficiency in that case. Note that if 'small' applications last less than 6 days, in practice, not providing resilience techniques for these applications at all can be more beneficial from the platform point of view.
 
 The goal of this paper is to find an efficient platform priority scheduling, when it is not possible to accommodate the optimal checkpointing period of all applications that run in parallel.
 
@@ -131,11 +131,13 @@ $$m_{s} = \sqrt{\frac{s^{3} C}{2 \mu (s - \gamma)}}, \qquad m_{b} = \sqrt{\frac{
 and solve numerically. We derive that
 $$d_{s} = \frac{T}{C} \frac{m_{s}}{s}, \qquad d_{b} = \frac{T}{C} \frac{m_{b}}{b}$$
 
-In the example we had arbitrarily chosen $T=10U$, $d_{s}=1$ and $d_{b}=10$.
-But with $T=10U$ we derive that the optimal solution is $d_{s}= 0.12$
-and $d_{b}=0.88$. We approximate $d_{b}=0.84$ to say that within one period,
-small jobs checkpoint once and large jobs checkpoints 7 times. This lead to a period
-$T = /...$
+In the example we had arbitrarily chosen $d_{b}/d_{s}=5$.
+But here we find that $d_{b}/d_{s}=5.4$. Let's round this to $6$.
+We get $T=6n_{b}C_{b}+n_{s}C_{s}=103.7h$, small application have period $T$
+and large one have period $T/6$.  Total waste is $17.02\%$.
+Note that if we round to ratio $5$, total waste becomes $17.03\%$.
+OK, this is only slightly better than previous solution, but the mathematics 
+ always win in the end.
 
 \paragraph{With NVRAM}
 
