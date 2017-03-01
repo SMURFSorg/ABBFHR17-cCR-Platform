@@ -25,7 +25,7 @@ Each scenario consists of the following information:
 or platform MTBF $\mu/p$\\
 - total I/O bandwidth $BW_{io}$
 \item A set of $n$ applications that execute in steady-state mode. 
-For each application $A_{i} = (q_{i}, CS_{i}, bw_{i}$, we need:\\
+For each application $A_{i} = (q_{i}, CS_{i}, bw_{i})$, we need:\\
 - the number of processors $q_{i}$\\
 - the checkpoint size $CS_{i}$ (in gigabytes)\\
 - the (averaged) I/O bandwidth fraction used to perform application-related I/O, 
@@ -38,8 +38,8 @@ where $bw_{avail} = BW_{io} - \sum_{i=1}^{n} bw_{i}$.\\
 
 Note: If some parameters are missing, we will \emph{adopt} reasonable values.
 This is easy for the MTBF but more difficult for the I/O consumptions $bw_{i}$.
-Fo reach application, we could divide total IO volume by execution duration if 
-these two are known.
+For each application, we could divide total IO volume by execution duration if 
+these two parameters are known.
 
 \section{Motivation}
 
@@ -187,7 +187,7 @@ because we need to recover from the last checkpoint saved on stable storage (NVR
 \end{itemize}
 The solution is similar to above.
 
-
+\end{document}
 \pagebreak
 
 \appendix
@@ -293,6 +293,7 @@ The equations are updated as follows:
 because we need to recover from the last checkpoint saved on stable storage (NVRAM is gone with the crash of a node)
 \end{itemize}
 The solution is similar to above.
+
 
 \clearpage
 \section{Meeting January 24, 2017}
