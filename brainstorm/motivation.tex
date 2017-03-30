@@ -4,6 +4,7 @@
 \usepackage{amsmath}
 \DeclareMathOperator{\lcm}{lcm}
 \usepackage{paralist}
+\usepackage{color}
 
 \author{Dorian Arnold, George Bosilca, Aurelien Bouteiller,\\
  Kurt Feirrera, Thomas Herault, Yves Robert}
@@ -51,12 +52,14 @@ Consider a platform that is not well balanced to do capacity checkpointing: eith
   Node MTBF           & $\mu_{ind}$ & 25 years\\\hline
   Node memory      & $M$             & 32GB\\\hline
   Checkpoint Ratio & $\rho$         & 33\%\\\hline
-  Filesystem Bandwidth & $\beta$ & 10GB/s\\
+  Filesystem Bandwidth & $\beta$ & \textcolor{red}{10GB/s}\\
 \end{tabular}
 \end{center}
 
 The time to checkpoint a capacity run is $p\frac{M \rho}{\beta} = 29.63h$. The MTBF of the machine is $\frac{\mu_{ind}}{p} = 2.19h$. Thus, one cannot use the first order approximation of Daly to find the optimal checkpointing time and the waste of the machine at this capacity. Since failures hit more often than it is possible to checkpoint at this size, the waste would be very close to one, because in average the application would not progress between failures (to give an example, an execution of 40 min
 followed by a checkpoint, hence 30 hours total, takes $10^{26}$ hours to complete successfully in expectation).
+
+3D Xpoint technology released by Intel and Micron early 2017 provides a fast layer of non-volatile memory that can be integrated as caches for larger capacity HDD and SSD. This new memory technology provides non-symmetrical bandwidth of about 280MBps for writes and 1.2GBps for reads\footnote{http://www.pcworld.com/article/3184464/storage/intel-optane-memory-has-a-mission-make-hard-drives-faster-than-ssds.html}
 
 If the machine is used at capacity for a large amount of smaller jobs, however, each application could be protected using a CR technique. Let's consider a toy example:
 
