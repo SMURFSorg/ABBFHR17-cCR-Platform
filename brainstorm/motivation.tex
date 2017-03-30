@@ -181,9 +181,9 @@ saved for real onto stable storage. Let $NV_{i}$ be the time to checkpoint on NV
 still is the time to checkpoint on stable storage. We expect $NV_{i} \ll C_{i}$.
 The equations are updated as follows:
 \begin{itemize}
-\item We still have $T  = \sum_{i=1}^{n} n_{i} C_{i}$
+\item We still have $T  = \sum_{i=1}^{n} d_{i} C_{i}$
 \item  We now have $T_{i}= w_{i}+NV_{i}$ instead of $T_{i}= w_{i}+C_{i}$
-but still $n_{i} T_{i}=T$, applications work more and the failure-free overhead is reduced
+but still $d_{i} T_{i}=T$, applications work more and the failure-free overhead is reduced
 \item However, the overhead due to failures is unchanged, 
 $LostWork_{i} = \frac{T_{i}}{2}$, 
 because we need to recover from the last checkpoint saved on stable storage (NVRAM is gone with the crash of a node)
