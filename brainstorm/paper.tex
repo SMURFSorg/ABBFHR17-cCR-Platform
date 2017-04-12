@@ -1,0 +1,347 @@
+\documentclass{article}
+
+\usepackage{graphicx}
+\usepackage{amsmath}
+\DeclareMathOperator{\lcm}{lcm}
+\usepackage{paralist}
+\usepackage{color}
+\usepackage{xspace}
+
+\newtheorem{example}{Example}
+\newcommand{\ema}[1]{\ensuremath{#1}}
+\newcommand{\Waste}{\ema{\mathit{Waste}}\xspace}
+\newcommand{\Daly}{\ema{\mathit{Daly}}\xspace}
+
+\author{Dorian Arnold, George Bosilca, Aurelien Bouteiller,\\
+ Kurt Feirrera, Thomas Herault, Yves Robert}
+
+\title{Optimal application resilience with scarce I/O}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+Consider a large-scale platform with several applications executing
+concurrently. All these applications routinely perform I/O operations
+throughout their execution. The average fraction of I/O bandwidth that
+remains available can be used for checkpointing. Ideally, each application $A_{i}$
+should checkpoint, during a time $C_{i}$ , 
+every $P_{i}$ units of time. Here $P_{i}$ is the length of the
+optimal checkpointing period given by the Young/Daly formula:
+$$P_{i} = \sqrt{2 \mu_{i} C_{i}}$$
+where $\mu_{i}$ is the application MTBF, which is inversely proportional to the number of processors enrolled in its execution.
+ 
+Checkpointing each application with optimal period $P_{i}$ is possible
+only if enough I/O bandwidth is available. If this is the case, the impact of failures is kept to a minimum using Daly's period for each application.
+However, if I/O bandwidth is limited, either in the absolute (imbalanced hardware design)
+or in the current co-execution (because  a few applications need to consume a large fraction of  bandwidth to progress), applications have to checkpoint less frequently.
+All of them? if not, which ones? what are the optimal checkpointing periods in this context of co-scheduling with  a  given bound
+on available I/O  bandwidth? This paper answers these important questions.
+
+
+\section{Motivating examples}
+\label{sec.example}
+
+Consider the following platform:
+
+\begin{center}
+\begin{tabular}{l|c|l}
+  Number of nodes & $p$             & $10^5$ \\\hline
+  Node MTBF           & $\mu_{ind}$ & 25 years\\\hline
+  Node memory      & $M$             & 32GB\\\hline
+  Checkpoint Ratio & $\rho$         & 33\%\\\hline
+  Filesystem I/O Bandwidth & $\beta$ & \textcolor{red}{10GB/s}\\
+\end{tabular}
+\end{center}
+
+Here the I/O bandwidth is assumed very low for such a large platform, but this is 
+to illustrate the approach. Also, Aurélien said he found corroborating data for Titan.
+For simplicity, we assume that the applications perform no I/O (except checkpoint) in this section, therefore $\beta=10GB/s$ is the bandwidth actually available for resilience.
+
+First we note that a capacity run cannot be protected from failures with
+coordinated checkpointing on such a platform.
+The time to checkpoint a capacity run is $C(p) = p\frac{M \rho}{\beta} = 29.63h$. The MTBF of the machine is $\frac{\mu_{ind}}{p} = 2.19h$. Thus, one cannot use the first order approximation of Daly to find the optimal checkpointing time and the waste of the machine at this capacity. Since failures hit more often than it is possible to checkpoint at this size, the waste would be very close to one, because in average the application would not progress between failures (to give an example, an execution of 40 min
+followed by a checkpoint, hence 30 hours total, takes $10^{26}$ hours to complete successfully in expectation).
+
+However, instead of running a single capacity run, assume that we are running
+$1,000$ small applications with $100$ processors each:
+
+\begin{example}
+Here is the first example:
+\begin{center}
+\begin{tabular}{lcl}
+  Total number of processors & $p$ & $100,000$\\\hline
+  Number of 'small' applications & $n_{s}$ & 1,000\\\hline
+  Size of 'small' applications & $s$ & 100\\\hline
+\end{tabular}
+\end{center}
+\label{example1}
+\end{example}
+
+For an application using $q$ processors, we have the following resilience parameters:
+\begin{eqnarray}
+C(q) &=& \frac{q\rho M}{\beta}\\
+\mu(q) &=& \frac{\mu_{ind}}{q}\\
+\Waste(q, T) &=& \frac{C(q)}{T} + \frac{1}{\mu(q)}\left(\frac{T}{2}+R(q)\right)\\
+\Daly(q) &=& \sqrt{2\mu(q)C(q)} = \sqrt{\frac{2\mu_{ind}\rho M}{\beta}}
+\end{eqnarray}
+
+We assume that $R(q) =C(q)$ for the recovery cost. We see that $C(q)$ is proportional to $q$ because the volume of data to be checkpointed is proportional to $q$, since each
+processor is saving the same fraction $\rho$ of its memory $M$.
+We also see that the period $\Daly(q)=\Daly$ is independent of
+$q$, because checkpoint time is linear in $q$ while MTBF is inversely proportional to $q$.
+Now, $\Waste(q,T)$ is the first-order approximation of the individual waste incurred
+by each processor executing an application with $q$ 
+processors and checkpointing with period $T$. 
+The waste is defined as the fraction of time where the processor is not doing useful work and comes from two different sources. The first source $\frac{C(q)}{T} $ is the failure-free overhead:
+one loses $C(q)$ seconds every $T$ second. 
+The second source is the overhead induced by failures: within time $T$ one expects $ \frac{T}{\mu(q)}$
+failures, each causing a loss of $R$ seconds to recover and $\frac{T}{2}$ seconds (in average) to re-execute.
+
+Now consider the $n_{s}=1,000$ small applications with $s=100$ processors.
+Each application checkpoints in time $C(s) = s\frac{M \rho}{\beta}  = 1min47s$
+and the optimal Daly period is $\Daly = 11.39h$. Of course
+$n_{s}C(s) =  C(p) = 29.63h$, the value we had before for a capacity application, so it is not possible to checkpoint each small application with period
+$\Daly$. The obvious solution is to checkpoint all applications in  a round-robin fashion, 
+hence with period $T_{rr} = n_{s}C(s) =  C(p) = 29.63h$. What is the consequence? For each processor,
+we move from $\Waste(s,\Daly) = \Waste(100,11.39h) = 0.5\%$ to
+$\Waste(s,C(s)) = \Waste(100,29.63h) = 0.77$. This represents a $1.54$ increase factor of the waste, but its value remains small, so this round-robin scheme is quite acceptable.
+
+Next, let us instantiate a more challenging problem, with 
+a mix of big and small applications, as follows:
+
+\begin{example}
+Here is the second example:
+\begin{center}
+\begin{tabular}{lcl}
+  Total number of processors & $p$ & $100,000$\\\hline
+  Number of 'big' applications & $n_{b}$ & 10\\\hline
+  Size of 'big' applications & $b$ & 5,000\\\hline
+  Number of 'small' applications & $n_{s}$ & 500\\\hline
+  Size of 'small' applications & $s$ & 100\\\hline
+  % Ratio of the machine used by 'big' applications & $\alpha = \frac{b n_{b}}{p} $ & 50\%\\
+\end{tabular}
+\end{center}
+\label{example2}
+\end{example}
+
+Half the machine is devoted to executing the $10$ big applications, and the other half
+does the $500$ small ones.
+If each application could checkpoint using Daly's period (which we know
+is not possible), we would have $Waste(s, \Daly) = 0.5\%$, as before,
+and $Waste(b, \Daly) = 29.2\%$. One of these two waste values is incurred 
+by each platform processor, since half of them runs big applications and half small ones.
+From a platform manager's perspective, we 
+define the platform waste as the weighted waste of each processor. If small applications checkpoint with period $T_{s}$ and big ones with period $T_{b}$, the
+platform waste is given by
+$$\Waste_{plat}(T_s, T_b) = \frac{s n_{s}}{p}\Waste(s, T_s) + \frac{b n_{b}}{p}\Waste(b, T_b)$$
+
+We have $\frac{s n_{s}}{p} = \frac{b n_{b}}{p} = \frac{1}{2}$ here.
+A lower bound for the platform waste is when each application ideally checkpoints 
+with period \Daly, which translates into 
+$$\Waste_{ideal} = \Waste_{plat}(\Daly, \Daly) = \frac{1}{2} \Waste(s, \Daly) + \frac{1}{2} \Waste(b, \Daly) = 14.9\%$$
+However, we know cannot achieve this lower bound. A natural approach is to try and
+ apply the round-robin strategy where each application checkpoints in turn, 
+ hence with period $T_{rr} = n_{s}C(s) + n_{b}C(b) =  C(p)$ (same value as before
+ with only small applications). We compute
+$$
+\begin{array}{rl}
+\Waste(s, T_{rr}) &= 0.77\%\\
+\Waste(b, T_{rr}) &= 41.8\%\\
+\Waste_{plat}(T_{rr}, T_{rr}) & = 21.5\%
+\end{array}
+$$
+
+Although the small applications are not really impacted by a much larger period, big ones are impacted significantly, and  the platform waste using the round robin strategy becomes
+$21.5\%$, which is $1.44$ times higher than the ideal waste. Now the numbers are significant, and the tax payers' dollars are at risk.
+
+Can we do better than round-robin?
+One could decide to checkpoint more often the big applications. Say $10$ times more often.
+That means that after checkpointing all the big applications, we checkpoint one tenth of
+the small ones. Now the big applications have period $T_{b} =  n_b C(b) + \frac{n_{s}}{10}C(s)$, and small applications have period $T_{s} = 10 T_{b}$. Numerically, we get
+$T_{b} = 16.29h$, which is only approximately five hours larger than $\Daly = 11.39h$.
+
+On the contrary, small applications get a very long checkpointing period  $T_{s}$ lasting almost seven days. In practice, small applications with short makespan may never checkpoint;
+furthermore, if they last less than a couple days, not providing resilience techniques for these applications at all can be more beneficial from the platform point of view.
+
+Altogether, the platform waste is reduced:
+$$
+\begin{array}{rl}
+\Waste(s, T_{s}) &= 3.7\%\\
+\Waste(b, T_{b}) &= 30.8\%\\
+\Waste_{plat}(T_{s}, T_{b}) & = 17.25\%
+\end{array}
+$$
+
+The platform waste is $1.17$ times higher than the (unfeasible) ideal waste, instead of $1.44$ higher with the round-robin strategy. Thus, with limited I/O bandwidth, hindering small applications  in favor of big ones turns out positive for the global platform efficiency. 
+Granted, choosing to checkpoint one tenth of small applications after big ones was an arbitrary decision. What is the optimal strategy?
+The goal of this paper is to find an efficient priority scheduling, whenever it is not possible to accommodate the optimal checkpointing period of all applications that run concurrently
+due to limited I/O bandwidth.
+
+
+\section{Optimal co-checkpoint strategy}
+\label{sec.strategy}
+
+In this section we try to answer the previous questions with a unified framework.
+We consider the steady-state operation of a platform made up with $p$ processors of individual MTBF $\mu_{ind}$. There are 
+$n$ applications $A_{1}, A_{2}, \cdots, A_{n}$ executing concurrently.  Application $A_{i}$ enrolls $q_{i}$ processors and its checkpoint time is $C_{i}$. We assume that $p = \sum_{i=1}^{n} q_{i}$, so that the $n$ applications span the whole platform. Contrarily to the example is Section~\ref{sec.example},
+we do not assume here that $C_{i} = q_{i} C_{\textit{base}}$: this is because each application could have a different volume of data to save. The MTBF of $A_{i}$ is $\mu_{i} = \frac{\mu_{ind}}{q_{i}}$,
+and its \Daly period is $\Daly(A_{i}) = \sqrt{2 \mu_{i} C_{i}} = \sqrt{\frac{2 \mu_{ind} C_{i}}{q_{i}}}$. 
+
+In practice, we envision scenarios with many applications (hence $n$ will be large)
+but with only a few classes of them, like the small and the big applications we had
+in Section~\ref{sec.example}. Consider a scenario with, say, three classes, small, medium
+and large applications. We assume that when some small application ends, it is replaced by another one, so that the global partition of the platform into application classes is not 
+modiifed, and that we can optimize the throughput of the platform in the long range.
+Whenever the load of the platform, in terms of numbers and sizes of running applications,
+has evolved significantly, one should adapt to the new load and call our co-checkpoint scheduling algorithm again at that point.
+
+The primary assumption is that there is not enough bandwidth to checkpoint
+all applications with their optimal Daly period, which translates into
+$$\sum_{i=1}^{n} C_{i} \geq \max_{1 \leq i \leq n} \Daly(A_{i})  = \max_{1 \leq i \leq n} \sqrt{\frac{2 \mu_{ind} C_{i}}{q_{i}}}$$
+As in the previous examples, we aim at determining a schedule where some applications checkpoint more often than others. There are three steps in our algorithm. 
+
+The first step is to compute rational values for checkpoint relative frequencies. 
+The second step is to round these values to integers and build a global pattern
+within which all applications checkpoint regularly. The third step is to compute the platform
+waste with that pattern, and to compare it with the waste of the  basic round-robin strategy.
+
+\subsection{Checkpoint ratios}
+
+For the first step, we  aim at determining
+a periodic pattern of length $P$ where each application $A_{i}$ will checkpoint $d_{i}$ times.
+The values of the $d_{i}$ give us the relative checkpoint frequencies. For instance we had
+$d_{b} = 10$ for big applications and and $d_{s} = 1$ for small applications in Example~\ref{example2}.
+Within the pattern of length $P  = \sum_{i=1}^{n} d_{i} C_{i}$ (checkpoints are taken during the 
+whole period, with $A_{i}$ checkpointing $d_{i}$ times), 
+each application $A_{i}$ repeats $d_{i}$ periods of length $P_{i} = w_{i}+C_{i}$,
+and we have $P = d_{i} P_{i}$ for all $i$.
+
+In this first step, we assume that all the applications can checkpoint exactly when needed, i.e.,
+at the end of each scheduled period, and at full speed, i.e., using all the available I/O bandwidth,
+which is not realistic because interferences are very likely to occur. 
+Recall that we also assume that $d_{i}$ is a rational number for each $A_{i}$, because we are interested in the ratios$d_{i}/d_{j}$ of the checkpointing frequency of one application $A_{i}$ versus the other $A_{j}$. (Side note: maybe
+we could assume that the applications can store data anytime on a local disk
+before that data is saved onto stable storage and hence truly checkpointed, but this does not help
+to compute the waste. Anyway, we build an actual pattern with integer values and non-interfering checkpoints in  the next steps.)
+
+What is the waste of the platform with such a pattern? The waste for $A_{i}$ is 
+$$\Waste_{i} = \frac{C_{i}}{P_{i}} + \frac{1}{\mu_{i}} (LostWork_{i} + R_{i})$$
+and for the whole platform, $\Waste_{plat} = \sum_{i=1}^{n} \frac{q_{i}}{p} \Waste_{i}$.
+As mentioned above, assuming that $A_{i}$ can checkpoint without delay, we have
+$$LostWork_{i} = \frac{P_{i}}{2}$$
+Again, this is  optimistic, because even though we can schedule the I/O, there is little chance that checkpoints can be equally spaced for each application.
+We get
+$$\Waste_{i} = \frac{C_{i}}{P_{i}} + \frac{1}{\mu_{i}} (\frac{P_{i}}{2} + R_{i})
+= \frac{C_{i} d_{i}}{P}+ \frac{q_{i}}{\mu_{ind}} (\frac{P}{2d_{i}} + R_{i})$$
+In that case we can solve and compute the $d_{i}$, at least numerically. 
+Indeed, we we want to minimize 
+$\Waste_{plat} = \frac{1}{p} \sum_{i=1}^{n} q_{i} \Waste_{i}$, 
+which is 
+$$\Waste_{plat} = \frac{1}{p} \sum_{i=1}^{n} q_{i} (\frac{C_{i} d_{i}}{P}+ \frac{q_{i}}{\mu_{ind}} (\frac{P}{2d_{i}} + R_{i}))$$
+where $P  = \sum_{i=1}^{n} d_{i} C_{i}$.
+
+We introduce the variables $m_{i} = \frac{C_{i} d_{i}}{P}$ to rewrite the waste as
+$$\Waste_{plat}= \frac{1}{p} \sum_{i=1}^{n} q_{i} (m_{i}+ \frac{q_{i}C_{i}}{2 \mu_{ind} m_{i}} +\frac{q_{i} R_{i}}{\mu_{ind}})$$
+subject to $\sum_{i=1}^{n} m_{i} = 1$.
+Using the Lagrange multiplier $\gamma$, we minimize
+$$Waste - \gamma (\sum_{i=1}^{n} m_{i} - 1)$$
+by zeroing out the $n$ partial derivates for each $m_{i}$ and for $\gamma$.
+We obtain
+$q_{i} - \frac{q_{i}^{2} C_{i}}{2 \mu_{ind} m_{i}^{2}} - \gamma = 0$ for all $i$ (and the constraint
+$\sum_{i=1}^{n} m_{i} = 1$ for $\gamma$). This leads to 
+$$m_{i} = \sqrt{\frac{q_{i}^{2} C_{i}}{2 \mu_{ind} (q_{i} - \gamma)}}$$
+and we find $\gamma$ numerically from $\sum_{i=1}^{n} m_{i} = 1$.
+
+Once we get the $m_{i}$, we get the $d_{i}$, hence the desired relative checkpoint frequencies.
+Going back to Example~\ref{example2} with $n_{b}$ large jobs with $b$ processors
+and $n_{s}$ small jobs with $s$ processors,
+we have $n = n_{s} + n_{b}$ applications, $p =  s n_{s} + b n_{b}$ processors. We get
+$C_{s} = s C$ and $C_{b} = b C$ where $C = \frac{q\rho M}{\beta}$ is the time to checkpoint one processor. We derive that 
+$$m_{s} = \sqrt{\frac{s^{3} C}{2 \mu_{ind} (s - \gamma)}}, \qquad m_{b} = \sqrt{\frac{b^{3} C}{2 \mu_{ind} (b - \gamma)}}$$
+and solve numerically for $\gamma$. We obtain
+$d_{b}/d_{s}=5.4$.
+For Example~\ref{example2}, we had arbitrarily chosen $d_{b}/d_{s}=10$.
+But here we find that $d_{b}/d_{s}=5.4$. Let's round this to $5$, which means we checkpoint one fifth
+of small applications (100 out of 500) after all big ones.
+We get a period  $P=5n_{b}C_{b}+n_{s}C_{s}$, small application have period $P$
+and large one have period $T/6$.  Platform waste is $17.03\%$ instead of $17.25$ with $d_{b}/d_{s}=10$.
+OK, this is only slightly better than previous solution where , but mathematics 
+ always win in the end.
+
+Now, because $d_{b}/d_{s} =5.4$, we could try and round it to $6$. However, we have $n_{s}=500$
+small applications, which is not divisible by $6$, so we cannot checkpoint one sixth of small applications after big ones.  Maybe we should consider that we have $504$ small applications with $4$ fake ones and checkpoint
+$\frac{504}{6} = 84$  of them after all big ones. Leaving a few holes in the pattern enables to keep the
+regularity of the checkpoint periods of all applications. It only gives the opportunity to recover from a failure
+using this precious fraction of time where the storage disk is not continuously used to write checkpoints This explains why we need steps 2 and 3 in the general case. To better illustrate this, consider another example with three classes of applications:
+
+\begin{example}
+Here is the third example:
+\begin{center}
+\begin{tabular}{lcl}
+  Total number of processors & $p$ & $100,000$\\\hline
+  Number of 'big' applications & $n_{b}$ & 8 \\\hline
+  Size of 'big' applications & $b$ & 5,000\\\hline
+  Number of 'medium' applications & $n_{m}$ & 15\\\hline
+  Size of 'medium' applications & $m$ & 2,000\\\hline
+  Number of 'small' applications & $n_{s}$ & 60\\\hline
+  Size of 'small' applications & $s$ & 500\\\hline
+ \end{tabular}
+\end{center}
+\label{example3}
+\end{example}
+
+Doing the numerical calculation with Lagrange multipliers, we derive that 
+$m_{b} / m_{m} = 3.8$ and  $m_{b} / m_{s} = 30.3$. This means that big applications
+should checkpoint $4$ times more than medium ones, and $30$ times more than small ones.
+We are lucky to have $60$ small applications, a number divisible by $30$,
+but we better had $16$ medium application than $15$, because we need a number divisible by $4$.
+So we suggest to add a fake medium application, 
+and to build the pattern with all the big applications (8), one fourth of medium ones (4)
+and one thirty-th of small ones (2), so the pattern is huge. In fact the whole pattern is even more huge because
+$4$ does not divide $30$, so we need to go to $60$:
+$ P = 60 C_{b} + 15 C_{m } + 2 C_{s}$
+to achieve the good ratios. Inside we repeat the pattern ($8$ bigs, $4$ medium, $2$ smalls) 
+$60$ times! And remember that the $16-th$ medium application is a fake.
+
+OK, this is work in progress for the last two steps, but you get the idea.
+
+\end{document}
+\paragraph{With NVRAM}
+
+Assume each node is equipped with NVRAM. Checkpoints are sent to NVRAM before
+saved for real onto stable storage. Let $NV_{i}$ be the time to checkpoint on NVRAM; $C_{i}$
+still is the time to checkpoint on stable storage. We expect $NV_{i} \ll C_{i}$.
+The equations are updated as follows:
+\begin{itemize}
+\item We still have $T  = \sum_{i=1}^{n} d_{i} C_{i}$
+\item  We now have $T_{i}= w_{i}+NV_{i}$ instead of $T_{i}= w_{i}+C_{i}$
+but still $d_{i} T_{i}=T$, applications work more and the failure-free overhead is reduced
+\item However, the overhead due to failures is unchanged, 
+$LostWork_{i} = \frac{T_{i}}{2}$, 
+because we need to recover from the last checkpoint saved on stable storage (NVRAM is gone with the crash of a node)
+\end{itemize}
+The solution is similar to above.
+
+\end{document}
+
+\textbf{To keep for later.}
+We can compute $T$ to ensure that each application checkpoints an integer number of times $d_{i}$ during the period $T$. Let $m_{i} = \frac{u_{i}}{v_{i}}$
+where $u_{i}$ and $v_{i}$ are relatively prime integers, we have 
+$d_{i} = \frac{T m_{i}}{C_{i}} = T \frac{u_{i}}{v_{i} C_{i}}$
+so that choosing $T = \lcm_{1 \leq i \leq n}(v_{i} C_{i})$ ensure that application $A_{i}$ checkpoints an integer number of times during period $T$. Of course this will lead to huge values of $T$
+and we will approximate the optimal solution (by rounding the $m_{i}$'s to 
+reduce the period length.
+
+$$d_{s} = \frac{T}{C} \frac{m_{s}}{s}, \qquad d_{b} = \frac{T}{C} \frac{m_{b}}{b}$$
+
+In the example we had arbitrarily chosen $d_{b}/d_{s}=5$.
+But here we find that $d_{b}/d_{s}=5.4$. Let's round this to $6$.
+We get $T=6n_{b}C_{b}+n_{s}C_{s}=103.7h$, small application have period $T$
+and large one have period $T/6$.  Total waste is $17.02\%$.
+Note that if we round to ratio $5$, total waste becomes $17.03\%$.
+OK, this is only slightly better than previous solution, but the mathematics 
+ always win in the end.
+
