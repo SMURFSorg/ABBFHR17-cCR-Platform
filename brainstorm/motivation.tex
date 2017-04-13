@@ -174,21 +174,25 @@ Note that if we round to ratio $5$, total waste becomes $17.03\%$.
 OK, this is only slightly better than previous solution, but the mathematics 
  always win in the end.
 
+\todo[inline]{new problem: can we capture the slowdown on $C_i$ due to concurrent $R_{j}$?}
+
 \paragraph{With NVRAM}
 
-Assume each node is equipped with NVRAM. Checkpoints are sent to NVRAM before
-saved for real onto stable storage. Let $NV_{i}$ be the time to checkpoint on NVRAM; $C_{i}$
-still is the time to checkpoint on stable storage. We expect $NV_{i} \ll C_{i}$.
+3D Xpoint technology released by Intel and Micron early 2017 provides a fast layer of non-volatile memory that can be integrated as caches for larger capacity HDD and SSD. This new memory technology provides non-symmetrical bandwidth of about 280MBps for writes and 1.2GBps for reads\footnote{http://www.pcworld.com/article/3184464/storage/intel-optane-memory-has-a-mission-make-hard-drives-faster-than-ssds.html}
+
+Assume each node is equipped with NVRAM. Checkpoints are staged to NVRAM before they get 
+saved for real onto stable storage. Let $S_{i}$ be the time to stage he checkpoint to NVRAM; $C_{i}$
+still is the time to checkpoint to stable storage. We expect $S_{i} \ll C_{i}$.
 The equations are updated as follows:
 \begin{itemize}
 \item We still have $T  = \sum_{i=1}^{n} d_{i} C_{i}$
-\item  We now have $T_{i}= w_{i}+NV_{i}$ instead of $T_{i}= w_{i}+C_{i}$
-but still $d_{i} T_{i}=T$, applications work more and the failure-free overhead is reduced
-\item However, the overhead due to failures is unchanged, 
-$LostWork_{i} = \frac{T_{i}}{2}$, 
-because we need to recover from the last checkpoint saved on stable storage (NVRAM is gone with the crash of a node)
+\item  We now have $d_{i} (w_{i}+S_{i})=T$ instead of $d_{i} (w_{i}+S_{i})=T$, applications work more and the failure-free overhead is reduced
+\item However, the overhead due to failures is unchanged, $LostWork_{i} = \frac{T}{2d_{i}}$, 
+because we need to recover from the last checkpoint saved on stable storage (NVRAM is gone, at least for some duration, with the crash of a node; we could also consider the time for NVRAM to come back online?)
 \end{itemize}
 The solution is similar to above.
+
+\todo[inline]{More problems with staging: assume we allow moving the start date of $S_i$ so that all application checkpoint at a regular interval (i.e. the $LostWork_i$ is indeed $T_i/2$). Then, there is a vulnerability period between the time at which $S_i$ happens and the date at which the next $C_i$ i/o access slot ends (the checkpoint is not safe until then, so we may have to restart $2\times T_i/2$). Is that risk characterized by $\frac{q_i}{\mu} dateBegin(S_i)-dateEnd(C_i)$ ? Is there a risk that at the end of the $T$ global period, we create a workload that can't be absorbed without i/o contentions? (I do not think so)? }
 
 \end{document}
 \pagebreak
@@ -283,7 +287,6 @@ $\sum_{i=1}^{n} m_{i} = 1$ for $\gamma$). This leads to
 $$m_{i} = \sqrt{\frac{q_{i}^{2} C_{i}}{2 \mu (q_{i} - \gamma)}}$$
 and we find $\gamma$ numerically from $\sum_{i=1}^{n} m_{i} = 1$.
 
-\todo[inline]{new problem: can we capture the slowdown on $C_i$ due to concurrent $R_{j}$?}
 
 \paragraph{With NVRAM}
 
