@@ -11,6 +11,7 @@
 \newcommand{\ema}[1]{\ensuremath{#1}}
 \newcommand{\Waste}{\ema{\mathit{Waste}}\xspace}
 \newcommand{\Daly}{\ema{\mathit{Daly}}\xspace}
+\newcommand{\dca}[1]{{\color{blue}Dorian: #1}}
 
 \author{Dorian Arnold, George Bosilca, Aurelien Bouteiller,\\
  Kurt Feirrera, Thomas Herault, Yves Robert}
@@ -60,10 +61,16 @@ Here the I/O bandwidth is assumed very low for such a large platform, but this i
 to illustrate the approach. Also, Aurélien said he found corroborating data for Titan.
 For simplicity, we assume that the applications perform no I/O (except checkpoint) in this section, therefore $\beta=10GB/s$ is the bandwidth actually available for resilience.
 
-First we note that a capacity run cannot be protected from failures with
-coordinated checkpointing on such a platform.
-The time to checkpoint a capacity run is $C(p) = p\frac{M \rho}{\beta} = 29.63h$. The MTBF of the machine is $\frac{\mu_{ind}}{p} = 2.19h$. Thus, one cannot use the first order approximation of Daly to find the optimal checkpointing time and the waste of the machine at this capacity. Since failures hit more often than it is possible to checkpoint at this size, the waste would be very close to one, because in average the application would not progress between failures (to give an example, an execution of 40 min
-followed by a checkpoint, hence 30 hours total, takes $10^{26}$ hours to complete successfully in expectation).
+First we note that a capacity run cannot be protected from failures with coordinated
+checkpointing on such a platform. \dca{This should be capability run, right?}  The
+time to checkpoint a capacity run is $C(p) = p\frac{M \rho}{\beta} = 29.63h$. The
+MTBF of the machine is $\frac{\mu_{ind}}{p} = 2.19h$. Thus, one cannot use the first
+order approximation of Daly to find the optimal checkpointing time and the waste of
+the machine at this capacity. Since failures hit more often than it is possible to
+checkpoint at this size, the waste would be very close to one, because in average the
+application would not progress between failures (to give an example, an execution of
+40 min followed by a checkpoint, hence 30 hours total, takes $10^{26}$ hours to
+complete successfully in expectation).
 
 However, instead of running a single capacity run, assume that we are running
 $1,000$ small applications with $100$ processors each:
@@ -108,6 +115,9 @@ $\Daly$. The obvious solution is to checkpoint all applications in  a round-robi
 hence with period $T_{rr} = n_{s}C(s) =  C(p) = 29.63h$. What is the consequence? For each processor,
 we move from $\Waste(s,\Daly) = \Waste(100,11.39h) = 0.5\%$ to
 $\Waste(s,C(s)) = \Waste(100,29.63h) = 0.77$. This represents a $1.54$ increase factor of the waste, but its value remains small, so this round-robin scheme is quite acceptable.
+
+\dca{can we come up with a general heuristic (round-robin or otherwise) and show that
+  is generally acceptable when the application mix is homogenous?}
 
 Next, let us instantiate a more challenging problem, with 
 a mix of big and small applications, as follows:
@@ -192,11 +202,15 @@ and its \Daly period is $\Daly(A_{i}) = \sqrt{2 \mu_{i} C_{i}} = \sqrt{\frac{2 \
 
 In practice, we envision scenarios with many applications (hence $n$ will be large)
 but with only a few classes of them, like the small and the big applications we had
-in Section~\ref{sec.example}. Consider a scenario with, say, three classes, small, medium
-and large applications. We assume that when some small application ends, it is replaced by another one, so that the global partition of the platform into application classes is not 
-modiifed, and that we can optimize the throughput of the platform in the long range.
-Whenever the load of the platform, in terms of numbers and sizes of running applications,
-has evolved significantly, one should adapt to the new load and call our co-checkpoint scheduling algorithm again at that point.
+in Section~\ref{sec.example}. Consider a scenario with, say, three classes, small,
+medium and large applications. We assume that when some small application ends, it is
+replaced by another one, so that the global partition of the platform into
+application classes is not modiifed, and that we can optimize the throughput of the
+platform in the long range.\dca{Small v. medium v. large stipulates process(or) count
+  not runtime. I think, all we need to assume is that all applications have the same
+  makespan.}  Whenever the load of the platform, in terms of numbers and sizes of
+running applications, has evolved significantly, one should adapt to the new load and
+call our co-checkpoint scheduling algorithm again at that point.
 
 The primary assumption is that there is not enough bandwidth to checkpoint
 all applications with their optimal Daly period, which translates into
@@ -206,7 +220,8 @@ As in the previous examples, we aim at determining a schedule where some applica
 The first step is to compute rational values for checkpoint relative frequencies. 
 The second step is to round these values to integers and build a global pattern
 within which all applications checkpoint regularly. The third step is to compute the platform
-waste with that pattern, and to compare it with the waste of the  basic round-robin strategy.
+waste with that pattern, and to compare it with the waste of the  basic round-robin
+strategy \dca{and the infeasible optimal?}.
 
 \subsection{Checkpoint ratios}
 
