@@ -17,6 +17,11 @@
 \newcommand{\nbnodes}[1]{q_{#1}}
 \newcommand{\period}[1]{P_{#1}}
 \newcommand{\ckpt}[1]{C_{#1}}
+\newcommand{\wasteapp}[1]{W_{#1}}
+\newcommand{\mtbfplat}{\mu}
+\newcommand{\wasteplat}{W}
+
+\newcommand{\todo}[1]{\textit{TBD: [#1]}}
 
 \author{Dorian Arnold, George Bosilca, Aurelien Bouteiller,\\
  Kurt Feirrera, Thomas Herault, Yves Robert}
@@ -131,7 +136,7 @@ weighted arithemtic mean of the $\wasteapp{i}$ for all applications
 (where each application is weighted by the number of computing nodes
 it uses):
 
-$$\wasteplat = \sum_i \frac{\nbapps{i} \nbnodes{i}}{\nbnodesplat} \wasteapp{i}$$
+$$\wasteplat = \sum_i \frac{\nbapp{i} \nbnodes{i}}{\nbnodesplat} \wasteapp{i}$$
 
 \todo{Explain why $\sum_i \frac{\ckpt{i}}{\period{i}}\leq 1$}
 
