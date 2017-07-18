@@ -1,0 +1,145 @@
+\documentclass{article}
+
+\usepackage{graphicx}
+\usepackage{amsmath}
+\DeclareMathOperator{\lcm}{lcm}
+\usepackage{paralist}
+\usepackage{color}
+\usepackage{xspace}
+
+\newtheorem{example}{Example}
+
+\newcommand{\appset}{{\mathcal A}}
+\newcommand{\nbnodesplat}{{\mathcal N}}
+\newcommand{\nbapps}{|{\mathcal A}|}
+\newcommand{\app}[1]{A_{#1}}
+\newcommand{\nbapp}[1]{n_{#1}}
+\newcommand{\nbnodes}[1]{q_{#1}}
+\newcommand{\period}[1]{P_{#1}}
+\newcommand{\ckpt}[1]{C_{#1}}
+
+\author{Dorian Arnold, George Bosilca, Aurelien Bouteiller,\\
+ Kurt Feirrera, Thomas Herault, Yves Robert}
+
+\title{Optimal Uncooperative Checkpointing for Shared HPC Platforms}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+Consider a large-scale platform with several applications executing
+concurrently. All these applications routinely perform I/O operations
+throughout their execution. The average fraction of I/O bandwidth that
+remains available can be used for checkpointing. Ideally, each application $A_{i}$
+should checkpoint, during a time $C_{i}$ , 
+every $P_{i}$ units of time. Here $P_{i}$ is the length of the
+optimal checkpointing period given by the Young/Daly formula:
+$$P_{i} = \sqrt{2 \mu_{i} C_{i}}$$
+where $\mu_{i}$ is the application MTBF, which is inversely
+proportional to the number of processors enrolled in its execution.
+ 
+However, with each application having a different $P_{i}$, lasting and
+starting for and at arbitrary times (a behavior we call
+uncooperative), nothing prevents the checkpoint of an application to
+occur while another competitively does I/O (because of its normal
+application behavior, or because of a checkpoint). Because this
+introduces interferences between I/O (\cite{interference}), the time
+to complete both the checkpoint of the first application and the
+competing I/O of the second are adversely impacted. When many
+applications execute an I/O operation competitively, all of them can
+be impacted, reducing the efficiency of each.
+
+Moreover, checkpointing each application with optimal period $P_{i}$
+is possible only if enough I/O bandwidth is available. If this is the
+case, the impact of failures is kept to a minimum using Daly's period
+for each application.  However, if I/O bandwidth is limited, either in
+the absolute (imbalanced hardware design) or in the current
+co-execution (because a few applications need to consume a large
+fraction of bandwidth to progress), applications have to checkpoint
+less frequently.  All of them? if not, which ones? what are the
+optimal checkpointing periods in this context of co-scheduling with a
+given bound on available I/O bandwidth, and how to schedule the
+checkpoints in order to minimize interferences and optimize resource
+spent doing I/O? This paper answers these important questions.
+
+\section{Execution Model}
+\label{sec.model}
+
+\todo{Question: how can we consider applications with finite time, initial
+  input and final output? Current idea is to distribute complete
+  volume of I/O over wall time, then take a single fake schedule that
+  assign resources to the apps following a distribution, and say 'it
+  shouldn't be far from finite apps being scheduled eagerly over
+  finite resource for a long time, in average'.}
+
+In this work, we consider a shared platform. The platform consists of
+a set of computing nodes, an interconnection network, and storage
+resources in the form of a parallel filesystem. Applications are
+scheduled on the platform by a job scheduler. They access their
+computing resource exclusively, but share the network and parallel
+filesystem. They do regular Input/Output operations during their
+execution, load an input file at startup and dump an output file at
+completion. Because applications last long, and the platform is
+subject to failures, they use periodic coordinated checkpoint with
+rollback recovery to ensure their resilience.
+
+Applications are of different sizes: they use a different number of
+computing nodes, their I/O pattern and requirement vary, their
+duration vary, and the size of their checkpoints vary. To model this
+behavior with a few parameters, we do a set of simplifying assumptions
+that we validate in the experimental section:
+\begin{itemize}
+  \item there is a large number of applications, but a small number of
+    application classes (set of applications that behave similarly in
+    terms of number of nodes, I/O requirements, duration and
+    checkpoint size);
+  \item the non-checkpoint-related I/O of applications is distributed
+    over their entire execution duration equally;
+  \item Applications are long-lasting, and we consider a finite
+    segment of a single representative schedule.
+    \todo{I can't write that properly... Need rework}
+\end{itemize}
+
+Formally, we consider a set $\appset$ of $\nbapps$ applications
+classes $\app{1}, \ldots \app{\nbapps}$ that run in parallel in a
+parallel machine with $\nbnodesplat$ nodes. Application class
+$\app{i}$ represents $\nbapp{i}$ applications that each use
+$\nbnodes{i}$ nodes
+($\sum_{i}\nbapp{i} \nbnodes{i} = nbnodesplat$), and checkpoints
+periodically with period $\period{i}$, in a time $\ckpt{i}$ when there
+is no interference with other I/O operation.
+
+\section{Optimal Checkpointing Period under I/O constraint}
+\label{sec.optimal}
+
+The waste of an application is the ratio of time that the application spends doing
+resilience operations by the time that it does useful work. The time
+spent doing resilience operations include he time spend during each period to
+checkpoint, and in case of failure, the time of computation that was
+lost and the time to rollback from the previous checkpoint. We assume
+that the rollback time is equivalent to the checkpoint time, and we
+can define the waste $\wasteapp{i}$ of an application of class
+$app{i}$ as follows (\cite{daly}):
+
+$$\wasteapp{i} = \frac{\ckpt{i}}{\period{i}} +
+\frac{\nbnodes{i}}{\mtbfplat}(\frac{\period{i}}{2} + \ckpt{i})$$
+
+Let $\wasteplat$ be the waste of the platform. We define this as the
+weighted arithemtic mean of the $\wasteapp{i}$ for all applications
+(where each application is weighted by the number of computing nodes
+it uses):
+
+$$\wasteplat = \sum_i \frac{\nbapps{i} \nbnodes{i}}{\nbnodesplat} \wasteapp{i}$$
+
+\todo{Explain why $\sum_i \frac{\ckpt{i}}{\period{i}}\leq 1$}
+
+The Optimal Checkpointing Period under I/O constraint is the set of
+$\period{i}$ that minimize $\wasteplat$, knowing that $\sum_i
+\frac{\ckpt{i}}{\period{i}} \leq 1$.
+
+\section{Optimal Cooperative Checkpointing Strategy}
+\label{sec.strategy}
+
+\end{document}
