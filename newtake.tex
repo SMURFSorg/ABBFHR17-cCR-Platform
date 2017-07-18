@@ -6,13 +6,16 @@
 \usepackage{paralist}
 \usepackage{color}
 \usepackage{xspace}
+\usepackage{amsthm}
 
 \newtheorem{example}{Example}
+\newtheorem{theorem}{Theorem}
 
 \newcommand{\appset}{{\mathcal A}}
 \newcommand{\nbnodesplat}{{\mathcal N}}
 \newcommand{\nbapps}{|{\mathcal A}|}
 \newcommand{\app}[1]{A_{#1}}
+\newcommand{\application}[2]{a_{#1}^{#2}}
 \newcommand{\nbapp}[1]{n_{#1}}
 \newcommand{\nbnodes}[1]{q_{#1}}
 \newcommand{\period}[1]{P_{#1}}
@@ -20,6 +23,8 @@
 \newcommand{\wasteapp}[1]{W_{#1}}
 \newcommand{\mtbfplat}{\mu}
 \newcommand{\wasteplat}{W}
+\newcommand{\lastckpt}[2]{L_{#1}^{#2}}
+\newcommand{\wastefct}[2]{W_{#1}(#2)}
 
 \newcommand{\todo}[1]{\textit{TBD: [#1]}}
 
@@ -128,7 +133,7 @@ that the rollback time is equivalent to the checkpoint time, and we
 can define the waste $\wasteapp{i}$ of an application of class
 $app{i}$ as follows (\cite{daly}):
 
-$$\wasteapp{i} = \frac{\ckpt{i}}{\period{i}} +
+$$\wasteapp{i} = \wastefct{i}{\ckpt{i}} = \frac{\ckpt{i}}{\period{i}} +
 \frac{\nbnodes{i}}{\mtbfplat}(\frac{\period{i}}{2} + \ckpt{i})$$
 
 Let $\wasteplat$ be the waste of the platform. We define this as the
@@ -144,7 +149,55 @@ The Optimal Checkpointing Period under I/O constraint is the set of
 $\period{i}$ that minimize $\wasteplat$, knowing that $\sum_i
 \frac{\ckpt{i}}{\period{i}} \leq 1$.
 
+\todo{Use the Karush-Kuhn-Tucker approach to find optimal
+  $\period{i}$ under the constraint above}
+
 \section{Optimal Cooperative Checkpointing Strategy}
 \label{sec.strategy}
+
+\subsection{With Burst Buffers}
+
+With burst buffers, $\ckpt{i}$ still represents the time it takes to
+upload the checkpoint to the stable storage (the filesystem).
+Consider the following algorithm: every $\period{i}$ time units, each
+application of class $\app{i}$ takes a checkpoint on the burst buffer,
+and adds the transfer of this checkpoint to the filesystem to a global
+shared FIFO queue of transfers to execute.
+
+\begin{theorem}
+This algorithm ensures that all checkpoints are transfered to the
+filesystem without interference between checkpoints and without
+filling up the burst buffers
+\end{theorem}
+
+\begin{proof}
+  \todo{This derives from $\sum_i \frac{\ckpt{i}}{\period{i}} \leq 1$,
+    but should be done properly. Especially, the maximal number of
+    checkpoints to keep in the burst buffer should be defined.}
+\end{proof}
+
+\subsection{Without Burst Buffers}
+
+Without a caching mechanism, the times at which to take the checkpoint
+must be scheduled to avoid any kind of checkpoint-checkpoint
+interference (which can only waste resources, as all interfering
+applications are slowed down while blocking on non-productive
+operations). We consider here a centralized scheduler that decides at
+any time what next application should checkpoint, and when.
+
+The scheduler remembers when each application $\application{i}{j}$ of class
+$\app{i}$ last initiated a checkpoint. We then define $\lastckpt{i}{j}$
+as the time since the last checkpoint $\application{i}{j}$ started
+(since the start of $\application{i}{j}$ if none is known). 
+
+At any time, if no application is checkpointing, the scheduler selects
+$\application{i}{j}$ such that 
+$$
+\left\{
+\begin{array}{l}
+\nbnodes{i}(\frac{\wastefct{i}{\lastckpt{i}{j}}}{\wastefct{i}{\period{i}}}) \textrm{ if }\lastckpt{i}{j}\geq\period{i}\\
+0\textrm{ if }\lastckpt{i}{j}<\period{i}\\
+\end{array}\right.$$
+is maximal and strictly superior to 0.
 
 \end{document}
