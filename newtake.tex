@@ -8,6 +8,9 @@
 \usepackage{xspace}
 \usepackage{amsthm}
 
+\usepackage{algorithm}
+\usepackage{algorithmicx}
+
 \newtheorem{example}{Example}
 \newtheorem{theorem}{Theorem}
 
@@ -160,22 +163,57 @@ $\period{i}$ that minimize $\wasteplat$, knowing that $\sum_i
 
 With burst buffers, $\ckpt{i}$ still represents the time it takes to
 upload the checkpoint to the stable storage (the filesystem).
-Consider the following algorithm: every $\period{i}$ time units, each
-application of class $\app{i}$ takes a checkpoint on the burst buffer,
-and adds the transfer of this checkpoint to the filesystem to a global
-shared FIFO queue of transfers to execute.
+Consider the algorithm~\ref{alg.withbb}: every $\period{i}$ time
+units, each application of class $\app{i}$ takes a checkpoint and save
+it onto the next free slot on the burst buffer; a global shared FIFO
+queue transfers checkpoints from active slots in burst buffers onto
+the parallel filesystem following the FIFO queue order.
+
+\algblockdefx{Process}{EndProcess}[1]{\textbf{On Process} #1}{\textbf{End Process}}
+\algnotext{EndProcess}
+\algblockdefx{Every}{DoneEvery}[1]{\textbf{Every } #1}{\textbf{Done}}
+\algnotext{DoneEvery}
+\algblockdefx{When}{DoneWhen}[1]{\textbf{When } #1}{\textbf{Done}}
+\algnotext{DoneWhen}
+\algloopdefx{If}[1]{\textbf{If} #1 \textbf{then}}
+\begin{algorithm}
+\caption{Cooperative Checkpointing Algorithm with Burst Buffers}
+\label{alg.withbb}
+\begin{algorithmic}
+\State \textbf{var} $transfer\_queue$, a FIFO initially empty
+\Process{$p$, belonging to application $\application{i}{j}$ of class $\app{i}$}
+   \State \textbf{var} $slots$ set of burst buffer files that can
+   store a checkpoint 
+   \Every{$\period{i}$ time units}
+           \State $slot  \gets $ oldest slot that is not being used for transfer
+           \State Checkpoint application state into $slot$
+           \If{$slot$ is marked done transfering}
+                  \State Append $(p, slot)$ to $transfer\_queue$
+    \DoneEvery
+\EndProcess
+
+\Process{$T$}
+   \When{$transfer\_queue$ is not empty}
+       \State Pop $slot$ from $transfer\_queue$
+       \State Mark $slot$ as being transferred
+       \State Transfer Checkpoint in $slot$ to File System
+       \State Mark $slot$ as done transfering
+   \DoneWhen
+\EndProcess
+\end{algorithmic}
+\end{algorithm}
 
 \begin{theorem}
-This algorithm ensures that all checkpoints are transferred to the
-filesystem without interference between checkpoints and without
-filling up the burst buffers
+  Algorithm~\ref{alg.withbb} ensures that all applications of class $\app{i}$
+  checkpoint at most every $max(\sum_j\nbapp{j}*\ckpt{j}, \period{i})$
+  time units, and requires only a burst buffer capable of storing 2
+  checkpoints per process.
 \end{theorem}
 
 \begin{proof}
   \todo{This derives from $\sum_i \frac{\ckpt{i}}{\period{i}} \leq 1$,
-<<<<<<< .mine
     but should be done properly. Yves will write it down soon.}
-    \end{proof}
+\end{proof}
     
 The theorem does provide a lower bound for the platform waste.
 However, we have a FIFO system, and some applications may incur
@@ -191,13 +229,13 @@ Formally, the maximal re-execution time for application
 $\application{i}{j}$ of class
 $\app{i}$ is
 $$\max(P_{i}, \sum_{k=1}^{\nbapps} n_{k}C_{k} - C_{i})$$
-%|
-%  \todo{Discussed at JLESC meeting: size of burst buffer can be
-%    bounded by $2\ckpt{i}$ easily, and it should be: if there are 3
-%    checkpoints in the burst buffer, then the first one might be being
-%    transfered, but this means that the 2nd is useless as we already
-%    reached the 3rd one. The 2nd should be discarded and its slot in
-%    the FIFO queue should be taken by the 3rd.}
+
+ \todo{Discussed at JLESC meeting: size of burst buffer can be
+    bounded by 2 checkpoints easily, and it should be: if there are 3
+    checkpoints in the burst buffer, then the first one might be being
+    transfered, but this means that the 2nd is useless as we already
+    reached the 3rd one. The 2nd should be discarded and its slot in
+    the FIFO queue should be taken by the 3rd.}
 
 \subsection{Without Burst Buffers}
 
@@ -261,16 +299,6 @@ after each checkpoint completion. Computing the actual waste can be achieved
 through simulation, and compared to the lower bound of Section~\ref{sec.optimal}. 
 \end{itemize}
 
-
-%\todo{Discussed at the JLESC meeting: this function is not right. We
-%  now have a function based on $O(\lastckpt{i}{j}\nbnodes{i}^2)$, that
-%  works with the following assumption: we wait that $\lastckpt{i}{j}
-%  \geq \period{i}$ to prevent any increased waste due to greedy
-%  checkpointing (this also guarantees Daly periods, if we have enough
-%  slack to do them); then, once we reached at least $\period{i}$, the
-%  goal is to minimize the waste due to the risk. And that reduces to
-%  minimizing the risk weighted by the amount of resource at risk, which is in
-%  $\frac{\nbnodes{i}}{\nbnodesplat}\cdot\frac{\nbnodes{i}}{\mtbfplat}(\lastckpt{i}{j} + \ckpt{i})$.}
 
 \bibliographystyle{abbrv}
 \bibliography{biblio}
