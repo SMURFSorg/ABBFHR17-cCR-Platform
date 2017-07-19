@@ -174,6 +174,12 @@ filling up the burst buffers
   \todo{This derives from $\sum_i \frac{\ckpt{i}}{\period{i}} \leq 1$,
     but should be done properly. Especially, the maximal number of
     checkpoints to keep in the burst buffer should be defined.}
+  \todo{Discussed at JLESC meeting: size of burst buffer can be
+    bounded by $2\ckpt{i}$ easily, and it should be: if there are 3
+    checkpoints in the burst buffer, then the first one might be being
+    transfered, but this means that the 2nd is useless as we already
+    reached the 3rd one. The 2nd should be discarded and its slot in
+    the FIFO queue should be taken by the 3rd.}
 \end{proof}
 
 \subsection{Without Burst Buffers}
@@ -199,5 +205,15 @@ $$
 0\textrm{ if }\lastckpt{i}{j}<\period{i}\\
 \end{array}\right.$$
 is maximal and strictly superior to 0.
+
+\todo{Discussed at the JLESC meeting: this function is not right. We
+  now have a function based on $O(\lastckpt{i}{j}\nbnodes{i}^2)$, that
+  works with the following assumption: we wait that $\lastckpt{i}{j}
+  \geq \period{i}$ to prevent any increased waste due to greedy
+  checkpointing (this also guarantees Daly periods, if we have enough
+  slack to do them); then, once we reached at least $\period{i}$, the
+  goal is to minimize the waste due to the risk. And that reduces to
+  minimizing the risk weighted by the amount of resource at risk, which is in
+  $\frac{\nbnodes{i}}{\nbnodesplat}\cdot\frac{\nbnodes{i}}{\mtbfplat}(\lastckpt{i}{j} + \ckpt{i})$.}
 
 \end{document}
