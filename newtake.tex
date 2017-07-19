@@ -25,7 +25,8 @@
 \newcommand{\wasteplat}{W}
 \newcommand{\lastckpt}[2]{L_{#1}^{#2}}
 \newcommand{\wastefct}[2]{W_{#1}(#2)}
-
+\newcommand{\pool}{{\mathcal P}}
+\newcommand{\risk}{{\textsc Risk}}
 \newcommand{\todo}[1]{\textit{TBD: [#1]}}
 
 \author{Dorian Arnold, George Bosilca, Aurelien Bouteiller,\\
@@ -211,33 +212,66 @@ The scheduler remembers when each application $\application{i}{j}$ of class
 $\app{i}$ last initiated a checkpoint. We then define $\lastckpt{i}{j}$
 as the time since the last checkpoint $\application{i}{j}$ started
 (or since the start of $\application{i}{j}$ if none has been taken yet). 
+As soon as $\application{i}{j}$ has executed for $P_{i}$ time-units,
+it is put in the checkpointing pool $\pool$ by the centralized scheduler. It 
+continues executing until it is selected from the pool to checkpoint.
 
-At any time, if no application is checkpointing, the scheduler selects
-$\application{i}{j}$ such that 
-$$
-\left\{
-\begin{array}{l}
-\nbnodes{i}(\frac{\wastefct{i}{\lastckpt{i}{j}}}{\wastefct{i}{\period{i}}}) \textrm{ if }\lastckpt{i}{j}\geq\period{i}\\
-0\textrm{ if }\lastckpt{i}{j}<\period{i}\\
-\end{array}\right.$$
-is maximal and strictly superior to 0.
+Which application in the pool should be selected to checkpoint?
+Assume that some previous checkpoint terminates at time $t$,
+and let 
+$$\pool = \{ \application{i_{1}}{j_{1}}, \dots, \application{i_{k}}{j_{k}} \}$$
+be the set of applications  in the pool at time $t$. All these applications are 
+candidate to checkpointing. At time $t$, each application $\application{i_{\ell}}{j_{\ell}} \in \pool$
+has been executing for  $\lastckpt{i_{\ell}}{j_{\ell}}$ time-units.
 
-<<<<<<< .mine
+If we select $\application{i_{\ell}}{j_{\ell}}$ to checkpoint (in time $C_{j_{\ell}}$),
+and if there is a failure during that checkpoint, the time lost by every other application
+$\application{i_{m}}{j_{m}} \in \pool$, $m \neq \ell$, is (in expectation) equal to
+ $\lastckpt{i_m}{j_m} + \frac{C_{j_{\ell}}}{2}$. 
+We define the risk incurred by application
+$\application{i_{m}}{j_{m}} \in \pool$, $m \neq \ell$
+as its potential waste, which is the time lost divided by its MTBF $\frac{\mtbfplat}{\nbnodes{i}}$,
+times the number $\nbnodes{i_m}$ processors enrolled by this application, i.e.
+$$ \frac{\nbnodes{i_{m}}}{\mtbfplat}  (\lastckpt{i_m}{j_m} + \frac{C_{j_{\ell}}}{2})
+\times \nbnodes{i_m} $$
+Altogether, selecting $\application{i_{\ell}}{j_{\ell}}$ to checkpoint leads to a total risk
+$$\risk(\application{i_{\ell}}{j_{\ell}}) = \sum_{1 \leq m \leq k, m \neq \ell} \frac{\nbnodes{i_{m}}^{2}}{\mtbfplat}  \times (\lastckpt{i_m}{j_m} + \frac{C_{j_{\ell}}}{2})$$
+  for all applications that stayed in the pool.
+  
+We greedily choose the application in the pool that minimizes the risk:
+$$\application{i_{\ell}}{j_{\ell}} = Argmin_{\application{i_m}{j_m} \in \pool} \risk(\application{i_m}{j_m})$$
+
+%At the end of each checkpointing, the scheduler selects
+%$\application{i}{j}$ such that 
+%$$
+%\left\{
+%\begin{array}{l}
+%\nbnodes{i}(\frac{\wastefct{i}{\lastckpt{i}{j}}}{\wastefct{i}{\period{i}}}) \textrm{ if }\lastckpt{i}{j}\geq\period{i}\\
+%0\textrm{ if }\lastckpt{i}{j}<\period{i}\\
+%\end{array}\right.$$
+%is maximal and strictly superior to 0.
+
+Two remarks:
+\begin{itemize}
+\item Because we put applications in the ppol only after they have run for $P_{i}$ times-steps,
+this greedy algorithm guarantees Young/Daly periods to every application
+whenever there is non conflict to access I/O resources.
+\item The final schedule is not periodic. Instead, it is constructed dynamically
+after each checkpoint completion. Computing the actual waste can be achieved 
+through simulation, and compared to the lower bound of Section~\ref{sec.optimal}. 
+\end{itemize}
+
+
+%\todo{Discussed at the JLESC meeting: this function is not right. We
+%  now have a function based on $O(\lastckpt{i}{j}\nbnodes{i}^2)$, that
+%  works with the following assumption: we wait that $\lastckpt{i}{j}
+%  \geq \period{i}$ to prevent any increased waste due to greedy
+%  checkpointing (this also guarantees Daly periods, if we have enough
+%  slack to do them); then, once we reached at least $\period{i}$, the
+%  goal is to minimize the waste due to the risk. And that reduces to
+%  minimizing the risk weighted by the amount of resource at risk, which is in
+%  $\frac{\nbnodes{i}}{\nbnodesplat}\cdot\frac{\nbnodes{i}}{\mtbfplat}(\lastckpt{i}{j} + \ckpt{i})$.}
+
 \bibliographystyle{abbrv}
 \bibliography{biblio}
-
-
-||||||| .r43
-=======
-\todo{Discussed at the JLESC meeting: this function is not right. We
-  now have a function based on $O(\lastckpt{i}{j}\nbnodes{i}^2)$, that
-  works with the following assumption: we wait that $\lastckpt{i}{j}
-  \geq \period{i}$ to prevent any increased waste due to greedy
-  checkpointing (this also guarantees Daly periods, if we have enough
-  slack to do them); then, once we reached at least $\period{i}$, the
-  goal is to minimize the waste due to the risk. And that reduces to
-  minimizing the risk weighted by the amount of resource at risk, which is in
-  $\frac{\nbnodes{i}}{\nbnodesplat}\cdot\frac{\nbnodes{i}}{\mtbfplat}(\lastckpt{i}{j} + \ckpt{i})$.}
-
->>>>>>> .r44
 \end{document}
