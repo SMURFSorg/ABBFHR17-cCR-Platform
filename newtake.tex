@@ -45,7 +45,7 @@ throughout their execution. The average fraction of I/O bandwidth that
 remains available can be used for checkpointing. Ideally, each application $A_{i}$
 should checkpoint, during a time $C_{i}$ , 
 every $P_{i}$ units of time. Here $P_{i}$ is the length of the
-optimal checkpointing period given by the Young/Daly formula:
+optimal checkpointing period given by the Young/Daly formula~\cite{young74,daly04}:
 $$P_{i} = \sqrt{2 \mu_{i} C_{i}}$$
 where $\mu_{i}$ is the application MTBF, which is inversely
 proportional to the number of processors enrolled in its execution.
@@ -117,7 +117,7 @@ classes $\app{1}, \ldots \app{\nbapps}$ that run in parallel in a
 parallel machine with $\nbnodesplat$ nodes. Application class
 $\app{i}$ represents $\nbapp{i}$ applications that each use
 $\nbnodes{i}$ nodes
-($\sum_{i}\nbapp{i} \nbnodes{i} = nbnodesplat$), and checkpoints
+($\sum_{i}\nbapp{i} \nbnodes{i} = \nbnodesplat$), and checkpoints
 periodically with period $\period{i}$, in a time $\ckpt{i}$ when there
 is no interference with other I/O operation.
 
@@ -131,7 +131,7 @@ checkpoint, and in case of failure, the time of computation that was
 lost and the time to rollback from the previous checkpoint. We assume
 that the rollback time is equivalent to the checkpoint time, and we
 can define the waste $\wasteapp{i}$ of an application of class
-$app{i}$ as follows (\cite{daly}):
+$\app{i}$ as follows (\cite{springer-monograph}):
 
 $$\wasteapp{i} = \wastefct{i}{\ckpt{i}} = \frac{\ckpt{i}}{\period{i}} +
 \frac{\nbnodes{i}}{\mtbfplat}(\frac{\period{i}}{2} + \ckpt{i})$$
@@ -165,22 +165,38 @@ and adds the transfer of this checkpoint to the filesystem to a global
 shared FIFO queue of transfers to execute.
 
 \begin{theorem}
-This algorithm ensures that all checkpoints are transfered to the
+This algorithm ensures that all checkpoints are transferred to the
 filesystem without interference between checkpoints and without
 filling up the burst buffers
 \end{theorem}
 
 \begin{proof}
   \todo{This derives from $\sum_i \frac{\ckpt{i}}{\period{i}} \leq 1$,
-    but should be done properly. Especially, the maximal number of
-    checkpoints to keep in the burst buffer should be defined.}
-  \todo{Discussed at JLESC meeting: size of burst buffer can be
-    bounded by $2\ckpt{i}$ easily, and it should be: if there are 3
-    checkpoints in the burst buffer, then the first one might be being
-    transfered, but this means that the 2nd is useless as we already
-    reached the 3rd one. The 2nd should be discarded and its slot in
-    the FIFO queue should be taken by the 3rd.}
-\end{proof}
+<<<<<<< .mine
+    but should be done properly. Yves will write it down soon.}
+    \end{proof}
+    
+The theorem does provide a lower bound for the platform waste.
+However, we have a FIFO system, and some applications may incur
+a re-execution time larger than $P_{i}$. What is the worst case?
+A first optimization is the following: when a checkpoint is taken
+    by a given application, we check whether its previous checkpoint is
+    still in the queue from the burst buffer to the file system. If yes, the new
+checkpoint should \emph{replace} the old one, keeping the same position in the queue.
+With this optimization, there is at most two checkpoints per application in the queue,
+one being currently transferred and one waiting.
+Then the worst case is to wait for the checkpoint of all the other applications.
+Formally, the maximal re-execution time for application
+$\application{i}{j}$ of class
+$\app{i}$ is
+$$\max(P_{i}, \sum_{k=1}^{\nbapps} n_{k}C_{k} - C_{i})$$
+%|
+%  \todo{Discussed at JLESC meeting: size of burst buffer can be
+%    bounded by $2\ckpt{i}$ easily, and it should be: if there are 3
+%    checkpoints in the burst buffer, then the first one might be being
+%    transfered, but this means that the 2nd is useless as we already
+%    reached the 3rd one. The 2nd should be discarded and its slot in
+%    the FIFO queue should be taken by the 3rd.}
 
 \subsection{Without Burst Buffers}
 
@@ -194,7 +210,7 @@ any time what next application should checkpoint, and when.
 The scheduler remembers when each application $\application{i}{j}$ of class
 $\app{i}$ last initiated a checkpoint. We then define $\lastckpt{i}{j}$
 as the time since the last checkpoint $\application{i}{j}$ started
-(since the start of $\application{i}{j}$ if none is known). 
+(or since the start of $\application{i}{j}$ if none has been taken yet). 
 
 At any time, if no application is checkpointing, the scheduler selects
 $\application{i}{j}$ such that 
@@ -206,6 +222,13 @@ $$
 \end{array}\right.$$
 is maximal and strictly superior to 0.
 
+<<<<<<< .mine
+\bibliographystyle{abbrv}
+\bibliography{biblio}
+
+
+||||||| .r43
+=======
 \todo{Discussed at the JLESC meeting: this function is not right. We
   now have a function based on $O(\lastckpt{i}{j}\nbnodes{i}^2)$, that
   works with the following assumption: we wait that $\lastckpt{i}{j}
@@ -216,4 +239,5 @@ is maximal and strictly superior to 0.
   minimizing the risk weighted by the amount of resource at risk, which is in
   $\frac{\nbnodes{i}}{\nbnodesplat}\cdot\frac{\nbnodes{i}}{\mtbfplat}(\lastckpt{i}{j} + \ckpt{i})$.}
 
+>>>>>>> .r44
 \end{document}
