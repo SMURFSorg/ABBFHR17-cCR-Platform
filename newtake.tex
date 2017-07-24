@@ -26,6 +26,7 @@
 \newcommand{\wasteapp}[1]{W_{#1}}
 \newcommand{\mtbfplat}{\mu}
 \newcommand{\wasteplat}{W}
+\newcommand{\ioconstraint}{\mathit{IO}}
 \newcommand{\lastckpt}[2]{L_{#1}^{#2}}
 \newcommand{\wastefct}[2]{W_{#1}(#2)}
 \newcommand{\pool}{{\mathcal P}}
@@ -159,7 +160,10 @@ of class $\app{i}$ is obtained by minimizing $\wasteapp{i}$ in Equation~\eqref{e
 Differentiating and solving 
 $$\frac{\delta \wasteapp{i}}{\delta \period{i}} = - \frac{\ckpt{i}}{\period{i}^{2}} + \frac{\nbnodes{i}}{2 \mtbfplat} = 0$$
 we readily derive that
-$$\period{i} = \sqrt{2 \frac{\mtbfplat}{\nbnodes{i}} \ckpt{i}} = \sqrt{2 \mu_{i} \ckpt{i}}$$
+\begin{equation}
+\period{i} = \sqrt{2 \frac{\mtbfplat}{\nbnodes{i}} \ckpt{i}} = \sqrt{2 \mu_{i} \ckpt{i}}
+\label{eq.daly}
+\end{equation}
 where $\mu_{i}$ is the MTBF of  class $\app{i}$ applications, which is the Young/Daly formula~\cite{young74,daly04}.
 
 However, I/O constraints impose to use sub-optimal periods. If each application
@@ -176,10 +180,27 @@ the set of values $\period{i}$ that minimize $\wasteplat$ in Equation~\eqref{eq.
 Note that Equation~\eqref{eq.IOconstraint} is a necessary condition, but is may not be sufficient:
 even though the total I/O bandwidth is not exceeded, meaning there is enough capacity to take all the checkpoints at the given periods, we still need to orchestrate these checkpoints so that there is no contention. We come back to this point below.
 
-
-\todo{Use the Karush-Kuhn-Tucker approach to find optimal
-  $\period{i}$ under the constraint above}
-
+The optimization problem writes: minimize $\wasteplat = \sum_i \frac{\nbapp{i} \nbnodes{i}}{\nbnodesplat}  \left( \frac{\ckpt{i}}{\period{i}} +
+\frac{\nbnodes{i}}{\mtbfplat}(\frac{\period{i}}{2} + \ckpt{i}) \right)$
+subject to $\ioconstraint = \sum_{i} \frac{\nbapp{i} \ckpt{i}}{\period{i}} \leq 1$.
+Using the Karush-Kuhn-Tucker condition, we know that there exists a nonnegative constant 
+$\lambda$
+such that 
+$$- \frac{\delta \wasteplat}{\delta \period{i}} = \lambda \frac{\delta\ioconstraint }{\delta \period{i}}$$
+for all $i$. We derive that 
+$$\frac{\nbapp{i} \nbnodes{i} \ckpt{i}}{\nbnodesplat \period{i}^{2}} -    \frac{\nbapp{i} \nbnodes{i}^{2}}{2 \mtbfplat \nbnodesplat} = - \lambda \frac{\nbapp{i} \ckpt{i}}{\period{i}^{2}}
+$$
+for all $i$. This leads to:
+ \begin{equation}
+\period{i} = \sqrt{\frac{2 \mtbfplat  \nbnodesplat}{\nbnodes{i}^{2}} \left(\frac{\nbnodes{i}}{\nbnodesplat} +\lambda \right) \ckpt{i}}
+  \label{eq.KKT}
+\end{equation}
+for all $i$. Note that when $\lambda=0$, Equation~\eqref{eq.KKT} reduces to Equation~\eqref{eq.daly}. Because of the I/O constraint in Equation~eq\ref{eq.IOconstraint},
+we will choose for $\lambda$ the minimum value such that Equation~eq\ref{eq.IOconstraint}
+  is satisfied. This will lead to periods $P_{i}$ larger than the optimal value of Equation~\eqref{eq.daly}. 
+  Note that there is no closed-form expression for the minimum value of $\lambda$,
+  it has to be found numerically.
+   
 \section{Optimal Cooperative Checkpointing Strategy}
 \label{sec.strategy}
 
