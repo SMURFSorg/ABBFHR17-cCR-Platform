@@ -35,7 +35,7 @@
 \author{Dorian Arnold, George Bosilca, Aurelien Bouteiller,\\
  Kurt Feirrera, Thomas Herault, Yves Robert}
 
-\title{Optimal Uncooperative Checkpointing for Shared HPC Platforms}
+\title{Optimal Cooperative Checkpointing for Shared HPC Platforms}
 
 \begin{document}
 
@@ -105,15 +105,15 @@ duration vary, and the size of their checkpoints vary. To model this
 behavior with a few parameters, we do a set of simplifying assumptions
 that we validate in the experimental section:
 \begin{itemize}
-  \item there is a large number of applications, but a small number of
+  \item There is a large number of applications, but a small number of
     application classes (set of applications that behave similarly in
     terms of number of nodes, I/O requirements, duration and
     checkpoint size);
-  \item the non-checkpoint-related I/O of applications is distributed
+  \item The non-checkpoint-related I/O of applications is distributed
     over their entire execution duration equally;
-  \item Applications are long-lasting, and we consider a finite
-    segment of a single representative schedule.
-    \todo{I can't write that properly... Need rework}
+  \item Applications may have different execution times, but we consider a finite
+    segment of a representative schedule where the number of applications in each class remains constant. This is the key to analyze and optimize the steady-state I/O behavior of the 
+    application portfolio. 
 \end{itemize}
 
 Formally, we consider a set $\appset$ of $\nbapps$ applications
@@ -137,21 +137,45 @@ that the rollback time is equivalent to the checkpoint time, and we
 can define the waste $\wasteapp{i}$ of an application of class
 $\app{i}$ as follows (\cite{springer-monograph}):
 
-$$\wasteapp{i} = \wastefct{i}{\ckpt{i}} = \frac{\ckpt{i}}{\period{i}} +
-\frac{\nbnodes{i}}{\mtbfplat}(\frac{\period{i}}{2} + \ckpt{i})$$
+\begin{equation}
+\wasteapp{i} = \wastefct{i}{\ckpt{i}} = \frac{\ckpt{i}}{\period{i}} +
+\frac{\nbnodes{i}}{\mtbfplat}(\frac{\period{i}}{2} + \ckpt{i})
+\label{eq.wasteAi}
+\end{equation}
 
 Let $\wasteplat$ be the waste of the platform. We define this as the
-weighted arithemtic mean of the $\wasteapp{i}$ for all applications
+weighted arithemetic mean of the $\wasteapp{i}$ for all applications
 (where each application is weighted by the number of computing nodes
 it uses):
 
-$$\wasteplat = \sum_i \frac{\nbapp{i} \nbnodes{i}}{\nbnodesplat} \wasteapp{i}$$
+\begin{equation}
+\wasteplat = \sum_i \frac{\nbapp{i} \nbnodes{i}}{\nbnodesplat} \wasteapp{i}
+\label{eq.waste}
+\end{equation}
 
-\todo{Explain why $\sum_i \frac{\ckpt{i}}{\period{i}}\leq 1$}
+In the absence of I/O constraints, the checkpointing period can be minimized
+for each application independently. Indeed, the optimal period for an application of 
+of class $\app{i}$ is obtained by minimizing $\wasteapp{i}$ in Equation~\eqref{eq.wasteAi}.
+Differentiating and solving 
+$$\frac{\delta \wasteapp{i}}{\delta \period{i}} = - \frac{\ckpt{i}}{\period{i}^{2}} + \frac{\nbnodes{i}}{2 \mtbfplat} = 0$$
+we readily derive that
+$$\period{i} = \sqrt{2 \frac{\mtbfplat}{\nbnodes{i}} \ckpt{i}} = \sqrt{2 \mu_{i} \ckpt{i}}$$
+where $\mu_{i}$ is the MTBF of  class $\app{i}$ applications, which is the Young/Daly formula~\cite{young74,daly04}.
 
-The Optimal Checkpointing Period under I/O constraint is the set of
-$\period{i}$ that minimize $\wasteplat$, knowing that $\sum_i
-\frac{\ckpt{i}}{\period{i}} \leq 1$.
+However, I/O constraints impose to use sub-optimal periods. If each application
+of  class $\app{i}$ checkpoints in time $\ckpt{i}$ during its period $\period{i}$ (hence without any contention), it uses the I/O device during a fraction $\frac{\ckpt{i}}{\period{i}}$ of the time.
+The total usage fraction of the  I/O device is $\sum_{i} \frac{\nbapp{i} \ckpt{i}}{\period{i}}$
+and cannot exceed $1$. Therefore, we have to solve the following optimization problem: find
+the set of values $\period{i}$ that minimize $\wasteplat$ in Equation~\eqref{eq.waste} subject to the I/O constraint:
+
+\begin{equation}
+\sum_{i} \frac{\nbapp{i} \ckpt{i}}{\period{i}} \leq 1
+\label{eq.IOconstraint}
+\end{equation}
+
+Note that Equation~\eqref{eq.IOconstraint} is a necessary condition, but is may not be sufficient:
+even though the total I/O bandwidth is not exceeded, meaning there is enough capacity to take all the checkpoints at the given periods, we still need to orchestrate these checkpoints so that there is no contention. We come back to this point below.
+
 
 \todo{Use the Karush-Kuhn-Tucker approach to find optimal
   $\period{i}$ under the constraint above}
@@ -197,7 +221,7 @@ the parallel filesystem following the FIFO queue order.
        \State Pop $slot$ from $transfer\_queue$
        \State Mark $slot$ as being transferred
        \State Transfer Checkpoint in $slot$ to File System
-       \State Mark $slot$ as done transfering
+       \State Mark $slot$ as done transferring
    \DoneWhen
 \EndProcess
 \end{algorithmic}
@@ -291,7 +315,7 @@ $$\application{i_{\ell}}{j_{\ell}} = Argmin_{\application{i_m}{j_m} \in \pool} \
 
 Two remarks:
 \begin{itemize}
-\item Because we put applications in the ppol only after they have run for $P_{i}$ times-steps,
+\item Because we put applications in the pool only after they have run for $P_{i}$ times-steps,
 this greedy algorithm guarantees Young/Daly periods to every application
 whenever there is non conflict to access I/O resources.
 \item The final schedule is not periodic. Instead, it is constructed dynamically
