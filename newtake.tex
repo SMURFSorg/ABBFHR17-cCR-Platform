@@ -200,19 +200,26 @@ we will choose for $\lambda$ the minimum value such that Equation~eq\ref{eq.IOco
   is satisfied. This will lead to periods $P_{i}$ larger than the optimal value of Equation~\eqref{eq.daly}. 
   Note that there is no closed-form expression for the minimum value of $\lambda$,
   it has to be found numerically.
+   Altogether, we state our main result:
    
+   \begin{theorem}
+  In the presence of I/O constraints, the optimal values of the checkpointing periods are given
+  by Equation~\eqref{eq.KKT}, where $\lambda$ is the smallest nonnegative value such that
+  Equation~eq\ref{eq.IOconstraint} holds.
+\end{theorem}
+
 \section{Optimal Cooperative Checkpointing Strategy}
 \label{sec.strategy}
 
 \subsection{With Burst Buffers}
 
 With burst buffers, $\ckpt{i}$ still represents the time it takes to
-upload the checkpoint to the stable storage (the filesystem).
-Consider the algorithm~\ref{alg.withbb}: every $\period{i}$ time
+upload the checkpoint to the stable storage (the file system).
+Consider Algorithm~\ref{alg.withbb}: every $\period{i}$ time
 units, each application of class $\app{i}$ takes a checkpoint and save
 it onto the next free slot on the burst buffer; a global shared FIFO
 queue transfers checkpoints from active slots in burst buffers onto
-the parallel filesystem following the FIFO queue order.
+the parallel file system following the FIFO queue order.
 
 \algblockdefx{Process}{EndProcess}[1]{\textbf{On Process} #1}{\textbf{End Process}}
 \algnotext{EndProcess}
@@ -232,7 +239,7 @@ the parallel filesystem following the FIFO queue order.
    \Every{$\period{i}$ time units}
            \State $slot  \gets $ oldest slot that is not being used for transfer
            \State Checkpoint application state into $slot$
-           \If{$slot$ is marked done transfering}
+           \If{$slot$ is marked done transferring}
                   \State Append $(p, slot)$ to $transfer\_queue$
     \DoneEvery
 \EndProcess
@@ -257,7 +264,7 @@ the parallel filesystem following the FIFO queue order.
 
 \begin{proof}
   \todo{This derives from $\sum_i \frac{\ckpt{i}}{\period{i}} \leq 1$,
-    but should be done properly. Yves will write it down soon.}
+    but should be done properly.}
 \end{proof}
     
 The theorem does provide a lower bound for the platform waste.
