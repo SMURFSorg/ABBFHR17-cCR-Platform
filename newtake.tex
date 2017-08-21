@@ -14,6 +14,9 @@
 \newtheorem{example}{Example}
 \newtheorem{theorem}{Theorem}
 
+\newcommand{\muind}{\mu_{\text{ind}}}
+\newcommand{\bandtotal}{\beta_{\text{tot}}}
+\newcommand{\bandavail}{\beta_{\text{avail}}}
 \newcommand{\appset}{{\mathcal A}}
 \newcommand{\nbnodesplat}{{\mathcal N}}
 \newcommand{\nbapps}{|{\mathcal A}|}
@@ -44,40 +47,97 @@
 
 \section{Introduction}
 
-Consider a large-scale platform with several applications executing
-concurrently. All these applications routinely perform I/O operations
-throughout their execution. The average fraction of I/O bandwidth that
-remains available can be used for checkpointing. Ideally, each application $A_{i}$
-should checkpoint, during a time $C_{i}$ , 
-every $P_{i}$ units of time. Here $P_{i}$ is the length of the
-optimal checkpointing period given by the Young/Daly formula~\cite{young74,daly04}:
-$$P_{i} = \sqrt{2 \mu_{i} C_{i}}$$
-where $\mu_{i}$ is the application MTBF, which is inversely
-proportional to the number of processors enrolled in its execution.
- 
-However, with each application having a different $P_{i}$, lasting and
-starting for and at arbitrary times (a behavior we call
-uncooperative), nothing prevents the checkpoint of an application to
-occur while another competitively does I/O (because of its normal
-application behavior, or because of a checkpoint). Because this
-introduces interferences between I/O (\cite{interference}), the time
-to complete both the checkpoint of the first application and the
-competing I/O of the second are adversely impacted. When many
-applications execute an I/O operation competitively, all of them can
-be impacted, reducing the efficiency of each.
+This paper investigates scheduling strategies to checkpoint several applications
+that execute concurrently on a shared HPC (High-Performance Computing) platform.
+Sharing HPC platforms is the norm: running a capability application that spans the entire platform
+is the exception, and execution logs show that several smaller-size applications typically share the platform~\cite{xx}.
 
-Moreover, checkpointing each application with optimal period $P_{i}$
-is possible only if enough I/O bandwidth is available. If this is the
-case, the impact of failures is kept to a minimum using Daly's period
-for each application.  However, if I/O bandwidth is limited, either in
-the absolute (imbalanced hardware design) or in the current
-co-execution (because a few applications need to consume a large
-fraction of bandwidth to progress), applications have to checkpoint
-less frequently.  All of them? if not, which ones? what are the
-optimal checkpointing periods in this context of co-scheduling with a
-given bound on available I/O bandwidth, and how to schedule the
-checkpoints in order to minimize interferences and optimize resource
-spent doing I/O? This paper answers these important questions.
+With several applications executing concurrently, the de-facto standard execution mode on today's platforms is to let each application checkpoint independently. There are two widely-used approaches: (i) to use the same checkpoint period, typically one hour, for each application; (ii) to use a checkpoint period specific to each application, based upon its checkpoint time and its number of processors. In the second approach (ii), the well-known Young/Daly formula~\cite{young74,daly04} states that is is optimal to checkpoint an application
+every $\sqrt{2 \mu C}$ seconds, where $C$ is the checkpoint time and $\mu$ the application MTBF.
+Here the application MTBF $\mu$ is equal to $\mu = \frac{\muind}{q}$ where $q$ is the number of processors enrolled by the application and $\muind$ the MTBF of an individual processor~\cite{springer-monograph}. As a consequence, both $\mu$ and $C$ 
+in the Young/Daly formula are application-dependent, and optimal periods can be quite different
+over the application spectrum.
+
+While both approaches (i) and (ii) are routinely used on shared HPC platforms, they incur a
+big resource waste, because they lead to a very inefficient usage of an already scarce resource, namely the I/O system. There are two major reasons for that:
+\begin{itemize}
+\item First, the I/O system itself may not be capable to sustain the I/O requirements from all the applications. Let $\bandtotal$ be the total filesystem I/O bandwidth. Unless the platform was ill-provisioned, the value of $\bandtotal$ should allow for the possibility to checkpoint all platform nodes
+in reasonable time. However, the applications sharing the platform perform regular (non-checkpoint)
+I/O operations throughout execution, so that only a fraction $\bandavail$ of the total  bandwidth remains available for checkpoints, and this fraction may not be sufficient, in particular when some applications perform
+intensive non-checkpoint I/O and others have large checkpoint files.
+\item Second, and more importantly, the applications execute independently, so there is a high probability that their checkpoints will overlap. Consider the simple case where two applications checkpoint simultaneously a file of same size. Each will be assigned half the fraction $\bandavail$
+to checkpoint, so that both checkpoints will be twice longer than expected. Such interferences dramatically decrease the throughput of the platform.
+\end{itemize}
+
+The objective of this paper is to assess the impact of such interferences, and to design scheduling algorithms that squeeze the most out of the I/O bandwidth available for checkpoints. We introduce cooperative algorithms where applications checkpoint in sequence, with a frequency that
+is dictated by the priority they dynamically receive from the scheduler. When there is enough I/O bandwidth available, each application checkpoints with its optimal Young/daly period. When it is not the case, the scheduling algorithm provides the optimal checkpoint instants for each application, in order to maximize the platform throughput.
+
+The main contributions of the paper are: ...
+The rest of the paper is organized as follows ...
+
+%Consider a large-scale platform with several applications executing
+%concurrently. All these applications routinely perform I/O operations
+%throughout their execution. The average fraction of I/O bandwidth that
+%remains available can be used for checkpointing. Ideally, each application $A_{i}$
+%should checkpoint, during a time $C_{i}$ , 
+%every $P_{i}$ units of time. Here $P_{i}$ is the length of the
+%optimal checkpointing period given by the Young/Daly formula~\cite{young74,daly04}:
+%$$P_{i} = \sqrt{2 \mu_{i} C_{i}}$$
+%where $\mu_{i}$ is the application MTBF, which is inversely
+%proportional to the number of processors enrolled in its execution.
+% 
+%However, with each application having a different $P_{i}$, lasting and
+%starting for and at arbitrary times (a behavior we call
+%uncooperative), nothing prevents the checkpoint of an application to
+%occur while another competitively does I/O (because of its normal
+%application behavior, or because of a checkpoint). Because this
+%introduces interferences between I/O (\cite{interference}), the time
+%to complete both the checkpoint of the first application and the
+%competing I/O of the second are adversely impacted. When many
+%applications execute an I/O operation competitively, all of them can
+%be impacted, reducing the efficiency of each.
+%
+%Moreover, checkpointing each application with optimal period $P_{i}$
+%is possible only if enough I/O bandwidth is available. If this is the
+%case, the impact of failures is kept to a minimum using Daly's period
+%for each application.  However, if I/O bandwidth is limited, either in
+%the absolute (imbalanced hardware design) or in the current
+%co-execution (because a few applications need to consume a large
+%fraction of bandwidth to progress), applications have to checkpoint
+%less frequently.  All of them? if not, which ones? what are the
+%optimal checkpointing periods in this context of co-scheduling with a
+%given bound on available I/O bandwidth, and how to schedule the
+%checkpoints in order to minimize interferences and optimize resource
+%spent doing I/O? This paper answers these important questions.
+
+\section{Related work}
+\label{sec.related}
+
+We survey related work in this section. We first discuss papers related to I/O pressure 
+dur to checkpointing. Then we deal with I/O interference.
+
+\subsection{Checkpointing and I/O}
+
+For a single application, the optimal checkpointting period is given by the Young/Daly
+formula~\cite{young74,daly04}. This period minimizes the platform waste, defined as 
+the fraction of the
+execution time that does not contribute to the progress of the application (the
+time \emph{wasted}).  There are two sources of waste, the time spent taking checkpoints
+(which calls for longer checkpoint periods),
+and the time needed to recover and re-execute after each failure
+(which calls for shorter checkpoint periods),
+The Young/Daly
+period acheives the optimal trade-off between both sources to minimize the 
+total waste.
+However, this optimal period may put too much pressure 
+on the I/O system. It is possible to use a longer, sub-optimal, period that would
+less pressure and still lead to a reasonable waste? S. Arunagiri et al.~\cite{Arunagiri2009} have studied such trade-offs and they have shown, both analytically and instantiating the model with four real-life platforms,
+that a great decrease in I/O requirement can be achieved  at the price of a small increase of the waste.
+
+
+
+\subsection{I/O interference}
+
 
 \section{Execution Model}
 \label{sec.model}
