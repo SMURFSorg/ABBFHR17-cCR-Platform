@@ -36,6 +36,9 @@
 \newcommand{\risk}{{\textsc Risk}}
 \newcommand{\todo}[1]{\textit{TBD: [#1]}}
 
+\newcommand{\IOcat}{\textsc{IO-Candid}\xspace}
+\newcommand{\Ckptcat}{\textsc{Ckpt-Candid}\xspace}
+
 \author{Dorian Arnold, George Bosilca, Aurelien Bouteiller,\\
  Kurt Feirrera, Thomas Herault, Yves Robert}
 
@@ -45,7 +48,96 @@
 
 \maketitle
 
-\section{Introduction}
+\section{Status}
+
+After several discussions at UTK recently, here is the current status for the simulator
+and for the paper.
+
+\subsection{Scheduling applications}
+
+\begin{itemize}
+  \item We take a large number of applications. These applications belong to a few classes
+  (say 4 classes). We enforce the percentage per class that is reported in the APEX paper.
+  Each application comes with: class, number of processors, input I/O size, output I/O size, 
+  checkpoint size,  CPU time (equal to wall-time reported in APEX paper). To avoid side effects
+  induced by having hundreds
+  of completely identical applications,
+  we use normal distributions for CPU time with mean equal to original APEX value and small standard deviation (say 10\%). 
+  \item We shuffle the applications and present them all in a big queue to the scheduler, 
+  which uses a simple first-fit.
+  algorithm. No user reservation, plain greedy.
+  \item When an application fails, we resubmit it will new wall-time equal to the fraction that remains since the last checkpoint.  Input I/O becomes recovery. Output I/O is not modified. 
+  Now we reschedule every application that has not started yet, and we put the
+  failed application at the head of the queue so that the scheduler will consider it first now.
+\end{itemize}
+
+\subsection{Dealing with interferences for non-cooperative application scheduling}
+\begin{itemize}
+  \item For coherence, we use the same policy for input I/O, output I/O and checkpoint operations 
+  \item Blocking: only one application can perform I/O operations at the given time-step.
+  I/O requests are served on a FCFS basis. When an application has requested an I/O operation, it waits idle until being served.
+  \item Sharing: the I/O resource is shared at very time-step to serve all current requests. Sharing is fair, i.e., bandwidth is inversely proportional to number of requests. 
+  \item Here is an example:
+  application $A_{1}$ wants to perform five gigabytes of I/O at time $t$, 
+  and available bandwidth is 
+  $1$ gigabyte per second. If there is no other request, the operation will take five seconds.
+  Now application $A_{2}$ wants to perform two gigabytes of I/O at time $t+1$.
+  \begin{itemize}
+  \item Blocking: $A_{2}$'s operation is delayed until time $t+5$ and will complete at $t+7$.
+  \item Sharing: Instead of taking $2$ seconds, $A_{2}$'s operation will take $4$ seconds, because the bandwidth is shared with $A_{1}$ during its whole transfer. As a results, $A_{2}$'s operation completes at $t+5$ while $A_{1}$'s  operation is slowed down during four units and now completes at $t+7$.
+  \end{itemize}
+\end{itemize}
+
+\subsection{Orchestrating I/O for cooperative application scheduling}
+
+\begin{itemize}
+  \item We always use the blocking strategy but not the FCFS policy.
+  \item Instead, whenever an I/O operation completes at time $t$, we have a pool of application candidates:
+  \begin{itemize}
+   \item Category \IOcat: Applications $A_{i}$ which need to do input I/O, output I/O or recovery
+  \item Category \Ckptcat: Applications $A_{i}$ whose last checkpoint took place not later than time $t - \period{Daly}(A_{i})$, where $\period{Daly}(A_{i})$ is the Young/Daly period for $A_{i}$.
+  \end{itemize}
+  \item Category \IOcat applications are given priority. If several of them are present, we choose the one
+  which minimizes the total idle time incurred by the other applications, see Section~\ref{sec.iocat}.
+  \item Category \Ckptcat applications are selected whenever there is no candidate of category \IOcat .
+  If several of them are present, we choose the one
+  which minimizes the total expected  waste of resources incurred by the other applications,
+  Section~\ref{sec.ckptcat}.
+\end{itemize}
+
+
+\subsubsection{Selection in category \IOcat}
+\label{sec.iocat}
+  
+  Let $(A_{i})_{1 \leq i \leq m}$ be the application candidates of category \IOcat. 
+  Application $A_{i}$ has an I/O request of volume $v_{i}$ and enrolls $q_{i}$ processors.
+  Choosing $A_{i}$ makes every other candidate application $A_{j}$, $j \neq i$, keep $q_{j}$ processors idle during a time
+  proportional to $v_{i}$, so we choose $i$ that minimizes 
+  $$(\sum_{j \neq i} q_{j}) \times v_{i}$$
+    
+\subsubsection{Selection in category \Ckptcat}
+\label{sec.ckptcat}
+
+Let $(A_{i})_{1 \leq i \leq m}$ be the application candidates of category \Ckptcat. 
+  Application $A_{i}$ has a checkpoint of duration $C_{i}$ seconds,
+  and enrolls $q_{i}$ processors. At the current time-step, $A_{i}$ took its last checkpoint 
+  $d_{i}$ seconds ago (and for the record, we must have $d_{i} \geq \period{Daly}(A_{i})$
+  since $A_{i}$ is a candidate).
+   Choosing $A_{i}$ puts every other candidate application $A_{j}$, $j \neq i$, 
+   at the risk of a failure that will strike  within $C_{i}/2$ seconds on average.
+   Let $\bar{Q}_{i} = \sum_{j \neq i}q_{j}$ be the total number of processors at risk of 
+   the failure.
+   With probability $C_{i}/(\muind/\bar{Q}_{i})$ there will be a fault on one of these
+   processors. Here $\muind$ is the individual MTBF, hence we divide it by $\bar{Q}_{i}$
+   to get the MTBF over all processors at risk. 
+   
+   With probability $q_{j}/\bar{Q}_{i}$ the fault will strike application $A_{j}$ and incur a waste of duration $d_{j} + C_{i}/2$ for each of its $q_{j}$ processors. Altogether, the
+   expected amount of wasted time is 
+   $$\frac{C_{i}}{(\muind/\bar{Q}_{i}) } \times \sum_{j \neq i}\frac{q_{j}}{\bar{Q}_{i}}(d_{j}+ \frac{C_{i}}{2})q_{j} = \frac{C_{i}}{\muind} \sum_{j \neq i} q_{j}^{2}(d_{j}+ \frac{C_{i}}{2})$$
+    and we choose $i$ that minimizes the above quantity.
+    
+    
+   \section{Introduction}
 
 This paper investigates scheduling strategies to checkpoint several applications
 that execute concurrently on a shared HPC (High-Performance Computing) platform.
