@@ -81,7 +81,7 @@ and for the paper.
   application $A_{1}$ wants to perform five gigabytes of I/O at time $t$, 
   and available bandwidth is 
   $1$ gigabyte per second. If there is no other request, the operation will take five seconds.
-  Now application $A_{2}$ wants to perform two gigabytes of I/O at time $t+1$.
+  Now application $A_{2}$ (of same number of processors as $A_(1)$) wants to perform two gigabytes of I/O at time $t+1$.
   \begin{itemize}
   \item Blocking: $A_{2}$'s operation is delayed until time $t+5$ and will complete at $t+7$.
   \item Sharing: Instead of taking $2$ seconds, $A_{2}$'s operation will take $4$ seconds, because the bandwidth is shared with $A_{1}$ during its whole transfer. As a results, $A_{2}$'s operation completes at $t+5$ while $A_{1}$'s  operation is slowed down during four units and now completes at $t+7$.
@@ -125,8 +125,8 @@ Let $(A_{i})_{1 \leq i \leq m}$ be the application candidates of category \Ckptc
   since $A_{i}$ is a candidate).
    Choosing $A_{i}$ puts every other candidate application $A_{j}$, $j \neq i$, 
    at the risk of a failure that will strike  within $C_{i}/2$ seconds on average.
-   Let $\bar{Q}_{i} = \sum_{j \neq i}q_{j}$ be the total number of processors at risk of 
-   the failure.
+   Let $\bar{Q}_{i} = \sum_{j \neq i}q_{j}$ be the total number of
+   processors belonging to applications that want to checkpoint.
    With probability $C_{i}/(\muind/\bar{Q}_{i})$ there will be a fault on one of these
    processors. Here $\muind$ is the individual MTBF, hence we divide it by $\bar{Q}_{i}$
    to get the MTBF over all processors at risk. 
@@ -347,8 +347,8 @@ for all $i$. This leads to:
 \period{i} = \sqrt{\frac{2 \mtbfplat  \nbnodesplat}{\nbnodes{i}^{2}} \left(\frac{\nbnodes{i}}{\nbnodesplat} +\lambda \right) \ckpt{i}}
   \label{eq.KKT}
 \end{equation}
-for all $i$. Note that when $\lambda=0$, Equation~\eqref{eq.KKT} reduces to Equation~\eqref{eq.daly}. Because of the I/O constraint in Equation~eq\ref{eq.IOconstraint},
-we will choose for $\lambda$ the minimum value such that Equation~eq\ref{eq.IOconstraint}
+for all $i$. Note that when $\lambda=0$, Equation~\eqref{eq.KKT} reduces to Equation~\eqref{eq.daly}. Because of the I/O constraint in Equation~\eqref{eq.IOconstraint},
+we will choose for $\lambda$ the minimum value such that Equation~\eqref{eq.IOconstraint}
   is satisfied. This will lead to periods $P_{i}$ larger than the optimal value of Equation~\eqref{eq.daly}. 
   Note that there is no closed-form expression for the minimum value of $\lambda$,
   it has to be found numerically.
