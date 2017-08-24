@@ -370,8 +370,16 @@ we will choose for $\lambda$ the minimum value such that Equation~\eqref{eq.IOco
 
 \subsection{With Burst Buffers}
 
-With burst buffers, $\ckpt{i}$ still represents the time it takes to
-upload the checkpoint to the stable storage (the file system).
+We slightly change the machine model, and will consider that, in addition 
+to the global PFS, each node is provisioned with a local stage-in I/O 
+burst buffer. With burst buffers, $\ckpt{i}$ still represents the time it 
+takes to upload the checkpoint to the stable storage (the file system).
+However, the availability of burst buffers permits a reduction in the 
+apparent time for the checkpoints as experienced by application idle 
+time. Note that under I/O constraints on the PFS, checkpoints may remain 
+in burst buffers (which is not a stable storage) until sufficient 
+PFS bandwidth is available. 
+
 Consider Algorithm~\ref{alg.withbb}: every $\period{i}$ time
 units, each application of class $\app{i}$ takes a checkpoint and save
 it onto the next free slot on the burst buffer; a global shared FIFO
@@ -424,7 +432,7 @@ the parallel file system following the FIFO queue order.
     but should be done properly.}
 \end{proof}
     
-The theorem does provide a lower bound for the platform waste.
+The theorem does provide a lower bound for the platform waste.\todo{the 2 storages holds only after the optimization, doesn't it? Or is it also a consequence of the above "proof" sketch?}
 However, we have a FIFO system, and some applications may incur
 a re-execution time larger than $P_{i}$. What is the worst case?
 A first optimization is the following: when a checkpoint is taken
@@ -442,13 +450,14 @@ $$\max(P_{i}, \sum_{k=1}^{\nbapps} n_{k}C_{k} - C_{i})$$
  \todo{Discussed at JLESC meeting: size of burst buffer can be
     bounded by 2 checkpoints easily, and it should be: if there are 3
     checkpoints in the burst buffer, then the first one might be being
-    transfered, but this means that the 2nd is useless as we already
+    transferred, but this means that the 2nd is useless as we already
     reached the 3rd one. The 2nd should be discarded and its slot in
     the FIFO queue should be taken by the 3rd.}
 
 \subsection{Without Burst Buffers}
 
-Without a caching mechanism, the times at which to take the checkpoint
+Without a local caching mechanism\footnote{Note that this case covers ``shared'' burst-buffers, where the 
+PFS contains an intermediate stage-in area (presumably with SSD drives, a much higher bandwidth, and possibly contention reduced to a subset of the nodes it serves, but provides for stable/persistent storage as soon as the data is committed to the shared burst-buffer.}, the times at which to take the checkpoint
 must be scheduled to avoid any kind of checkpoint-checkpoint
 interference (which can only waste resources, as all interfering
 applications are slowed down while blocking on non-productive
