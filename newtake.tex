@@ -290,8 +290,7 @@ is no interference with other I/O operation. At any given time, we'll schedule a
 
 The waste of an application is the ratio of time that the application spends doing
 resilience operations by the time that it does useful work. The time
-spent doing resilience operations include the time spend during each period to checkpoint, and in case of failure, the time of computation that was
-lost and the time to rollback from the previous checkpoint. We assume
+spent doing resilience operations include the time spend during each period to checkpoint, and in case of failure, the time to rollback to the previous checkpoint, and the time to recompute lost work. We assume
 that the rollback time is equivalent to the checkpoint time, and we
 can define the waste $\wasteapp{i}$ of an application of class
 $\app{i}$ as follows (\cite{springer-monograph}):
@@ -303,7 +302,7 @@ $\app{i}$ as follows (\cite{springer-monograph}):
 \end{equation}
 
 Let $\wasteplat$ be the waste of the platform. We define this as the
-weighted arithemetic mean of the $\wasteapp{i}$ for all applications
+weighted arithmetic mean of the $\wasteapp{i}$ for all applications
 (where each application is weighted by the number of computing nodes
 it uses):
 
@@ -313,7 +312,7 @@ it uses):
 \end{equation}
 
 In the absence of I/O constraints, the checkpointing period can be minimized
-for each application independently. Indeed, the optimal period for an application of 
+for each application independently. Indeed, the optimal period for an application  
 of class $\app{i}$ is obtained by minimizing $\wasteapp{i}$ in Equation~\eqref{eq.wasteAi}.
 Differentiating and solving 
 $$\frac{\delta \wasteapp{i}}{\delta \period{i}} = - \frac{\ckpt{i}}{\period{i}^{2}} + \frac{\nbnodes{i}}{2 \mtbfplat} = 0$$
@@ -324,7 +323,7 @@ we readily derive that
 \end{equation}
 where $\mu_{i}$ is the MTBF of  class $\app{i}$ applications, which is the Young/Daly formula~\cite{young74,daly04}.
 
-However, I/O constraints impose to use sub-optimal periods. If each application
+However, I/O constraints impose the use of sub-optimal periods. If each application
 of  class $\app{i}$ checkpoints in time $\ckpt{i}$ during its period $\period{i}$ (hence without any contention), it uses the I/O device during a fraction $\frac{\ckpt{i}}{\period{i}}$ of the time.
 The total usage fraction of the  I/O device is $\sum_{i} \frac{\nbapp{i} \ckpt{i}}{\period{i}}$
 and cannot exceed $1$. Therefore, we have to solve the following optimization problem: find
