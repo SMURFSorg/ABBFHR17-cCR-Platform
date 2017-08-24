@@ -65,8 +65,12 @@ and for the paper.
   of completely identical applications,
   we use normal distributions for CPU time with mean equal to original APEX value and small standard deviation (say 10\%). 
   \item We shuffle the applications and present them all in a big queue to the scheduler, 
-  which uses a simple first-fit.
-  algorithm. No user reservation, plain greedy.
+  which uses a simple first-fit algorithm. No user reservation, plain greedy. But we do assume the scheduler has access to the entire list of pending applications.
+\item We also make the assumption that the applications know precisely
+  the necessary wall-time. This diverges from a real scenario but
+  allow us to only take in account one type of disturbance: an
+  application is slower than expected due to C/R overheads (and will
+  extend it's original wall-time).
   \item When an application fails, we resubmit it with a new wall-time equal to the fraction that remains from the last checkpoint.  Input I/O becomes recovery. Output I/O is not modified. 
  
 We put back the restarted application at the head of the scheduling queue 
@@ -77,7 +81,7 @@ We put back the restarted application at the head of the scheduling queue
   their work).
 \end{itemize}
 
-\subsection{Dealing with interferences for non-cooperative application scheduling}
+\subsection{Dealing with interference for non-cooperative application scheduling}
 \begin{itemize}
   \item For coherence, we use the same policy for input I/O, output I/O and checkpoint operations \todo[inline]{we may want to separate Input+recovery from output+checkpoint (bidirectional channels)}
   \todo[inline]{answer: we could but not sure it is 100\% independent; and it would complicate things without changing the story.}
@@ -110,7 +114,8 @@ We put back the restarted application at the head of the scheduling queue
   If several of them are present, we choose the one
   which minimizes the total expected  waste of resources incurred by the other applications
   \todo[inline]{not sure if correct: we may want to see the minimal waste for all applications (including the selected one); why separate IOCAT from ckptcat workloads in the selection process and not minimize idle time overall?},
-   \todo[inline]{answer: applications continue to work will waiting to checkpoint while they don't
+   \todo[inline]{answer: applications continue to work while waiting
+     to checkpoint but they directly contribute to waste
    while waiting to perform I/O, so it is really two different things, hence the two categories.}
   see Section~\ref{sec.ckptcat}.
 \end{itemize}
@@ -242,7 +247,7 @@ that a great decrease in I/O requirement can be achieved  at the price of a smal
 \section{Execution Model}
 \label{sec.model}
 
-\todo{Question: how can we consider applications with finite time, initial
+\todo[inline]{Question: how can we consider applications with finite time, initial
   input and final output? Current idea is to distribute complete
   volume of I/O over wall time, then take a single fake schedule that
   assign resources to the apps following a distribution, and say 'it
@@ -270,8 +275,8 @@ that we validate in the experimental section:
     application classes (set of applications that behave similarly in
     terms of number of nodes, I/O requirements, duration and
     checkpoint size);
-  \item The non-checkpoint-related I/O of applications is distributed
-    over their entire execution duration equally;
+  \item The non-checkpoint-related I/O of applications is evenly distributed
+    over their entire execution duration;
   \item Applications may have different execution times, but we consider a finite
     segment of a representative schedule where the number of applications in each class remains constant. This is key to analyze and optimize the steady-state I/O behavior of the 
     application portfolio. 
@@ -322,6 +327,9 @@ we readily derive that
 \label{eq.daly}
 \end{equation}
 where $\mu_{i}$ is the MTBF of  class $\app{i}$ applications, which is the Young/Daly formula~\cite{young74,daly04}.
+\todo[inline]{So they were right! We might want to define what $\period{i}$
+  stands for before the reader reaches this point and can figure it by
+  itself}
 
 However, I/O constraints impose the use of sub-optimal periods. If each application
 of  class $\app{i}$ checkpoints in time $\ckpt{i}$ during its period $\period{i}$ (hence without any contention), it uses the I/O device during a fraction $\frac{\ckpt{i}}{\period{i}}$ of the time.
@@ -362,7 +370,7 @@ we will choose for $\lambda$ the minimum value such that Equation~\eqref{eq.IOco
    \begin{theorem}
   In the presence of I/O constraints, the optimal values of the checkpointing periods are given
   by Equation~\eqref{eq.KKT}, where $\lambda$ is the smallest nonnegative value such that
-  Equation~eq\ref{eq.IOconstraint} holds.
+  Equation~\ref{eq.IOconstraint} holds.
 \end{theorem}
 
 \section{Optimal Cooperative Checkpointing Strategy}
@@ -432,7 +440,7 @@ the parallel file system following the FIFO queue order.
     but should be done properly.}
 \end{proof}
     
-The theorem does provide a lower bound for the platform waste.\todo{the 2 storages holds only after the optimization, doesn't it? Or is it also a consequence of the above "proof" sketch?}
+The theorem does provide a lower bound for the platform waste.\todo[inline]{the 2 storages holds only after the optimization, doesn't it? Or is it also a consequence of the above "proof" sketch?}
 However, we have a FIFO system, and some applications may incur
 a re-execution time larger than $P_{i}$. What is the worst case?
 A first optimization is the following: when a checkpoint is taken
@@ -447,12 +455,19 @@ $\application{i}{j}$ of class
 $\app{i}$ is
 $$\max(P_{i}, \sum_{k=1}^{\nbapps} n_{k}C_{k} - C_{i})$$
 
- \todo{Discussed at JLESC meeting: size of burst buffer can be
+ \todo[inline]{Discussed at JLESC meeting: size of burst buffer can be
     bounded by 2 checkpoints easily, and it should be: if there are 3
     checkpoints in the burst buffer, then the first one might be being
     transferred, but this means that the 2nd is useless as we already
     reached the 3rd one. The 2nd should be discarded and its slot in
     the FIFO queue should be taken by the 3rd.}
+
+  \todo[inline]{No clear what qualifies for burst buffers here, but
+    currently the NVM bandwidth is (1) significantly lower than the
+    network bandwidth, and (2) unidirectional. This might change in
+    the future, but at least today it seems cheaper to use a
+    buddy-checkpointing approach.}%
+
 
 \subsection{Without Burst Buffers}
 
