@@ -10,6 +10,7 @@
 
 \usepackage{algorithm}
 \usepackage{algorithmicx}
+\usepackage{todonotes}
 
 \newtheorem{example}{Example}
 \newtheorem{theorem}{Theorem}
@@ -34,7 +35,7 @@
 \newcommand{\wastefct}[2]{W_{#1}(#2)}
 \newcommand{\pool}{{\mathcal P}}
 \newcommand{\risk}{{\textsc Risk}}
-\newcommand{\todo}[1]{\textit{TBD: [#1]}}
+%\newcommand{\todo}[1]{\textit{TBD: [#1]}}
 
 \newcommand{\IOcat}{\textsc{IO-Candid}\xspace}
 \newcommand{\Ckptcat}{\textsc{Ckpt-Candid}\xspace}
@@ -66,17 +67,22 @@ and for the paper.
   \item We shuffle the applications and present them all in a big queue to the scheduler, 
   which uses a simple first-fit.
   algorithm. No user reservation, plain greedy.
-  \item When an application fails, we resubmit it will new wall-time equal to the fraction that remains since the last checkpoint.  Input I/O becomes recovery. Output I/O is not modified. 
-  Now we reschedule every application that has not started yet, and we put the
-  failed application at the head of the queue so that the scheduler will consider it first now.
+  \item When an application fails, we resubmit it with a new wall-time equal to the fraction that remains from the last checkpoint.  Input I/O becomes recovery. Output I/O is not modified. 
+ 
+We put back the restarted application at the head of the scheduling queue 
+  (so that it has a chance to finish it's previously allotted wall time 
+  immediately, given that the resources it previously occupied are 
+  presumably available), and force a reschedule with every application that 
+  has not started yet (already running applications are left to continue 
+  their work).
 \end{itemize}
 
 \subsection{Dealing with interferences for non-cooperative application scheduling}
 \begin{itemize}
-  \item For coherence, we use the same policy for input I/O, output I/O and checkpoint operations 
+  \item For coherence, we use the same policy for input I/O, output I/O and checkpoint operations \todo{we may want to separate Input+recovery from output+checkpoint (bidirectional channels)}
   \item Blocking: only one application can perform I/O operations at the given time-step.
   I/O requests are served on a FCFS basis. When an application has requested an I/O operation, it waits idle until being served.
-  \item Sharing: the I/O resource is shared at very time-step to serve all current requests. Sharing is fair, i.e., bandwidth is inversely proportional to number of requests. 
+  \item Sharing: the I/O resource is shared at every time-step to serve all concurrent requests. Sharing is fair, i.e., bandwidth is inversely proportional to number of requests. 
   \item Here is an example:
   application $A_{1}$ wants to perform five gigabytes of I/O at time $t$, 
   and available bandwidth is 
@@ -95,13 +101,13 @@ and for the paper.
   \item Instead, whenever an I/O operation completes at time $t$, we have a pool of application candidates:
   \begin{itemize}
    \item Category \IOcat: Applications $A_{i}$ which need to do input I/O, output I/O or recovery
-  \item Category \Ckptcat: Applications $A_{i}$ whose last checkpoint took place not later than time $t - \period{Daly}(A_{i})$, where $\period{Daly}(A_{i})$ is the Young/Daly period for $A_{i}$.
+  \item Category \Ckptcat: Applications $A_{i}$ whose last checkpoint took place no later than time $t - \period{Daly}(A_{i})$, where $\period{Daly}(A_{i})$ is the Young/Daly period for $A_{i}$.
   \end{itemize}
   \item Category \IOcat applications are given priority. If several of them are present, we choose the one
   which minimizes the total idle time incurred by the other applications, see Section~\ref{sec.iocat}.
   \item Category \Ckptcat applications are selected whenever there is no candidate of category \IOcat .
   If several of them are present, we choose the one
-  which minimizes the total expected  waste of resources incurred by the other applications,
+  which minimizes the total expected  waste of resources incurred by the other applications\todo{not sure if correct: we may want to see the minimal waste for all applications (including the selected one); why separate IOCAT from ckptcat workloads in the selection process and not minimize idle time overall?},
   see Section~\ref{sec.ckptcat}.
 \end{itemize}
 
