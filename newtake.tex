@@ -79,7 +79,8 @@ We put back the restarted application at the head of the scheduling queue
 
 \subsection{Dealing with interferences for non-cooperative application scheduling}
 \begin{itemize}
-  \item For coherence, we use the same policy for input I/O, output I/O and checkpoint operations \todo{we may want to separate Input+recovery from output+checkpoint (bidirectional channels)}
+  \item For coherence, we use the same policy for input I/O, output I/O and checkpoint operations \todo[inline]{we may want to separate Input+recovery from output+checkpoint (bidirectional channels)}
+  \todo[inline]{answer: we could but not sure it is 100\% independent; and it would complicate things without changing the story.}
   \item Blocking: only one application can perform I/O operations at the given time-step.
   I/O requests are served on a FCFS basis. When an application has requested an I/O operation, it waits idle until being served.
   \item Sharing: the I/O resource is shared at every time-step to serve all concurrent requests. Sharing is fair, i.e., bandwidth is inversely proportional to number of requests. 
@@ -107,7 +108,10 @@ We put back the restarted application at the head of the scheduling queue
   which minimizes the total idle time incurred by the other applications, see Section~\ref{sec.iocat}.
   \item Category \Ckptcat applications are selected whenever there is no candidate of category \IOcat .
   If several of them are present, we choose the one
-  which minimizes the total expected  waste of resources incurred by the other applications\todo{not sure if correct: we may want to see the minimal waste for all applications (including the selected one); why separate IOCAT from ckptcat workloads in the selection process and not minimize idle time overall?},
+  which minimizes the total expected  waste of resources incurred by the other applications
+  \todo[inline]{not sure if correct: we may want to see the minimal waste for all applications (including the selected one); why separate IOCAT from ckptcat workloads in the selection process and not minimize idle time overall?},
+   \todo[inline]{answer: applications continue to work will waiting to checkpoint while they don't
+   while waiting to perform I/O, so it is really two different things, hence the two categories.}
   see Section~\ref{sec.ckptcat}.
 \end{itemize}
 
