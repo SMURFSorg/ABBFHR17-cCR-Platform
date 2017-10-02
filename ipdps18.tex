@@ -1,19 +1,21 @@
-\documentclass{article}
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
 
 \usepackage{graphicx}
-\usepackage{amsmath}
+\usepackage{amsmath,amssymb,amsfonts,amsthm}
 \DeclareMathOperator{\lcm}{lcm}
 \usepackage{paralist}
 \usepackage{color}
+\usepackage[hidelinks]{hyperref}
 \usepackage{xspace}
-\usepackage{amsthm}
-
 \usepackage{algorithm}
 \usepackage{algorithmicx}
 \usepackage{todonotes}
 
 \newtheorem{example}{Example}
 \newtheorem{theorem}{Theorem}
+
+\newcommand*{\email}[1]{\href{mailto:#1}{\nolinkurl{#1}} }
 
 \newcommand{\muind}{\mu_{\text{ind}}}
 \newcommand{\bandtotal}{\beta_{\text{tot}}}
@@ -44,10 +46,41 @@
 \newcommand{\Catiocat}{\mathcal{C}_{IO}\xspace}
 \newcommand{\Catckptcat}{\mathcal{C}_{Ckpt}\xspace}
 
-\author{Dorian Arnold, George Bosilca, Aurelien Bouteiller,\\
- Kurt Feirrera, Thomas Herault, Yves Robert}
+\title{Optimal Cooperative Checkpointing for Shared HPC Platforms
+\thanks{NSF Award \#abcdef SMURFS.}
+}
 
-\title{Optimal Cooperative Checkpointing for Shared HPC Platforms}
+\author{
+\IEEEauthorblockN{Dorian Arnold}
+\IEEEauthorblockA{Atlanta, GA, USA}
+\and
+\IEEEauthorblockN{George Bosilca}
+\IEEEauthorblockA{Innovative Computing Laboratory\\
+The University of Tennessee\\
+Knoxville, TN, USA\\
+\email{bosilca@icl.utk.edu}}
+\and
+\IEEEauthorblockN{Aurelien Bouteiller}
+\IEEEauthorblockA{Innovative Computing Laboratory\\
+The University of Tennessee\\
+Knoxville, TN, USA\\
+\email{bouteill@icl.utk.edu}}
+\and
+\IEEEauthorblockN{Kurt Feirrera}
+\IEEEauthorblockA{USA}
+\and
+\IEEEauthorblockN{Thomas Herault}
+\IEEEauthorblockA{Innovative Computing Laboratory\\
+The University of Tennessee\\
+Knoxville, TN, USA\\
+\email{herault@icl.utk.edu}}
+\and
+\IEEEauthorblockN{Yves Robert}
+\IEEEauthorblockA{ENS\\
+Lyon, France\\
+\email{yves.robert@ens-lyon.fr}}
+}
+
 
 \begin{document}
 
@@ -118,9 +151,9 @@ We put back the restarted application at the head of the scheduling queue
   \item To decide which application is given priority among all $r+s$ candidates applications in $\Catiocat \cup \Catckptcat$, we select the one that minimizes the expected total waste induced by this choice, as explained below.
   \end{itemize}
   
- \subsubsection{Selection among candidate applications in $\Catiocat \cup \Catckptcat$}
+ \subsubsection{Selection among candidate applications}
 
-At the current time-step, there are $r+s$ candidates:
+At the current time-step, there are $r+s$ candidates in $\Catiocat \cup \Catckptcat$:
 \begin{itemize}
   \item Application $A_{i} \in \Catiocat$, $1\leq i \leq r$, 
   has an I/O request of volume $v_{i}$ and enrolls $q_{i}$ processors. At the current time-step, $A_{i}$ initiated its I/O request $d_{i}$ seconds ago, and has been idle since $d_{i}$ seconds. 
@@ -580,6 +613,6 @@ through simulation, and compared to the lower bound of Section~\ref{sec.optimal}
 \end{itemize}
 
 
-\bibliographystyle{abbrv}
+\bibliographystyle{IEEEtran}
 \bibliography{biblio}
 \end{document}
