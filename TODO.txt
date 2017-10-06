@@ -1,0 +1,25 @@
+Thomas:
+ Compute application throughput
+ Waste should include checkpoint time
+  -> Refactor of the entire measurements to get a run without failure, without checkpoints, with perfectly scalable I/O
+ Remove wasted computation / IO from the "Work Ratio"
+ Boxplots: what are the outliers, whiskers?
+
+Kurt:
+ Talk with Dough D. to check we are interpreting the APEX table correctly
+ Related Work
+
+All:
+ Define a reasonable workload for 2020
+
+Plan:
+ Introduction -- George & Dorian
+ Model (Interferences, checkpoints, platform, workload) -- Yves
+ Lower Bound (derivation) -- Yves
+ Algorithms -- Aurélien & George
+ Simulator -- Thomas
+ Experiments -- Thomas & All
+ Related Work -- Kurt
+ Conclusion
+
+Meeting: Thu, Oct 12, 11am EST
