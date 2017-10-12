@@ -432,7 +432,7 @@ will randomly instantiate one of the four classes, assigning a work
 duration uniformly distributed between $0.8w$ and $1.2w$, where $w$ is
 the typical walltime specified for the chosen application class, and
 count the resource allocated for this application class, until A) the
-simulated execution would necessarily run for at least 60h, and B) the
+simulated execution would necessarily run for at least 2 months, and B) the
 amount of resource used by the selected class is within 1\% of the
 target goal of the representative workload percentage defined in the
 APEX workflows report.
@@ -518,14 +518,15 @@ simulation is ran four times with the same initial conditions (ordered
 set of applications and date and location of failures). Performance
 statistics are collected over each simulation. In order to consolidate
 these measures over many simulations, statistics are taken over a
-segment of fixed length of each simulation (e.g. a segment of
-48h of simulation). This segment excludes both the first 10\% of the
-simulation (in which applications might be synchronized artificially
-because a subset starts at the same date), and the last 10\% of the
-simulation (in which a large amount of resource may not be used as new
+segment of fixed length of each simulation (e.g. a segment of 48h of
+simulation). This segment excludes both the first day the simulation
+(in which applications might be synchronized artificially because a
+subset starts at the same date), and the last day of the simulation
+(in which a large amount of resource may not be used as new
 applications are not added to the workload). We simulate a large
-number of such runs, and compute the first, second, third quartile of
-the performance for each statistic, as well as the mean value.
+number of such runs (at least a thousand simulations per shown
+measurement), and compute the first, second, third quartile of the
+performance for each statistic, as well as the mean value.
 
 \paragraph*{Workload} We consider the workload from LANL found
 in the APEX Workflows report that consists of four simulation

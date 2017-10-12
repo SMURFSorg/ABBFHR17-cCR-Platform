@@ -9,7 +9,7 @@ all: $(PDFs)
 %.pdf: %.gnp $(DAT)
 	gnuplot $<
 
-%.dat: %.csv csv2dat.py
+$(DAT): $(CSV) csv2dat.py
 	python csv2dat.py
 
 clean:
