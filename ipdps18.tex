@@ -98,7 +98,8 @@ Knoxville, TN, USA\\
 \end{abstract}
 
 
-\section{Introduction}\label{sec:intro}
+\section{Introduction}
+\label{sec:intro}
 % Primary: George & Dorian
 
 This paper investigates scheduling strategies to checkpoint several
@@ -191,18 +192,20 @@ rollback recovery to ensure their resilience.
 Applications are of different sizes: they use a different number of
 computing nodes, their I/O pattern and requirement vary, their
 duration vary, and the size of their checkpoints vary. To model this
-behavior within a few parameters, we do a set of simplifying assumptions
+behavior within a few parameters, we state a set of simplifying assumptions
 that we validate in the experimental section:
 \begin{itemize}
-  \item There is a large number of applications, but a small number of
+  \item There is a large number of applications, but only a small number of
     application classes (set of applications that behave similarly in
     terms of number of nodes, I/O requirements, duration and
     checkpoint size);
-  \item The non-checkpoint-related I/O of applications is evenly distributed
-    over their entire execution duration;
+  \item The regular (not checkpoint-related) I/O operation of applications is evenly distributed
+    over their entire execution duration; of course input reading occurs at the beginning
+    and output writing occurs at the end of the exeuction
   \item Applications may have different execution times, but we consider a finite
     segment of a representative schedule where the number of applications in each class remains constant. This is key to analyze and optimize the steady-state I/O behavior of the
     application portfolio.
+    \todo[inline]{YR to TH: for the theoretical analysis OK, but for the simulations?}
 \end{itemize}
 
 Formally, we consider a set $\appset$ of $\nbapps$ applications
