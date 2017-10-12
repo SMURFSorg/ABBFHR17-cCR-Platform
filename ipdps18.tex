@@ -179,13 +179,13 @@ The rest of the paper is organized as follows ...
 
 In this work, we consider a shared platform. The platform consists of
 a set of computing nodes, an interconnection network, and storage
-resources in the form of a parallel filesystem. Applications are
+resources in the form of a parallel file system. Applications are
 scheduled on the platform by a job scheduler. They access their
-computing resource exclusively, but share the network and parallel
-filesystem. They do regular Input/Output operations during their
-execution, load an input file at startup and dump an output file at
-completion. Because applications last long, and the platform is
-subject to failures, they use periodic coordinated checkpoint with
+computing resources exclusively, but share the network and parallel
+files system. They load an input file at startup, perform regular I/O operations during their
+execution, and finally dump an output file at
+completion. Because they last long (typically, several hours or days), and the platform is
+subject to failures, applications use periodic coordinated checkpoint with
 rollback recovery to ensure their resilience.
 
 Applications are of different sizes: they use a different number of
