@@ -54,7 +54,9 @@
 
 \author{
 \IEEEauthorblockN{Dorian Arnold}
-\IEEEauthorblockA{Atlanta, GA, USA}
+\IEEEauthorblockA{Emory University\\
+Atlanta, GA, USA\\
+\email{dorian@cs.unm.edu}}
 \and
 \IEEEauthorblockN{George Bosilca}
 \IEEEauthorblockA{Innovative Computing Laboratory\\
@@ -69,7 +71,8 @@ Knoxville, TN, USA\\
 \email{bouteill@icl.utk.edu}}
 \and
 \IEEEauthorblockN{Kurt Feirrera}
-\IEEEauthorblockA{USA}
+\IEEEauthorblockA{Sandia National Laboratory, USA\\
+\email{kbferre@sandia.gov}}
 \and
 \IEEEauthorblockN{Thomas Herault}
 \IEEEauthorblockA{Innovative Computing Laboratory\\
@@ -78,8 +81,9 @@ Knoxville, TN, USA\\
 \email{herault@icl.utk.edu}}
 \and
 \IEEEauthorblockN{Yves Robert}
-\IEEEauthorblockA{ENS\\
-Lyon, France\\
+\IEEEauthorblockA{ENS Lyon, Lyon, France \&\\
+The University of Tennessee Knoxville\\
+Knoxville, TN, USA\\
 \email{yves.robert@ens-lyon.fr}}
 }
 
@@ -121,7 +125,7 @@ $C$  in the Young/Daly formula are application-dependent, and optimal
 periods can be quite different over the application spectrum.
 
 While both approaches (i) and (ii) are routinely used on shared HPC
-platforms, they incur a big resource waste, because they lead to a very
+platforms, they incur a dramatic resource waste, because they lead to an
 inefficient usage of an already scarce resource, namely the I/O system.
 There are two major reasons for that:
 \begin{itemize}
@@ -143,24 +147,27 @@ There are two major reasons for that:
   checkpoint simultaneously a file of the same size. Each will be
   assigned half the fraction $\bandavail$ to checkpoint, so that both
   checkpoints will be twice longer than expected. Such interferences
-  dramatically decrease the throughput of the platform.
+  severely decrease the throughput of the platform.
 \end{itemize}
 
 The objective of this paper is to assess the impact of such
 interferences, and to design scheduling algorithms that squeeze the most
-out of the I/O bandwidth available for checkpoints. We introduce
+out of the I/O bandwidth fraction that is available for checkpoints. We introduce
 cooperative algorithms where applications checkpoint in sequence, with a
-frequency that is dictated by the priority they dynamically receive from
+frequency that is dictated by a priority which they dynamically receive from
 the scheduler. When there is enough I/O bandwidth available, each
-application checkpoints with its optimal Young/Daly period. When it is
+application checkpoints with its optimal Young/Daly period. However, when it is
 not the case, the scheduling algorithm provides the optimal checkpoint
 instants for each application, in order to maximize the platform
-throughput.
+throughput. These instants are calculated so that there is no I/O interference 
+and the amount of work to re-execute whenever a failure strikes is kept minimal.
 
 The main contributions of the paper are: ...
+
 The rest of the paper is organized as follows ...
 
-\section{Model}\label{sec:model}
+\section{Model}
+\label{sec:model}
 % Primary: Yves
 
 \todo[inline]{Question: how can we consider applications with finite time, initial
