@@ -1,0 +1,148 @@
+\section{Simulation}\label{sec:simulator}
+% Primary: Thomas
+
+In order to evaluate the performance of the proposed approach, we
+ran a large set of discrete event simulations that we describe in this
+section. Simulations are instantiated by a set of initial conditions
+that define a set of application classes, and their distribution, and
+on what platform these applications will execute.
+
+\paragraph*{High level parameters}
+Application classes are characterized by the following parameters:
+size of initial input and output, size of checkpoints, quantity of
+work to execute, number of nodes to use, quantity of diffuse I/O to
+execute during the entire life of the application, and proportion of
+the available CPU-hours to use overall.  Platforms are characterized
+by the number of nodes, a system Mean Time Between Failures, and an
+aggregated I/O subsystem bandwidth that is shared between the
+different nodes.
+
+A simulation first selects randomly an ordered set of applications
+that are instances of the different application classes. The set of
+applications is constrained by two parameters: the minimum duration to
+execute this set of applications on that platform (not considering
+interferences or faults), and the relative proportion of platform
+resources allocated to each application class.
+
+As an example, we consider the subset of application classes given by
+the APEX workflows report for the subset of application classes of
+LANL (EAP, LAP, Silverton and VPIC), simulated as running over the
+Celio supercomputer, for a minimal execution time of 60h. A simulation
+will randomly instantiate one of the four classes, assigning a work
+duration uniformly distributed between $0.8w$ and $1.2w$, where $w$ is
+the typical walltime specified for the chosen application class, and
+count the resource allocated for this application class, until A) the
+simulated execution would necessarily run for at least 2 months, and B) the
+amount of resource used by the selected class is within 1\% of the
+target goal of the representative workload percentage defined in the
+APEX workflows report.
+
+Once this set of applications is defined, a set of node failures dates
+is computed. Dates of failures are placed following an exponential
+distribution with the MTBF required for the simulation. The nodes that
+are hit by failures are chosen uniformly between all nodes of the
+simulated platform. The ordered set of applications and the date and
+location of failures constitute the initial conditions of a simulation.
+
+\paragraph*{Job Scheduling}
+Then, an initial job schedule is computed: applications are set to
+start and end at planned dates and on planned nodes, depending on
+their characteristics, the job schedule and the order they appear in
+the ordered set. The job schedule follows a simple first-fit
+strategy. We simulate an online scheduling, and everytime an
+application ends before its planned date (because of a failure, or
+because it reached the end of its execution before the planned date),
+the schedule is amended by de-scheduling all applications that were
+not started yet and re-scheduling them following the current order of
+applications.
+
+\paragraph*{Execution Simulation}
+Once an application is started, it first executes its initial
+input. It then executes some work for a certain period and
+checkpoints. These two steps are repeated until all planned work is
+executed, after which the final output is executed by the application,
+before it ends. At any time during the execution, a node hosting the
+application may be subject to a failure (happening at pre-computed
+dates and places). When that happens, this application is terminated,
+and a new application is added to the list of applications to
+schedule. That new application represents the restarting application:
+it has similar characteristics as the failed application, but an
+initial input corresponding to the checkpoint size, and a work time
+corresponding to what was remaining to do at the last successful
+checkpoint date. To reflect a frequent policy of platforms, this
+restarting application is pushed in front of the ordered set of
+applications to execute, so that it gets a higher priority to obtain
+resources and complete its execution.
+
+Checkpointing periods can either be dynamic or fixed. Many users
+define a fixed period based on their own experience on the
+platform. An ordinary heuristic is to take a checkpoint every hour,
+with the reasoning that in the worst case, only 1h of work can be
+lost. We also consider a dynamic period that is defined for each
+application. We set for this the period given by the Young/Daly
+approximations, that assumes that chekpoints last for a fixed
+computable time. For this checkpoint time, we take the time it would
+take to checkpoint the application if there was no interference.
+
+\paragraph*{Interference Models}
+Depending on the simulation, applications filesystem operations can
+interfere with each other. The duration of an I/O, checkpoint storage
+or checkpoint access is dynamically computed during the simulation. We
+implemented 4 interference models: 1) a theoretically perfectly scalable
+filesystem, where the duration is only function of the aggregated
+bandwidth and the amount of data to transmit for a single application
+(as if there was no inteference); 2) a simple interference model,
+where all applications using the filesystem at a given time get a
+portion of the available aggregated bandwidth proportional to the
+number of nodes they use and inversely proportional to the number of
+nodes involved for all applications doing I/O; 3) a first-come
+first-served I/O scheduling, where applications are served in order,
+the first receiving all the filesystem bandwidth until termination of
+its execution, and the others waiting for their turn; and 4) an
+ordering of the I/O scheduling similar to first-come first-served, but
+implementing the prioriterizing described in
+Section~\ref{sec:algorithms} (Cooperative I/O).
+
+In the case of scheduled I/O (first-come first-served and Cooperative
+I/O), initial inputs and final outputs are blocking (the application
+cannot progress during the I/O until it is served), but checkpoints
+are non blocking, and the application continues progressing its
+computation until the filesystem is ready to serve the
+checkpoint. Note that this means that if a failure hits the
+application, it may have to re-execute from a checkpoint far in its
+past, if it was not granted access to the filesystem for a long time.
+
+\paragraph*{Method of statistics collection from simulations}
+As we compare the four different filesystem sharing strategies, each
+simulation is ran four times with the same initial conditions (ordered
+set of applications and date and location of failures). Performance
+statistics are collected over each simulation. In order to consolidate
+these measures over many simulations, statistics are taken over a
+segment of fixed length of each simulation (e.g. a segment of 48h of
+simulation). This segment excludes both the first day the simulation
+(in which applications might be synchronized artificially because a
+subset starts at the same date), and the last day of the simulation
+(in which a large amount of resource may not be used as new
+applications are not added to the workload). We simulate a large
+number of such runs (at least a thousand simulations per shown
+measurement), and compute the first, second, third quartile of the
+performance for each statistic, as well as the mean value.
+
+\paragraph*{Workload} We consider the workload from LANL found
+in the APEX Workflows report that consists of four simulation
+applications: EAP, LAP, Silverton and VPIC. The main characteristics
+of these classes are reported in Table~\ref{table:lanl}.
+
+\begin{table}
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+ Workflow & EAP & LAP & Silverton & VPIC \\\hline
+Workload percentage & 66 & 5.5 & 16.5 & 12 \\\hline
+Work time (h) & 262.4 & 64 & 128 & 157.2 \\\hline
+Number of cores & 16384 & 4096 & 32768 & 30000 \\\hline
+Initial Input (\% of memory) &  3 & 5 & 70 & 10 \\\hline
+Final Output (\% of memory) & 105 & 220 & 43 & 270 \\\hline
+Checkpoint Size (\% of memory) & 160 & 185 & 350 & 85 \\\hline
+\end{tabular}
+\caption{LANL Workflow Workload from the APEX Workflows report\label{table:lanl}}
+\end{table}
