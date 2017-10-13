@@ -171,12 +171,12 @@ The rest of the paper is organized as follows ...
 \label{sec:model}
 % Primary: Yves
 
-\todo[inline]{Question: how can we consider applications with finite time, initial
-  input and final output? Current idea is to distribute complete
-  volume of I/O over wall time, then take a single fake schedule that
-  assign resources to the apps following a distribution, and say 'it
-  shouldn't be far from finite apps being scheduled eagerly over
-  finite resource for a long time, in average'.}
+%\todo[inline]{Question: how can we consider applications with finite time, initial
+%  input and final output? Current idea is to distribute complete
+%  volume of I/O over wall time, then take a single fake schedule that
+%  assign resources to the apps following a distribution, and say 'it
+%  shouldn't be far from finite apps being scheduled eagerly over
+%  finite resource for a long time, in average'.}
 
 In this work, we consider a shared platform. The platform consists of
 a set of computing nodes, an interconnection network, and storage
@@ -189,7 +189,7 @@ completion. Because they last long (typically, several hours or days), and the p
 subject to failures, applications use periodic coordinated checkpoint with
 rollback recovery to ensure their resilience.
 
-Applications are of different sizes: they use a different number of
+Applications have different sizes; they use a different number of
 computing nodes, their I/O pattern and requirement vary, their
 duration vary, and the size of their checkpoints vary. To model this
 behavior within a few parameters, we state a set of simplifying assumptions
@@ -201,20 +201,35 @@ that we validate in the experimental section:
     checkpoint size);
   \item The regular (not checkpoint-related) I/O operation of applications is evenly distributed
     over their entire execution duration; of course input reading occurs at the beginning
-    and output writing occurs at the end of the exeuction
-  \item Applications may have different execution times, but we consider a finite
-    segment of a representative schedule where the number of applications in each class remains constant. This is key to analyze and optimize the steady-state I/O behavior of the
-    application portfolio.
-    \todo[inline]{YR to TH: for the theoretical analysis OK, but for the simulations?}
+    and output writing occurs at the end of the execution.
 \end{itemize}
 
+The number and characteristics of the application classes, as well as 
+the fraction of platform resources that they are using, 
+are parameters of the model, whose values are instantiated from real benchmarks, such as the APEX
+benchmark on the Celio platform~\cite{xx}.
+ 
+To evaluate the scheduling policies, we consider a finite
+    segment (typically lasting a couple of days) of a representative schedule where the number of applications in each class remains approximately constant at every instant. Of course with
+    applications having different execution times, we cannot enforce a fixed proportion of each 
+    application class at every instant, but we make sure the proportion is enforced in average throughout execution.  Similarly, we enforce that at every instant during the finite segment, 
+    at least
+    98\% of the nodes
+    \todo[inline]{YR to TH: what do we write here? saying \emph{a large fraction} is not precise enough.}
+     are enrolled for the execution.
+    This is key to enable a comparison of actual (simulated) performance
+    with the theoretical performance of the co-scheduling policy that optimizes the steady-state I/O behavior of the
+    application portfolio, assuming that all processors are used.
+    
 Formally, we consider a set $\appset$ of $\nbapps$ applications
 classes $\app{1}, \ldots \app{\nbapps}$ that run in parallel in a
 parallel machine with $\nbnodesplat$ nodes. Application class
 $\app{i}$ represents $\nbapp{i}$ applications that each use
 $\nbnodes{i}$ nodes, and checkpoints
 periodically with period $\period{i}$, in a time $\ckpt{i}$ when there
-is no interference with other I/O operation. At any given time, we'll schedule as many applications as possible. For simplicity we'll assume that for scheduled applications, ($\sum_{i}\nbapp{i} \nbnodes{i} = \nbnodesplat$). \todo{the portfolio of available and scheduled applications are not the same, no reason for available applications to match that constraints on node count, only on scheduled ones. }
+is no interference with other I/O operation. At any given time, we'll schedule as many applications as possible. As already mentioned, in the theoretical analysis, we assume that $\sum_{i}\nbapp{i} \nbnodes{i} = \nbnodesplat$, where $\nbnodesplat$ is the total number of nodes in the platform. 
+
+%\todo[inline]{the portfolio of available and scheduled applications are not the same, no reason for available applications to match that constraints on node count, only on scheduled ones. }
 
 %Consider a large-scale platform with several applications executing
 %concurrently. All these applications routinely perform I/O operations
@@ -251,8 +266,6 @@ is no interference with other I/O operation. At any given time, we'll schedule a
 %checkpoints in order to minimize interferences and optimize resource
 %spent doing I/O? This paper answers these important questions.
 
-\section{Lower Bound}\label{sec:lowerbound}
-% Primary: Yves (does that go into a subsec of the algorithms or models?)
 
 \section{Algorithms}\label{sec:algorithms}
 % Aurelien & George
@@ -273,7 +286,7 @@ is no interference with other I/O operation. At any given time, we'll schedule a
   the necessary wall-time. This diverges from a real scenario but
   allow us to only take in account one type of disturbance: an
   application is slower than expected due to C/R overheads (and will
-  extend it's original wall-time).
+  extend its original wall-time).
   \item When an application fails, we resubmit it with a new wall-time equal to the fraction that remains from the last checkpoint.  Input I/O becomes recovery. Output I/O is not modified.
 
 We put back the restarted application at the head of the scheduling queue
@@ -396,6 +409,9 @@ We obtain
 %   expected amount of wasted time is
 %   $$\frac{C_{i}}{(\muind/\bar{Q}_{i}) } \times \sum_{j \neq i}\frac{q_{j}}{\bar{Q}_{i}}(d_{j}+ \frac{C_{i}}{2})q_{j} = \frac{C_{i}}{\muind} \sum_{j \neq i} q_{j}^{2}(d_{j}+ \frac{C_{i}}{2})$$
 %    and we choose $i$ that minimizes the above quantity.
+
+\section{Lower Bound}\label{sec:lowerbound}
+% Primary: Yves (does that go into a subsec of the algorithms or models?)
 
 
 \section{Simulation}\label{sec:simulator}
