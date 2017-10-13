@@ -1,0 +1,110 @@
+\section{Model}
+\label{sec:model}
+% Primary: Yves
+
+%\todo[inline]{Question: how can we consider applications with finite time, initial
+%  input and final output? Current idea is to distribute complete
+%  volume of I/O over wall time, then take a single fake schedule that
+%  assign resources to the apps following a distribution, and say 'it
+%  shouldn't be far from finite apps being scheduled eagerly over
+%  finite resource for a long time, in average'.}
+
+In this work, we consider a shared platform that comprises a set of computational
+nodes, storage resources in the form of a parallel file system, and a network that
+interconnects the nodes as well as the storage resources. Applications are scheduled
+on the platform by a job scheduler such that computational nodes are space-shared
+(dedicated) amongst concurrent application instances. However, the I/O subsystem is
+time-shared (contended) amongst the application instances.
+
+Our \emph{application I/O} model entails loading an input file at startup, performing
+regular I/O operations during their main execution phase, and finally dumping an
+output file at completion. Because applications are long-running (typically, several
+hours or days) and the platform is failure-prone, applications are protected using
+coordinated CR that incur periodic \emph{CR I/O}.
+
+
+Applications can vary in size (number of computational nodes), application I/O
+pattern and requirements, and CR I/O requirements. To model these behavioral
+variations with minimal parameters, we make the following simplifying assumptions
+(that we validate in the experimental section):
+\begin{itemize}
+  \item There is a large number of applications, but only a small number of
+    application classes (sets of applications with similar duration, size,
+    application I/O and CR I/O requirements;
+  \item Other than initialization and finalization I/O, an application's (non-CR) I/O
+    activity is evenly distributed over its entire makespan.
+\end{itemize}
+We model the specific numbers and characteristics of the application classes based on
+real benchmark data, such as the APEX benchmark on the Celio platform~\cite{xx}.
+ 
+To evaluate the scheduling policies, we consider a finite segment (typically lasting
+a small number of days) of a representative schedule where the number of applications
+in each class remains approximately constant at every instant. Of course, with
+different application execution times, we cannot enforce a fixed proportion of each
+application class at every instant. However, we ensure the proper proportion is
+enforced in average throughout across schedule's execution. Similarly, we enforce
+that at every instant during the finite segment, at least 98\% of the nodes
+\todo[inline]{YR to TH: what do we write here? saying \emph{a large fraction} is not
+  precise enough.} are enrolled for the execution. This allows us to compare actual
+(simulated) performance with the theoretical performance of a co-scheduling policy
+that optimizes the steady-state I/O behavior of the application portfolio, assuming
+that all processors are used. 
+    
+Formally, we consider a set $\appset$ of $\nbapps$ applications classes
+$\app{1}, \ldots \app{\nbapps}$ that execute concurrently on a platform with
+$\nbnodesplat$ nodes. Application class $\app{i}$ specifies:
+%
+\begin{itemize}
+\item $\nbapp{i}$: the number of applications in $\app{i}$,
+\item $\nbnodes{i}$: the number of nodes used by each application in $\app{i}$,
+\item $\period{i}$: the checkpoint period of each application in $\app{i}$, and
+\item $\ckpt{i}$: the checkpoint commit latency for each application in $\app{i}$
+  when there is no interference with other I/O operations.
+\end{itemize}
+%
+%$\nbapp{i}$ applications that each use
+%$\nbnodes{i}$ nodes, and checkpoints
+%periodically with period $\period{i}$, in a time $\ckpt{i}$ when there
+%is no interference with other I/O operation. 
+%
+At every instant, we schedule as many applications as possible. As already mentioned,
+in the theoretical analysis, we assume that
+$\sum_{i}\nbapp{i} \nbnodes{i} = \nbnodesplat$, where $\nbnodesplat$ is the total
+number of nodes in the platform. \todo[inline]{DA: where is this already mentioned?}
+
+%\todo[inline]{the portfolio of available and scheduled applications are not the same, no reason for available applications to match that constraints on node count, only on scheduled ones. }
+
+%Consider a large-scale platform with several applications executing
+%concurrently. All these applications routinely perform I/O operations
+%throughout their execution. The average fraction of I/O bandwidth that
+%remains available can be used for checkpointing. Ideally, each application $A_{i}$
+%should checkpoint, during a time $C_{i}$ ,
+%every $P_{i}$ units of time. Here $P_{i}$ is the length of the
+%optimal checkpointing period given by the Young/Daly formula~\cite{young74,daly04}:
+%$$P_{i} = \sqrt{2 \mu_{i} C_{i}}$$
+%where $\mu_{i}$ is the application MTBF, which is inversely
+%proportional to the number of processors enrolled in its execution.
+%
+%However, with each application having a different $P_{i}$, lasting and
+%starting for and at arbitrary times (a behavior we call
+%uncooperative), nothing prevents the checkpoint of an application to
+%occur while another competitively does I/O (because of its normal
+%application behavior, or because of a checkpoint). Because this
+%introduces interferences between I/O (\cite{interference}), the time
+%to complete both the checkpoint of the first application and the
+%competing I/O of the second are adversely impacted. When many
+%applications execute an I/O operation competitively, all of them can
+%be impacted, reducing the efficiency of each.
+%
+%Moreover, checkpointing each application with optimal period $P_{i}$
+%is possible only if enough I/O bandwidth is available. If this is the
+%case, the impact of failures is kept to a minimum using Daly's period
+%for each application.  However, if I/O bandwidth is limited, either in
+%the absolute (imbalanced hardware design) or in the current
+%co-execution (because a few applications need to consume a large
+%fraction of bandwidth to progress), applications have to checkpoint
+%less frequently.  All of them? if not, which ones? what are the
+%optimal checkpointing periods in this context of co-scheduling with a
+%given bound on available I/O bandwidth, and how to schedule the
+%checkpoints in order to minimize interferences and optimize resource
+%spent doing I/O? This paper answers these important questions.

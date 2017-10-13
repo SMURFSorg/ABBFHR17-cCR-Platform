@@ -1,0 +1,76 @@
+\section{Introduction}
+\label{sec:intro}
+% Primary: George & Dorian
+\todo[inline]{DA: Resolve authorship order; UTK should decide.}
+
+%space sharing but not quite
+\emph{Space-sharing} high-performance computing (HPC) platforms for the concurrent
+execution of parallel applications is today's de-facto standard HPC execution
+mode. In fact, space-sharing in this fashion is more common than \emph{capability
+  application runs} that span entire platforms~\cite{xx}. However, while
+computational nodes are completely dedicated to particular application instances,
+most often the networks that interconnect computational nodes as well as storage
+devices are shared amongst application instances. In other words, without careful
+consideration, network and storage contention can reduce individual application and
+overall system performance efficiencies.
+
+In HPC, checkpoint/restart (CR) is the most common strategy employed to protect
+applications from underlying faults and failures. Generally, a parallel application
+protected by CR periodically outputs snapshots (aka checkpoints) of its global,
+distributed state to some remote storage device. If an application failure occurs, a
+stored checkpoint is retrieved and used to restart the application from the
+intermediate point captured by the checkpoint. Typically, concurrently executing
+applications independently (non-cooperatively) decide when to take their own
+checkpoints.
+
+There are two widely-used, non-cooperative approaches to determine when an
+application should \emph{commit} a checkpoint: (i) using a fixed checkpoint period
+(typically one hour) for each application; and (ii) using application-specific
+features to determine its checkpoint periods. In the second approach, the well-known
+Young/Daly formula~\cite{young74,daly04} yields an application's optimal checkpoint
+period, $\sqrt{2 \mu C}$ seconds, where $C$ is the time to commit a checkpoint and
+$\mu$ the application's mean time between failures (MTBF). $\mu = \frac{\muind}{q}$,
+where $q$ is the number of processors enrolled by the application and $\muind$ is the
+MTBF of an individual processor~\cite{springer-monograph}. As a consequence, both
+$\mu$ and $C$ in the Young/Daly formula are application-dependent, and optimal
+periods can be quite different over the application spectrum.
+
+Non-cooperative CR of concurrent application instances can incur significant resource
+wastage, because they lead to an inefficient usage of an already scarce resource,
+namely the I/O system.  There are two major reasons for this:
+\begin{enumerate}
+\item \emph{Application-CR I/O contention}: As a basis, the I/O subsystem already may
+  not be capable of sustaining the I/O requirements of all the concurrent
+  applications.  Let $\bandtotal$ be the total filesystem I/O bandwidth.  The
+  concurrently executing applications perform regular (non-CR) I/O operations
+  throughout their execution, so that only a fraction $\bandavail$ of the total
+  bandwidth remains available for checkpoints.  This fraction may be insufficient,
+  particularly when some applications perform intensive non-checkpoint I/O and others
+  have large checkpoint.
+  % $\bandtotal$ of a well-provisioned platform should allow for efficient CR I/O
+  % activities.
+
+\item \emph{CR-CR I/O contention}: More importantly, there is a high probability of
+  coincident CR activity amongst concurrent, non-cooperative application instances.
+  Consider the simple case where two applications checkpoint simultaneously a file of
+  the same size. Each will be assigned half the fraction $\bandavail$ to checkpoint,
+  so that both checkpoints will be twice longer than expected. Such interferences
+  severely decrease application efficiency (e.g., when the expected checkpoint commit
+  time used to compute the optimal checkpoint interval differs from the actual
+  checkpoint commit time) and overall platform throughput.
+\end{enumerate}
+
+In this work, we study cooperative CR scheduling strategies for concurrently
+executing HPC applications.  Our objective is to assess the impact of such
+interferences and to design scheduling algorithms that optimize I/O bandwidth
+availability CR activity.  Using our cooperative algorithms, applications checkpoint
+sequentially, with a dynamic, priority-dependent frequency dictated by a cooperative
+scheduler.  When enough I/O bandwidth is available, each application checkpoints with
+its optimal, Young/Daly, period. However, when I/O bandwidth is scarce, our
+scheduling algorithm provides an optimal checkpoint process that maximizes platform
+throughput. This cooperative checkpoint process is calculated such that there is no
+I/O interference and minimal re-work to be done when failures occur.
+
+The main contributions of the paper are: ...
+
+The rest of the paper is organized as follows ...
