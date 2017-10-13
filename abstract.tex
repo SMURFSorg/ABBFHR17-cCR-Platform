@@ -1,5 +1,16 @@
 \begin{abstract}
-  % Primary: George & Dorian
-  After several discussions at UTK recently, here is the current status for the simulator
-  and for the paper.
+% Primary: George & Dorian
+  In high-performance computing environments, input/output (I/O) from various sources
+  often contend for shared interconnection network resources.  For example, I/O from
+  concurrently running computations can contend with each other as well as with I/O
+  from checkpoint/restart (CR) services used to protect these computations from
+  platform faults and failures. Without careful consideration, contending I/O from
+  independently operating sources can lead to significant performance degradation. In
+  this work, we consider a cooperative I/O scheduling policy that optimizes they way
+  concurrently executing, CR-based applications share interconnection networks.
+  Using our cooperative policy, applications checkpoint sequentially, with a dynamic,
+  priority-dependent frequency dictated by the scheduler. When enough I/O bandwidth
+  is available, each application checkpoints with its optimal period. However, when
+  I/O bandwidth is scarce, our scheduling algorithm provides an optimal checkpoint
+  process that maximizes platform throughput. Our results show ...
 \end{abstract}
