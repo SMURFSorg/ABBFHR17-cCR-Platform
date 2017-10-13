@@ -14,12 +14,12 @@ the filesystem level. Application that want to checkpoint are considered in
 a FIFO ordering. When an application finishes a checkpoint, the head of
 the line application is granted the checkpointing token and proceed,
 other applications in the queue remain blocked in the checkpointing
-routine. The third algorithm (\fifononbloc) is similar, except it assumes
+routine. The third algorithm (\fifononblock) is similar, except it assumes
 that burst buffers are available to absorb the temporary influx of
 checkpoint data. In this case, the application blocks for the time it
 takes to stage the checkpoint on the burst buffer, however, the application
 receives full protection from fault only when the checkpoint is fully
-migrated to the PFS. Last, we propose an heuristic whose goal is to
+migrated to the PFS. Last, we propose an heuristic (\leastwaste) whose goal is to
 select the application that inflicts the least overhead on the system.
 Each application checkpoints in a non-blocking manner, and instead of
 following a FIFO order to select the next checkpointing application,
