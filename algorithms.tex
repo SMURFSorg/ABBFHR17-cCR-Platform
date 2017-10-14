@@ -1,3 +1,5 @@
+% !TEX root =  ipdps18.tex
+
 \section{Scheduling Policies}\label{sec:algorithms}
 % Aurelien & George
 \dca{I think this section currently conflates general concepts with specific
@@ -60,8 +62,8 @@ We put back the restarted application at the head of the scheduling queue
 
 \subsection{Dealing with interference for non-cooperative application scheduling}
 \begin{itemize}
-  \item For coherence, we use the same policy for input I/O, output I/O and checkpoint operations \todo[inline]{we may want to separate Input+recovery from output+checkpoint (bidirectional channels)}
-  \todo[inline]{answer: we could but not sure it is 100\% independent; and it would complicate things without changing the story.}
+%  \item For coherence, we use the same policy for input I/O, output I/O and checkpoint operations \todo[inline]{we may want to separate Input+recovery from output+checkpoint (bidirectional channels)}
+%  \todo[inline]{answer: we could but not sure it is 100\% independent; and it would complicate things without changing the story.}
   \item Blocking: only one application can perform I/O operations at the given time-step.
   I/O requests are served on a FCFS basis. When an application has requested an I/O
   operation, it waits idle until being served. \dca{Technically, blocking is
@@ -128,15 +130,18 @@ $$\wap{i} = \sum_{A_{j} \in \Catiocat, j\neq i} \wapp{i}{j} + \sum_{A_{j} \in \C
 We obtain
 \begin{equation}
 \label{eq.selection}
- \wap{i} = v_{i} \times \left( \sum_{1 \leq j \leq r, j\neq i} q_{j} (d_{j} + v_{i})
- + \sum_{r+1 \leq j \leq r+s}   \frac{q^{2}_{j}}{\muind} (R_{j} + d_{j} + \frac{v_{i}}{2}) \right)
+\begin{array}{ll}
+ \wap{i} = & v_{i} \times \left( \sum_{1 \leq j \leq r, j\neq i} q_{j} (d_{j} + v_{i}) \right.\\
+ & + \left. \sum_{r+1 \leq j \leq r+s}   \frac{q^{2}_{j}}{\muind} (R_{j} + d_{j} + \frac{v_{i}}{2}) \right)
+ \end{array}
 \end{equation}
 
  Assume now that the selected application $A_{i} \in \Catckptcat$. Then  $A_{i}$ will use the I/O resource for $C_{i}$ seconds instead of $v_{i}$ seconds for $A_{i} \in \Catiocat$. We directly obtain the counterpart of Equation~\eqref{eq.selection} for its waste $\wap{i}$:
  \begin{equation}
-\label{eq.selection2}
- \wap{i} = C_{i} \times \left( \sum_{1 \leq j \leq r} q_{j} (d_{j} + C_{i})
- + \sum_{r+1 \leq j \leq r+s, j\neq i}   \frac{q^{2}_{j}}{\muind} (R_{j} + d_{j} + \frac{C_{i}}{2}) \right)
+\begin{array}{ll}
+ \wap{i} = &  C_{i} \times \left( \sum_{1 \leq j \leq r} q_{j} (d_{j} + C_{i}) \right.\\
+ & + \left.  + \sum_{r+1 \leq j \leq r+s, j\neq i}   \frac{q^{2}_{j}}{\muind} (R_{j} + d_{j} + \frac{C_{i}}{2}) \right)
+  \end{array}
 \end{equation}
 
  Finally, we select the application $A_{i} \in \Catiocat \cup \Catckptcat$ whose waste
