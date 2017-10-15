@@ -127,22 +127,3 @@ applications are not added to the workload). We simulate a large
 number of such runs (at least a thousand simulations per shown
 measurement), and compute the first, second, third quartile of the
 performance for each statistic, as well as the mean value.
-
-\paragraph*{Workload} We consider the workload from LANL found
-in the APEX Workflows report that consists of four simulation
-applications: EAP, LAP, Silverton and VPIC. The main characteristics
-of these classes are reported in Table~\ref{table:lanl}.
-
-\begin{table}
-\begin{tabular}{|l|c|c|c|c|}
-\hline
- Workflow & EAP & LAP & Silverton & VPIC \\\hline
-Workload percentage & 66 & 5.5 & 16.5 & 12 \\\hline
-Work time (h) & 262.4 & 64 & 128 & 157.2 \\\hline
-Number of cores & 16384 & 4096 & 32768 & 30000 \\\hline
-Initial Input (\% of memory) &  3 & 5 & 70 & 10 \\\hline
-Final Output (\% of memory) & 105 & 220 & 43 & 270 \\\hline
-Checkpoint Size (\% of memory) & 160 & 185 & 350 & 85 \\\hline
-\end{tabular}
-\caption{LANL Workflow Workload from the APEX Workflows report\label{table:lanl}}
-\end{table}
