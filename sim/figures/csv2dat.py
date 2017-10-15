@@ -3,7 +3,7 @@
 import pandas as pd
 import numpy as np
 
-t = pd.read_csv("1h-ckpt-celio.csv", names=["Bandwidth", "MTBF", "Interference", "WORK", "IO", "CKPT", "WASTED", "TOTAL", "seed"])
+t = pd.read_csv("1h-ckpt-celio.csv", names=["Bandwidth", "MTBF", "Interference", "WORK", "IO", "CKPT", "WASTED", "TOTAL", "seed", "Convergence"])
 v = t.groupby(["Interference","seed"]).mean()
 v.reset_index(inplace=True)
 v['TOTWASTE']=v['CKPT']+v['WASTED']
@@ -22,7 +22,7 @@ p = v.groupby(['Interference', 'Bandwidth', 'MTBF'])['Computing Ratio', 'IO Rati
 r = p.describe(percentiles=[.1,.25,.50,.75,.9])
 r.to_csv('1h-ckpt-celio.dat',header=False,sep="\t")
 
-t = pd.read_csv("daly-ckpt-celio.csv", names=["Bandwidth", "MTBF", "Interference", "WORK", "IO", "CKPT", "WASTED", "TOTAL", "seed"])
+t = pd.read_csv("daly-ckpt-celio.csv", names=["Bandwidth", "MTBF", "Interference", "WORK", "IO", "CKPT", "WASTED", "TOTAL", "seed", "Convergence"])
 v = t.groupby(["Interference","seed"]).mean()
 v.reset_index(inplace=True)
 v['TOTWASTE']=v['CKPT']+v['WASTED']
