@@ -1,0 +1,99 @@
+
+\section{Steady-state analysis}
+\label{sec:lowerbound}
+% Primary: Yves (does that go into a subsec of the algorithms or models?)
+
+In this section we envision a (theoretical) scenario when the platform operates in steady-state,
+with a constant number of applications per class that span the whole platform. We also assume that
+the I/O bandwidth $\bandavail$  that is available for CR operations remains constant throughout
+execution.  Given the above, we determine the optimal checkpointing period for each application
+when the objective is to minimize the total waste incurred  by the platform, or equivalently,
+to maximize the total throughput of the platform.
+
+In steady-state operation, there are $\nbapp{i}$ applications of class $\app{i}$,
+each using $\nbnodes{i}$, and with checkpoint time $\ckpt{i}$. Because we orchestrate
+checkpoints to avoid CR-CR interferences, we have $\ckpt{i} = \frac{\size{i}}{\bandavail}$,
+where $\size{i}$ denote the size of the checkpoint file of each application of class $\app{i}$.
+
+The waste of an application is the ratio of time that the application spends doing
+resilience operations by the time that it does useful work. The time
+spent doing resilience operations include the time spend during each period to checkpoint, and in case of failure, the time to rollback to the previous checkpoint, and the time to recompute lost work. We assume
+that the recovery time is equivalent to the checkpoint time  $\ckpt{i}$. 
+We
+can express the waste $\wasteapp{i}$ of an application of class
+$\app{i}$ that checkpoints with period $\period{i}$
+as follows~\cite{springer-monograph}:
+
+\begin{equation}
+\wasteapp{i} = \wastefct{i}{\ckpt{i}} = \frac{\ckpt{i}}{\period{i}} +
+\frac{\nbnodes{i}}{\mtbfplat}(\frac{\period{i}}{2} + \ckpt{i})
+\label{eq.wasteAi}
+\end{equation}
+
+Let $\wasteplat$ be the waste of the platform. We define this as the
+weighted arithmetic mean of the $\wasteapp{i}$ for all applications,
+where each application is weighted by the number of computing nodes
+it uses):
+
+\begin{equation}
+\wasteplat = \sum_i \frac{\nbapp{i} \nbnodes{i}}{\nbnodesplat} \wasteapp{i}
+\label{eq.waste}
+\end{equation}
+
+In the absence of I/O constraints, the checkpointing period can be minimized
+for each application independently. Indeed, the optimal period for an application
+of class $\app{i}$ is obtained by minimizing $\wasteapp{i}$ in Equation~\eqref{eq.wasteAi}.
+Differentiating and solving
+$$\frac{\delta \wasteapp{i}}{\delta \period{i}} = - \frac{\ckpt{i}}{\period{i}^{2}} + \frac{\nbnodes{i}}{2 \mtbfplat} = 0$$
+we readily derive that
+\begin{equation}
+\period{i} = \sqrt{2 \frac{\mtbfplat}{\nbnodes{i}} \ckpt{i}} = \sqrt{2 \mu_{i} \ckpt{i}}
+\label{eq.daly}
+\end{equation}
+where $\mu_{i}$ is the MTBF of  class $\app{i}$ applications, which is the Young/Daly formula~\cite{young74,daly04}.
+
+However, I/O constraints may impose the use of sub-optimal periods. If each application
+of  class $\app{i}$ checkpoints in time $\ckpt{i}$ during its period $\period{i}$ (hence without any contention), it uses the I/O device during a fraction $\frac{\ckpt{i}}{\period{i}}$ of the time.
+The total usage fraction of the  I/O device is $\sum_{i} \frac{\nbapp{i} \ckpt{i}}{\period{i}}$
+and cannot exceed $1$. Therefore, we have to solve the following optimization problem: find
+the set of values $\period{i}$ that minimize $\wasteplat$ in Equation~\eqref{eq.waste} subject to the I/O constraint:
+
+\begin{equation}
+\sum_{i} \frac{\nbapp{i} \ckpt{i}}{\period{i}} \leq 1
+\label{eq.IOconstraint}
+\end{equation}
+
+Hence the optimization problem writes: minimize
+\begin{equation}
+\wasteplat = \sum_i \frac{\nbapp{i} \nbnodes{i}}{\nbnodesplat}  \left( \frac{\ckpt{i}}{\period{i}} +
+\frac{\nbnodes{i}}{\mtbfplat}(\frac{\period{i}}{2} + \ckpt{i}) \right)
+\label{eq.totalwaste}
+\end{equation}
+subject to Equation~\eqref{eq.IOconstraint}.
+Using the Karush-Kuhn-Tucker conditions~\cite{Boyd2004}, we know that there exists a nonnegative constant
+$\lambda$
+such that
+$$- \frac{\delta \wasteplat}{\delta \period{i}} = \lambda \frac{\delta\ioconstraint }{\delta \period{i}}$$
+for all $i$. We derive that
+$$\frac{\nbapp{i} \nbnodes{i} \ckpt{i}}{\nbnodesplat \period{i}^{2}} -    \frac{\nbapp{i} \nbnodes{i}^{2}}{2 \mtbfplat \nbnodesplat} = - \lambda \frac{\nbapp{i} \ckpt{i}}{\period{i}^{2}}
+$$
+for all $i$. This leads to:
+ \begin{equation}
+\period{i} = \sqrt{\frac{2 \mtbfplat  \nbnodesplat}{\nbnodes{i}^{2}} \left(\frac{\nbnodes{i}}{\nbnodesplat} +\lambda \right) \ckpt{i}}
+  \label{eq.KKT}
+\end{equation}
+for all $i$. Note that when $\lambda=0$, Equation~\eqref{eq.KKT} reduces to Equation~\eqref{eq.daly}. Because of the I/O constraint in Equation~\eqref{eq.IOconstraint},
+we choose for $\lambda$ the minimum value such that Equation~\eqref{eq.IOconstraint}
+  is satisfied. If $\lambda \neq 0$, this will lead to periods $P_{i}$ larger than the optimal value of Equation~\eqref{eq.daly}. Note that there is no closed-form expression for the minimum value of $\lambda$,
+  it has to be found numerically.
+   Altogether, we state our main result:
+
+   \begin{theorem}
+  In the presence of I/O constraints, the optimal values of the checkpointing periods are given
+  by Equation~\eqref{eq.KKT}, where $\lambda$ is the smallest nonnegative value such that
+  Equation~\eqref{eq.IOconstraint} holds. The total platform waste is then given by 
+  Equation~\eqref{eq.totalwaste}.
+\end{theorem}
+
+The optimal periods may not be achievable, because Equation~\eqref{eq.IOconstraint} is a necessary condition, but is may not be sufficient:
+even though the total I/O bandwidth is not exceeded, meaning there is enough capacity to take all the checkpoints at the given periods, we still need to orchestrate these checkpoints into a periodic pattern that repeats over time. In other words, we have derived a lower bound of the optimal waste.

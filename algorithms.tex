@@ -1,12 +1,35 @@
-\section{Algorithms}\label{sec:algorithms}
+% !TEX root =  ipdps18.tex
+
+\section{Scheduling Policies}\label{sec:algorithms}
 % Aurelien & George
 \dca{I think this section currently conflates general concepts with specific
   algorithmic details. Whenever we believe the content is close to fixed, I'd like to
   take a pass at refactoring the discussion.}
 
-In this section, we present an algorithm to schedule applications and
-I/O workload in order to alleviate the effect of concurrent access
-to I/O resources.
+In this section, we present the algorithms used to schedule applications
+and I/O workload in order to alleviate the effect of concurrent access
+to I/O resources. The first algorithm (\nocoop) represents the status-quo  in
+which applications are scheduled in a non-cooperative manner, which may
+incur interference on I/O resource access and wait time. The second
+algorithm (\fifoblock) inserts some coordination between I/O activities purely at
+the filesystem level. Application that want to checkpoint are considered in
+a FIFO ordering. When an application finishes a checkpoint, the head of
+the line application is granted the checkpointing token and proceed,
+other applications in the queue remain blocked in the checkpointing
+routine. The third algorithm (\fifononblock) is similar, except it assumes
+that burst buffers are available to absorb the temporary influx of
+checkpoint data. In this case, the application blocks for the time it
+takes to stage the checkpoint on the burst buffer, however, the application
+receives full protection from fault only when the checkpoint is fully
+migrated to the PFS. Last, we propose an heuristic (\leastwaste) whose goal is to
+select the application that inflicts the least overhead on the system.
+Each application checkpoints in a non-blocking manner, and instead of
+following a FIFO order to select the next checkpointing application,
+we compute the prospective waste incurred by selecting one of the
+checkpointing applications, and select the best one at that moment. Note
+that given the time dependent nature of that descision, the selection may
+not be the global optimum, but only an approximation given currently
+available information about the system status.
 
 \subsection{Scheduling applications}
 %TODO: remove/rewrite this section it is too attached to the instanciations. =
@@ -39,8 +62,8 @@ We put back the restarted application at the head of the scheduling queue
 
 \subsection{Dealing with interference for non-cooperative application scheduling}
 \begin{itemize}
-  \item For coherence, we use the same policy for input I/O, output I/O and checkpoint operations \todo[inline]{we may want to separate Input+recovery from output+checkpoint (bidirectional channels)}
-  \todo[inline]{answer: we could but not sure it is 100\% independent; and it would complicate things without changing the story.}
+%  \item For coherence, we use the same policy for input I/O, output I/O and checkpoint operations \todo[inline]{we may want to separate Input+recovery from output+checkpoint (bidirectional channels)}
+%  \todo[inline]{answer: we could but not sure it is 100\% independent; and it would complicate things without changing the story.}
   \item Blocking: only one application can perform I/O operations at the given time-step.
   I/O requests are served on a FCFS basis. When an application has requested an I/O
   operation, it waits idle until being served. \dca{Technically, blocking is
@@ -107,15 +130,18 @@ $$\wap{i} = \sum_{A_{j} \in \Catiocat, j\neq i} \wapp{i}{j} + \sum_{A_{j} \in \C
 We obtain
 \begin{equation}
 \label{eq.selection}
- \wap{i} = v_{i} \times \left( \sum_{1 \leq j \leq r, j\neq i} q_{j} (d_{j} + v_{i})
- + \sum_{r+1 \leq j \leq r+s}   \frac{q^{2}_{j}}{\muind} (R_{j} + d_{j} + \frac{v_{i}}{2}) \right)
+\begin{array}{ll}
+ \wap{i} = & v_{i} \times \left( \sum_{1 \leq j \leq r, j\neq i} q_{j} (d_{j} + v_{i}) \right.\\
+ & + \left. \sum_{r+1 \leq j \leq r+s}   \frac{q^{2}_{j}}{\muind} (R_{j} + d_{j} + \frac{v_{i}}{2}) \right)
+ \end{array}
 \end{equation}
 
  Assume now that the selected application $A_{i} \in \Catckptcat$. Then  $A_{i}$ will use the I/O resource for $C_{i}$ seconds instead of $v_{i}$ seconds for $A_{i} \in \Catiocat$. We directly obtain the counterpart of Equation~\eqref{eq.selection} for its waste $\wap{i}$:
  \begin{equation}
-\label{eq.selection2}
- \wap{i} = C_{i} \times \left( \sum_{1 \leq j \leq r} q_{j} (d_{j} + C_{i})
- + \sum_{r+1 \leq j \leq r+s, j\neq i}   \frac{q^{2}_{j}}{\muind} (R_{j} + d_{j} + \frac{C_{i}}{2}) \right)
+\begin{array}{ll}
+ \wap{i} = &  C_{i} \times \left( \sum_{1 \leq j \leq r} q_{j} (d_{j} + C_{i}) \right.\\
+ & + \left.  + \sum_{r+1 \leq j \leq r+s, j\neq i}   \frac{q^{2}_{j}}{\muind} (R_{j} + d_{j} + \frac{C_{i}}{2}) \right)
+  \end{array}
 \end{equation}
 
  Finally, we select the application $A_{i} \in \Catiocat \cup \Catckptcat$ whose waste

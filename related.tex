@@ -1,0 +1,30 @@
+
+% !TEX root =  ipdps18.tex
+
+\section{Related Works}\label{sec:related}
+% Primary: Kurt
+
+We survey related work in this section. We first discuss papers related to I/O pressure
+due to checkpointing. Then we deal with I/O interference.
+
+
+
+\subsection{Checkpointing and I/O}
+
+For a single application, the optimal checkpointing period is given by the Young/Daly
+formula~\cite{young74,daly04}. This period minimizes the platform waste, defined as
+the fraction of the
+execution time that does not contribute to the progress of the application (the
+time \emph{wasted}).  There are two sources of waste, the time spent taking checkpoints
+(which calls for longer checkpoint periods),
+and the time needed to recover and re-execute after each failure
+(which calls for shorter checkpoint periods),
+The Young/Daly
+period achieves the optimal trade-off between both sources to minimize the
+total waste.
+However, this optimal period may put too much pressure
+on the I/O system. It is possible to use a longer, sub-optimal, period that would incur
+less pressure and still lead to a reasonable waste. S. Arunagiri et al.~\cite{Arunagiri2009} have studied such trade-offs and they have shown, both analytically and instantiating the model with four real-life platforms,
+that a great decrease in I/O requirement can be achieved  at the price of a small increase of the waste.
+
+\subsection{I/O interference}
