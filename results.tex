@@ -39,15 +39,6 @@ resource usage: the sum of time each node spends doing a specific
 operation. Application usage sums the time spent doing I/O or
 computation that was not wasted by a restart due to a failure.
 
-\begin{figure}
-  \begin{center}
-    \includegraphics[width=\linewidth]{sim/figures/synthetic-01hMTBF-waste-celio.pdf}
-  \end{center}
-  \caption{Waste ratio as a function of the system bandwidth for the
-    seven I/O and Checkpointing scheduling strategies, and the Celio
-    workload \label{fig:celio-1hmtbf}}
-\end{figure}
-
 For each checkpointing and I/O scheduling technique presented in
 Section~\ref{sec:algorithm}, we then compute the resource waste, as
 the sum of application computation or I/O that was wasted due to
@@ -60,34 +51,94 @@ candelstick extremes represent the first and last decile of the
 measures, while the boxes represent the second and third quartile, and
 the point in the middle the mean value.
 
+\begin{figure}
+  \begin{center}
+    \includegraphics[width=\linewidth]{sim/figures/synthetic-01hMTBF-waste-celio.pdf}
+  \end{center}
+  \caption{Waste ratio as a function of the system bandwidth for the
+    seven I/O and Checkpointing scheduling strategies, and the Celio
+    workload \label{fig:celio-1hmtbf}}
+\end{figure}
+
 First, we explore the performance of each approach under heavy risks
-of failures. Figure~\ref{fig:celio-1hmtbf} represents the waste ratio on Celio,
-assuming the MTBF of the system was 1h. We vary the filesystem
-bandwidth from 40 GB/s to 160GB/s in order to evaluate the impact of
-this parameter. We observe 3 classes of behavior: \propfixed and
-\bfifofixed exhibit a waste ratio that remains between 40\% and 60\%
-even with a high available bandwidth; \fifodaly, \fifofixed, and
-\cooperative increase their performance with the bandwidth, but start
-at only 20\% of waste or less (15\% of waste for \cooperative), even
-under low filesystem capacity; and \propdaly and \bfifodaly start
-at the same level of efficiency as \propfixed and \bfifofixed, and
-reach the 20\% of waste as the bandwidth increases. 
+of failures. Figure~\ref{fig:celio-1hmtbf} represents the waste ratio
+on Celio, assuming the MTBF of the system was 1h. We vary the
+filesystem bandwidth from 40 GB/s to 160GB/s in order to evaluate the
+impact of this parameter. We observe 3 classes of behavior: \propfixed
+and \bfifofixed exhibit a waste ratio that decrease as the bandwidth
+increases, but remains above 40\% even with a high available
+bandwidth; \fifodaly, \fifofixed, and \cooperative quickly decrese at
+only 20\% of waste or less, and reach the theoretical model
+performance; and \propdaly and \bfifodaly start at the same level of
+efficiency as \propfixed and \bfifofixed, and reach the 20\% of waste
+as the bandwidth increases.
 
 This figure shows that with a high frequency of failures, providing
 each application with the appropriate checkpoint interval is central
-to relieve th filesystem from unecessary (or even detrimental)
+to relieve the filesystem from unecessary (or even detrimental)
 checkpoints, but this is not the sole criteria that should be taken
 into account. The two strategies that remain with a high waste despite
 a high bandwidth rely on a fixed 1h interval. As the figure
 illustrates, simply relying on the Daly checkpointing period is not
 sufficient to reach the best performance under constrained bandwidth:
-at 40GB/s for the filesystem, \propdaly and \bfifodaly experience two
-to three times the waste of the other strategies relying on the same
-value for the checkpointing period. All strategies that couple the
-decision of checkpointing with filesystem availability information
-(\fifodaly, \fifofixed, \cooperative) exhibits much better performance
-despite low bandwidth. Notably, \cooperative remains the most
-efficient technique under all conditions.
+at 60GB/s for the filesystem, \propdaly and \bfifodaly experience
+twice the waste of the other strategies relying on the same value for
+the checkpointing period. All strategies that decouple the execution
+of the application from the filesystem availability (\fifodaly,
+\fifofixed, \cooperative) exhibit much better performance despite low
+bandwidth. 
+
+Notably, \cooperative remains the most efficient technique under all
+conditions, and reaches the theoretical performance given by
+Equation~\ref{eq.totalwaste} in the case of a stead state
+analysis. This illustrates the efficiency of the proposed heuristic
+(Equations~\ref{eq.heuristicpart1} and~\ref{eq.heuristicpart2}) to
+schedule checkpoints and I/O in a way that avoids interferences,
+allowing the system to behave as if no interference was experienced,
+in most cases. The high variation shows that a minority of the runs
+experienced a significantly higher waste.
+
+\begin{figure}
+  \begin{center}
+    \includegraphics[width=\linewidth]{sim/figures/synthetic-040gbs-waste-celio.pdf}
+  \end{center}
+  \caption{Waste ratio as a function of the system MTBF for the
+    seven I/O and Checkpointing scheduling strategies, and the Celio
+    workload \label{fig:celio-40gbs}}
+\end{figure}
+
+Second, we explore the performance of each approach under low
+bandwidth (and thus high risk of
+interference). Figure~\ref{fig:celio-40gbs} represents the waste ratio
+on Celio, assuming the aggregated filesystem bandwidth of the system
+was 40GB/s. We vary the system MTBF from 1h (2 years of node MTBF) to
+24h (48 years of node MTBF) in order to evaluate the impact of this
+parameter. Similarly to Figure~\ref{fig:celio-1hmtbf}, we observe 3
+classes of behavior: \propfixed and \bfifofixed exhibit a waste ratio
+that remains constant around 80\% for all values of the MTBF. These
+appraoch are critically dependent on the filesystem bandwidth, and a
+lower frequency of failures does not significantly improve their
+performance. The I/O subsystem is saturated, and the applications
+spends most of their time waiting for it. \fifodaly, \fifofixed, and
+\cooperative quickly fall at only 20\% of waste or less, and reach
+the theoretical model performance; and \propdaly and \bfifodaly start
+at the same level of efficiency as \propfixed and \bfifofixed, and
+reach the 20\% of waste as the bandwidth increases.
+
+For all the strategies that integrate the Daly checkpointing period
+optimization, increasing the MTBF reduces the amount of I/O required
+and thus enables to manage a constrained bandwidth easily. All
+strategies that schedule the bandwidth are succesful at increasing the
+efficiency to values very close to the theoretical model. More
+suprisingly, the simple FIFO scheduling of checkpoints with fixed
+chekpoint interval (\bfifofixed) is capable of reaching a performance
+comparable to the one of the strategies that reduce the number of
+checkpoints. This is due to the significant reduction in interference
+due to the reduction of number of restarts with an MTBF of 8h. As soon
+as the number of restarting applications decreases, the filesystem
+sollicitation decreases sufficiently to avoid long delays in non blocking
+approaches, as is illustrated by the performance of \fifofixed at 2h
+of MTBF.
 
 \subsection{Prospective Systems}
 

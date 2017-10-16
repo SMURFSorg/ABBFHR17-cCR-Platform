@@ -174,23 +174,24 @@ set fit brief errorvariables nocovariancevariables errorscaling prescale nowrap 
 GNUTERM = "aqua"
 x = 0.0
 ## Last datafile plotted: "<awk '$1=="FCFS" && $2==4e10 {print}' 1h-ckpt-celio.dat"
-base =40
-
+#base =40
+base=50
 bwstr = sprintf("%g", BW*1e9)
 
-plot "<awk '$1==\"Simple\" && $2==" . bwstr . " {print}' 1h-ckpt-celio.dat" u (0.925*$3):(column(base+9)):(column(base+7)):(column(base+13)):(column(base+11)) w candlestick t "Proportional Interference (1h Checkpoint Interval)" ls 2 \
-   ,                                                          "" u (0.925*$3):(column(base+5)) w p t "" ls 2 ps .2  \
-   , "<awk '$1==\"Simple\" && $2==" . bwstr . " {print}' daly-ckpt-celio.dat" u (0.95*$3):(column(base+9)):(column(base+7)):(column(base+13)):(column(base+11)) w candlestick t "Proportional Interference (Daly Checkpoint Interval)" ls 3 \
-   ,                                                          "" u (0.95*$3):(column(base+5)) w p t "" ls 3 ps .2  \
-   , "<awk '$1==\"FCFS\" && $2==" . bwstr . " {print}' 1h-ckpt-celio.dat" u (0.975*$3):(column(base+9)):(column(base+7)):(column(base+13)):(column(base+11)) w candlestick t "FIFO (1h Checkpoint Interval)" ls 4 \
-   ,                                                           "" u (0.975*$3):(column(base+5)) w p t "" ls 4 ps .2 \
-   , "<awk '$1==\"FCFS\" && $2==" . bwstr . " {print}' daly-ckpt-celio.dat" u ($3):(column(base+9)):(column(base+7)):(column(base+13)):(column(base+11)) w candlestick t "FIFO (Daly Checkpoint Interval)" ls 5 \
-   ,                                                           "" u ($3):(column(base+5)) w p t "" ls 5 ps .2 \
-   , "<awk '$1==\"BLOCKING_FCFS\" && $2==" . bwstr . " {print}' 1h-ckpt-celio.dat" u (1.025*$3):(column(base+9)):(column(base+7)):(column(base+13)):(column(base+11)) w candlestick t "Blocking FIFO (1h Checkpoint Interval)" ls 6 \
-   ,                                                           "" u (1.025*$3):(column(base+5)) w p t "" ls 6 ps .2 \
-   , "<awk '$1==\"BLOCKING_FCFS\" && $2==" . bwstr . " {print}' daly-ckpt-celio.dat" u (1.05*$3):(column(base+9)):(column(base+7)):(column(base+13)):(column(base+11)) w candlestick t "Blocking FIFO (Daly Checkpoint Interval)" ls 7 \
-   ,                                                           "" u (1.05*$3):(column(base+5)) w p t "" ls 7 ps .2 \
-   ,  "<awk '$1==\"Coop\" && $2==" . bwstr . " {print}' daly-ckpt-celio.dat" u (1.075*$3):(column(base+9)):(column(base+7)):(column(base+13)):(column(base+11)) w candlestick t "Cooperative Checkpointing" ls 1 \
-   ,                                                          "" u (1.075*$3):(column(base+5)) w p t "" ls 1 ps .2
+plot "<awk '$1==\"Simple\" && $2==" . bwstr . " {print}' 1h-ckpt-celio.dat" u (0.925*$3):(1-column(base+9)):(1-column(base+7)):(1-column(base+13)):(1-column(base+11)) w candlestick t "Proportional Interference (1h Checkpoint Interval)" ls 2 \
+   ,                                                          "" u (0.925*$3):(1-column(base+5)) w p t "" ls 2 ps .2  \
+   , "<awk '$1==\"Simple\" && $2==" . bwstr . " {print}' daly-ckpt-celio.dat" u (0.95*$3):(1-column(base+9)):(1-column(base+7)):(1-column(base+13)):(1-column(base+11)) w candlestick t "Proportional Interference (Daly Checkpoint Interval)" ls 3 \
+   ,                                                          "" u (0.95*$3):(1-column(base+5)) w p t "" ls 3 ps .2  \
+   , "<awk '$1==\"FCFS\" && $2==" . bwstr . " {print}' 1h-ckpt-celio.dat" u (0.975*$3):(1-column(base+9)):(1-column(base+7)):(1-column(base+13)):(1-column(base+11)) w candlestick t "FIFO (1h Checkpoint Interval)" ls 4 \
+   ,                                                           "" u (0.975*$3):(1-column(base+5)) w p t "" ls 4 ps .2 \
+   , "<awk '$1==\"FCFS\" && $2==" . bwstr . " {print}' daly-ckpt-celio.dat" u ($3):(1-column(base+9)):(1-column(base+7)):(1-column(base+13)):(1-column(base+11)) w candlestick t "FIFO (Daly Checkpoint Interval)" ls 5 \
+   ,                                                           "" u ($3):(1-column(base+5)) w p t "" ls 5 ps .2 \
+   , "<awk '$1==\"BLOCKING_FCFS\" && $2==" . bwstr . " {print}' 1h-ckpt-celio.dat" u (1.025*$3):(1-column(base+9)):(1-column(base+7)):(1-column(base+13)):(1-column(base+11)) w candlestick t "Blocking FIFO (1h Checkpoint Interval)" ls 6 \
+   ,                                                           "" u (1.025*$3):(1-column(base+5)) w p t "" ls 6 ps .2 \
+   , "<awk '$1==\"BLOCKING_FCFS\" && $2==" . bwstr . " {print}' daly-ckpt-celio.dat" u (1.05*$3):(1-column(base+9)):(1-column(base+7)):(1-column(base+13)):(1-column(base+11)) w candlestick t "Blocking FIFO (Daly Checkpoint Interval)" ls 7 \
+   ,                                                           "" u (1.05*$3):(1-column(base+5)) w p t "" ls 7 ps .2 \
+   ,  "<awk '$1==\"Coop\" && $2==" . bwstr . " {print}' daly-ckpt-celio.dat" u (1.075*$3):(1-column(base+9)):(1-column(base+7)):(1-column(base+13)):(1-column(base+11)) w candlestick t "Cooperative Checkpointing" ls 1 \
+   ,                                                          "" u (1.075*$3):(1-column(base+5)) w p t "" ls 1 ps .2 \
+   ,  "<awk '$1==" . bwstr . " {print}' model.dat" u ($2*3600):3 w lines ls 8 t "Theoretical Model"
 							      
 #    EOF

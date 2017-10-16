@@ -129,15 +129,16 @@ to the other $r+s-1$ candidate applications is
 $$\wap{i} = \sum_{A_{j} \in \Catiocat, j\neq i} \wapp{i}{j} + \sum_{A_{j} \in \Catckptcat} \wapp{i}{j}$$
 We obtain
 \begin{equation}
-\label{eq.selection}
+\label{eq.heuristicpart1}
 \begin{array}{ll}
  \wap{i} = & v_{i} \times \left( \sum_{1 \leq j \leq r, j\neq i} q_{j} (d_{j} + v_{i}) \right.\\
  & + \left. \sum_{r+1 \leq j \leq r+s}   \frac{q^{2}_{j}}{\muind} (R_{j} + d_{j} + \frac{v_{i}}{2}) \right)
  \end{array}
 \end{equation}
 
- Assume now that the selected application $A_{i} \in \Catckptcat$. Then  $A_{i}$ will use the I/O resource for $C_{i}$ seconds instead of $v_{i}$ seconds for $A_{i} \in \Catiocat$. We directly obtain the counterpart of Equation~\eqref{eq.selection} for its waste $\wap{i}$:
+ Assume now that the selected application $A_{i} \in \Catckptcat$. Then  $A_{i}$ will use the I/O resource for $C_{i}$ seconds instead of $v_{i}$ seconds for $A_{i} \in \Catiocat$. We directly obtain the counterpart of Equation~\eqref{eq.heuristicpart1} for its waste $\wap{i}$:
  \begin{equation}
+  \label{eq.heuristicpart2}
 \begin{array}{ll}
  \wap{i} = &  C_{i} \times \left( \sum_{1 \leq j \leq r} q_{j} (d_{j} + C_{i}) \right.\\
  & + \left.  + \sum_{r+1 \leq j \leq r+s, j\neq i}   \frac{q^{2}_{j}}{\muind} (R_{j} + d_{j} + \frac{C_{i}}{2}) \right)

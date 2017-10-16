@@ -8,7 +8,7 @@ v = t.groupby(["Interference","seed"]).mean()
 v.reset_index(inplace=True)
 v['TOTWASTE']=v['CKPT']+v['WASTED']
 v['TOTWORK']=v['WORK']+v['IO']
-baseline = 1.0/v[v.Interference == "baseline"]['TOTWORK'].mean()
+baseline = 1.0/v[v.Interference == "baseline"]['TOTWORK'].max()
 v=v[v.Interference != "baseline"]
 v['Computing Ratio']=v['WORK']*baseline
 v['IO Ratio']=v['IO']*baseline
@@ -27,7 +27,7 @@ v = t.groupby(["Interference","seed"]).mean()
 v.reset_index(inplace=True)
 v['TOTWASTE']=v['CKPT']+v['WASTED']
 v['TOTWORK']=v['WORK']+v['IO']
-baseline = 1.0/v[v.Interference == "baseline"]['TOTWORK'].mean()
+baseline = 1.0/v[v.Interference == "baseline"]['TOTWORK'].max()
 v=v[v.Interference != "baseline"]
 v['Computing Ratio']=v['WORK']*baseline
 v['IO Ratio']=v['IO']*baseline
