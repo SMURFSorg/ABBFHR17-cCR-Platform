@@ -9,6 +9,40 @@
 %  shouldn't be far from finite apps being scheduled eagerly over
 %  finite resource for a long time, in average'.}
 
+
+
+%TODO: moved out of "algorithms" as this is describing the model; My
+% opinion is that the current text already captures these points, but
+% please check
+\begin{comment}
+\begin{itemize}
+\item We take a large number of applications. These applications belong to a few
+  classes (say 4 classes). We enforce the percentage per class that is reported in
+  the APEX paper.  Each application comes with: class, number of processors, input
+  I/O size, output I/O size, checkpoint size, CPU time (equal to wall-time reported
+  in APEX paper). To avoid side effects induced by having hundreds of completely
+  identical applications, we use normal distributions for CPU time with mean equal to
+  original APEX value and small standard deviation (say 10\%). \dca{Put in model
+    section?}
+  \item We shuffle the applications and present them all in a big queue to the scheduler,
+  which uses a simple first-fit algorithm. No user reservation, plain greedy. But we do assume the scheduler has access to the entire list of pending applications.
+\item We also make the assumption that the applications know precisely
+  the necessary wall-time. This diverges from a real scenario but
+  allow us to only take in account one type of disturbance: an
+  application is slower than expected due to C/R overheads (and will
+  extend its original wall-time). \dca{Put in model section?}
+  \item When an application fails, we resubmit it with a new wall-time equal to the fraction that remains from the last checkpoint.  Input I/O becomes recovery. Output I/O is not modified.
+
+We put back the restarted application at the head of the scheduling queue
+  (so that it has a chance to finish it's previously allotted wall time
+  immediately, given that the resources it previously occupied are
+  presumably available), and force a reschedule with every application that
+  has not started yet (already running applications are left to continue
+  their work).
+\end{itemize}
+\end{comment}
+
+
 In this work, we consider a shared platform that comprises a set of computational
 nodes, storage resources in the form of a parallel file system, and a network that
 interconnects the nodes as well as the storage resources. Applications are scheduled
@@ -36,7 +70,7 @@ variations with minimal parameters, we make the following simplifying assumption
 \end{itemize}
 We model the specific numbers and characteristics of the application classes based on
 real benchmark data, such as the APEX benchmark on the Celio platform~\cite{xx}.
- 
+
 To evaluate the scheduling policies, we consider a finite segment (typically lasting
 a small number of days) of a representative schedule where the number of applications
 in each class remains approximately constant at every instant. Of course, with
@@ -48,8 +82,8 @@ that at every instant during the finite segment, at least 98\% of the nodes
   precise enough.} are enrolled for the execution. This allows us to compare actual
 (simulated) performance with the theoretical performance of a co-scheduling policy
 that optimizes the steady-state I/O behavior of the application portfolio, assuming
-that all processors are used. 
-    
+that all processors are used.
+
 Formally, we consider a set $\appset$ of $\nbapps$ applications classes
 $\app{1}, \ldots \app{\nbapps}$ that execute concurrently on a platform with
 $\nbnodesplat$ nodes. Application class $\app{i}$ specifies:
@@ -65,9 +99,9 @@ $\nbnodesplat$ nodes. Application class $\app{i}$ specifies:
 %$\nbapp{i}$ applications that each use
 %$\nbnodes{i}$ nodes, and checkpoints
 %periodically with period $\period{i}$, in a time $\ckpt{i}$ when there
-%is no interference with other I/O operation. 
+%is no interference with other I/O operation.
 %
-At every instant, we schedule as many applications as possible. 
+At every instant, we schedule as many applications as possible.
 In the theoretical analysis, we assume that
 $\sum_{i}\nbapp{i} \nbnodes{i} = \nbnodesplat$, where $\nbnodesplat$ is the total
 number of nodes in the platform.

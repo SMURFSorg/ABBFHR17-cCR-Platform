@@ -1,10 +1,33 @@
-% !TEX root =  ipdps18.tex
-
-\section{Scheduling Policies}\label{sec:algorithms}
+\section{I/O Scheduling Algorithms}\label{sec:algorithms}
 % Aurelien & George
 \dca{I think this section currently conflates general concepts with specific
   algorithmic details. Whenever we believe the content is close to fixed, I'd like to
   take a pass at refactoring the discussion.}
+
+  %TODO: again this is part of the model
+  %TODO: looks like I'm not using the right terminology for blocking/non-blocking/sharing...
+  \subsection{Dealing with interference for non-cooperative application scheduling}
+  \begin{itemize}
+    \item For coherence, we use the same policy for input I/O, output I/O and checkpoint operations \todo[inline]{we may want to separate Input+recovery from output+checkpoint (bidirectional channels)}
+    \todo[inline]{answer: we could but not sure it is 100\% independent; and it would complicate things without changing the story.}
+    \item Blocking: only one application can perform I/O operations at the given time-step.
+    I/O requests are served on a FCFS basis. When an application has requested an I/O
+    operation, it waits idle until being served. \dca{Technically, blocking is
+      cooperative!}
+    \item Sharing: the I/O resource is shared at every time-step to serve all concurrent requests. Sharing is fair, i.e., bandwidth is inversely proportional to number of requests.
+    \item Here is an example:
+    application $A_{1}$ wants to perform five gigabytes of I/O at time $t$,
+    and available bandwidth is
+    $1$ gigabyte per second. If there is no other request, the operation will take five seconds.
+    Now application $A_{2}$ (with same number of processors as $A_{1}$, hence with same assigned bandwidth in the sharing policy) wants to perform two gigabytes of I/O at time $t+1$.
+    \begin{itemize}
+    \item Blocking: $A_{2}$'s operation is delayed until time $t+5$ and will complete at $t+7$.
+    \item Sharing: Instead of taking $2$ seconds, $A_{2}$'s operation will take $4$ seconds, because the bandwidth is shared with $A_{1}$ during its whole transfer. As a results, $A_{2}$'s operation completes at $t+5$ while $A_{1}$'s  operation is slowed down during four units and now completes at $t+7$.
+    \end{itemize}
+  \end{itemize}
+
+
+
 
 In this section, we present the algorithms used to schedule applications
 and I/O workload in order to alleviate the effect of concurrent access
@@ -31,56 +54,71 @@ that given the time dependent nature of that descision, the selection may
 not be the global optimum, but only an approximation given currently
 available information about the system status.
 
-\subsection{Scheduling applications}
-%TODO: remove/rewrite this section it is too attached to the instanciations. =
+\subsection{Non-cooperative I/O Scheduling}
 
-\begin{itemize}
-\item We take a large number of applications. These applications belong to a few
-  classes (say 4 classes). We enforce the percentage per class that is reported in
-  the APEX paper.  Each application comes with: class, number of processors, input
-  I/O size, output I/O size, checkpoint size, CPU time (equal to wall-time reported
-  in APEX paper). To avoid side effects induced by having hundreds of completely
-  identical applications, we use normal distributions for CPU time with mean equal to
-  original APEX value and small standard deviation (say 10\%). \dca{Put in model
-    section?}
-  \item We shuffle the applications and present them all in a big queue to the scheduler,
-  which uses a simple first-fit algorithm. No user reservation, plain greedy. But we do assume the scheduler has access to the entire list of pending applications.
-\item We also make the assumption that the applications know precisely
-  the necessary wall-time. This diverges from a real scenario but
-  allow us to only take in account one type of disturbance: an
-  application is slower than expected due to C/R overheads (and will
-  extend its original wall-time). \dca{Put in model section?}
-  \item When an application fails, we resubmit it with a new wall-time equal to the fraction that remains from the last checkpoint.  Input I/O becomes recovery. Output I/O is not modified.
+In the non-cooperative I/O scheduling, applications are selected to
+fill-up the system based on processor count availability. The I/O
+workload (including checkpointing activities) are not organized by any
+comprehensive system. Instead, it is assumed that concurrent access
+to I/O resources will cause a decrease in the application observed
+bandwidth for I/O operations. One can imagine multiple cost functions
+for the effect of that sharing; When the filesystem is scalable, the
+overall throughput of the platform is maintained when multiple applications
+concurently access, and each application observes a linear decrease in
+the per-application bandwidth. As the application is blocking on the
+completion of its I/O operations before it can continue, that decrease
+in observed bandwidth leads to a proportionate increase in I/O time,
+which in turn can generate a great amount of compute waste time
+(where processors are idle waiting on I/O to complete).
 
-We put back the restarted application at the head of the scheduling queue
-  (so that it has a chance to finish it's previously allotted wall time
-  immediately, given that the resources it previously occupied are
-  presumably available), and force a reschedule with every application that
-  has not started yet (already running applications are left to continue
-  their work).
-\end{itemize}
+\subsection{Blocking FIFO I/O Scheduling}
 
-\subsection{Dealing with interference for non-cooperative application scheduling}
-\begin{itemize}
-%  \item For coherence, we use the same policy for input I/O, output I/O and checkpoint operations \todo[inline]{we may want to separate Input+recovery from output+checkpoint (bidirectional channels)}
-%  \todo[inline]{answer: we could but not sure it is 100\% independent; and it would complicate things without changing the story.}
-  \item Blocking: only one application can perform I/O operations at the given time-step.
-  I/O requests are served on a FCFS basis. When an application has requested an I/O
-  operation, it waits idle until being served. \dca{Technically, blocking is
-    cooperative!}
-  \item Sharing: the I/O resource is shared at every time-step to serve all concurrent requests. Sharing is fair, i.e., bandwidth is inversely proportional to number of requests.
-  \item Here is an example:
-  application $A_{1}$ wants to perform five gigabytes of I/O at time $t$,
-  and available bandwidth is
-  $1$ gigabyte per second. If there is no other request, the operation will take five seconds.
-  Now application $A_{2}$ (with same number of processors as $A_{1}$, hence with same assigned bandwidth in the sharing policy) wants to perform two gigabytes of I/O at time $t+1$.
-  \begin{itemize}
-  \item Blocking: $A_{2}$'s operation is delayed until time $t+5$ and will complete at $t+7$.
-  \item Sharing: Instead of taking $2$ seconds, $A_{2}$'s operation will take $4$ seconds, because the bandwidth is shared with $A_{1}$ during its whole transfer. As a results, $A_{2}$'s operation completes at $t+5$ while $A_{1}$'s  operation is slowed down during four units and now completes at $t+7$.
-  \end{itemize}
-\end{itemize}
+A simple optimization to the aforementionned scheme is to favor one of
+the applications' I/O request over all others. While the overall throughput
+may remain unchanged (given an efficient PFS implementation), the favored
+application will complete its I/O workload faster (at nominal speed).
+Applications will be favored in the order of their I/O requests, \ie
+as soon as an application starts blocking on an I/O operation it will
+take its place in the queue.
 
-\subsection{Orchestrating I/O for cooperative application scheduling}
+The advantage can be trivially seen in a simple workload with two applications
+starting an I/O workload of volume $V$. If the two I/O requests
+start simultaneously, in the previous strategy, and assuming a linear
+interference model, both applications would use $V*2/\bandtotal$ time
+to complete their I/O. In the \fifoblock strategy, the first application
+(as determined by the queue serialization mechanism)
+will take $V/\bandtotal$, while the second application will now wait
+$V/\bandtotal$ before the I/O starts, but then enjoys the full use of
+the I/O system and therefore complete in $V*2/\bandtotal$. In
+average, the duration of the I/O workload has been reduced accross
+applications (altough fairness has been decreased).
+
+\subsection{Non-Blocking FIFO I/O Scheduling}
+
+One of the major costs incurred stems from the fact that the I/O are
+blocking. When considering normal application I/O, it is often
+possible for the application programmer to refactor his code in order
+to enable non-blocking I/O operation whose cost can then be
+overlapped by other computing activities (although possibly less so
+for initial and final input and output). In stark contrast,
+checkpointing I/O workload is very time sensitive by nature.
+Most commonly used types of checkpoints coordinate the
+issuance of checkpoints from all processes of the application; when
+that consistent global state has been established, the I/O operations
+are initiated and no further application progress is possible until
+it has completed. There are however techniques that exchange memory,
+or the availability of a scratch space on the compute nodes (like a
+local SSD drive used as a scratch buffer) that permit making the
+checkpoint non-blocking. In the \fifononblock algorithm, the first
+requesting application is still given full priority, however, unlike
+in the previous algorithm, the cost of queueing the application is
+greatly reduced and independent of the interference pattern, as we
+consider that the application or the checkpointing system have been
+modified to perform non-blocking, copy-on-write, or copy-to-scratchpad
+mechanism.
+
+\subsection{Least-waste algorithm}
+
 
 \subsubsection{Strategy}
 
@@ -130,19 +168,15 @@ $$\wap{i} = \sum_{A_{j} \in \Catiocat, j\neq i} \wapp{i}{j} + \sum_{A_{j} \in \C
 We obtain
 \begin{equation}
 \label{eq.heuristicpart1}
-\begin{array}{ll}
- \wap{i} = & v_{i} \times \left( \sum_{1 \leq j \leq r, j\neq i} q_{j} (d_{j} + v_{i}) \right.\\
- & + \left. \sum_{r+1 \leq j \leq r+s}   \frac{q^{2}_{j}}{\muind} (R_{j} + d_{j} + \frac{v_{i}}{2}) \right)
- \end{array}
+ \wap{i} = v_{i} \times \left( \sum_{1 \leq j \leq r, j\neq i} q_{j} (d_{j} + v_{i})
+ + \sum_{r+1 \leq j \leq r+s}   \frac{q^{2}_{j}}{\muind} (R_{j} + d_{j} + \frac{v_{i}}{2}) \right)
 \end{equation}
 
  Assume now that the selected application $A_{i} \in \Catckptcat$. Then  $A_{i}$ will use the I/O resource for $C_{i}$ seconds instead of $v_{i}$ seconds for $A_{i} \in \Catiocat$. We directly obtain the counterpart of Equation~\eqref{eq.heuristicpart1} for its waste $\wap{i}$:
  \begin{equation}
   \label{eq.heuristicpart2}
-\begin{array}{ll}
- \wap{i} = &  C_{i} \times \left( \sum_{1 \leq j \leq r} q_{j} (d_{j} + C_{i}) \right.\\
- & + \left.  + \sum_{r+1 \leq j \leq r+s, j\neq i}   \frac{q^{2}_{j}}{\muind} (R_{j} + d_{j} + \frac{C_{i}}{2}) \right)
-  \end{array}
+ \wap{i} = C_{i} \times \left( \sum_{1 \leq j \leq r} q_{j} (d_{j} + C_{i})
+ + \sum_{r+1 \leq j \leq r+s, j\neq i}   \frac{q^{2}_{j}}{\muind} (R_{j} + d_{j} + \frac{C_{i}}{2}) \right)
 \end{equation}
 
  Finally, we select the application $A_{i} \in \Catiocat \cup \Catckptcat$ whose waste
