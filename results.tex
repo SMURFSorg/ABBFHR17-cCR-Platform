@@ -1,14 +1,16 @@
 \section{Results}\label{sec:results}
 % Primary: Thomas & all
 
-\subsection{LANL APEX Simulation Workflows on Celio}
+\subsection{LANL APEX Simulation Workflows on Cielo}
 
 We consider the workload from LANL found in the APEX Workflows
 report~\cite{apex} that consists of four simulation applications
 classes: EAP, LAP, Silverton and VPIC. The main characteristics of
 these classes are reported in Table~\ref{table:lanl}. We simulate the
-behavior of these applications over the Celio Platform. \todo{Describe
-  Celio here}
+behavior of these applications over the Cielo Platform. Cielo is a
+1.37 petaflops capability system installed in 2010-2011 at the Los
+Alamos National Laboratory, with 143,104 cores, 286 TB of main memory,
+and a paralell filesystem of 160GB/s.
 
 \begin{table}
 \begin{tabular}{|l|c|c|c|c|}
@@ -56,13 +58,13 @@ the point in the middle the mean value.
     \includegraphics[width=\linewidth]{sim/figures/synthetic-01hMTBF-waste-celio.pdf}
   \end{center}
   \caption{Waste ratio as a function of the system bandwidth for the
-    seven I/O and Checkpointing scheduling strategies, and the Celio
-    workload \label{fig:celio-1hmtbf}}
+    seven I/O and Checkpointing scheduling strategies, and the Cielo
+    workload \label{fig:cielo-1hmtbf}}
 \end{figure}
 
 First, we explore the performance of each approach under heavy risks
-of failures. Figure~\ref{fig:celio-1hmtbf} represents the waste ratio
-on Celio, assuming the MTBF of the system was 1h. We vary the
+of failures. Figure~\ref{fig:cielo-1hmtbf} represents the waste ratio
+on Cielo, assuming the MTBF of the system was 1h. We vary the
 filesystem bandwidth from 40 GB/s to 160GB/s in order to evaluate the
 impact of this parameter. We observe 3 classes of behavior: \propfixed
 and \bfifofixed exhibit a waste ratio that decrease as the bandwidth
@@ -103,17 +105,17 @@ experienced a significantly higher waste.
     \includegraphics[width=\linewidth]{sim/figures/synthetic-040gbs-waste-celio.pdf}
   \end{center}
   \caption{Waste ratio as a function of the system MTBF for the
-    seven I/O and Checkpointing scheduling strategies, and the Celio
-    workload \label{fig:celio-40gbs}}
+    seven I/O and Checkpointing scheduling strategies, and the Cielo
+    workload \label{fig:cielo-40gbs}}
 \end{figure}
 
 Second, we explore the performance of each approach under low
 bandwidth (and thus high risk of
-interference). Figure~\ref{fig:celio-40gbs} represents the waste ratio
-on Celio, assuming the aggregated filesystem bandwidth of the system
+interference). Figure~\ref{fig:cielo-40gbs} represents the waste ratio
+on Cielo, assuming the aggregated filesystem bandwidth of the system
 was 40GB/s. We vary the system MTBF from 1h (2 years of node MTBF) to
 24h (48 years of node MTBF) in order to evaluate the impact of this
-parameter. Similarly to Figure~\ref{fig:celio-1hmtbf}, we observe 3
+parameter. Similarly to Figure~\ref{fig:cielo-1hmtbf}, we observe 3
 classes of behavior: \propfixed and \bfifofixed exhibit a waste ratio
 that remains constant around 80\% for all values of the MTBF. These
 appraoch are critically dependent on the filesystem bandwidth, and a
