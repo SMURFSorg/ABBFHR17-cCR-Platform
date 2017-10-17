@@ -1,10 +1,7 @@
 \section{I/O Scheduling Algorithms}\label{sec:algorithms}
 % Aurelien & George
-\begin{comment}
-  \begin{itemize}
-    \end{itemize}
-  \end{itemize}
-\end{comment}
+
+%TODO: general: use same notations as in model for C[i] etc.
 
 In this section, we present the algorithms used to schedule applications
 and I/O workload in order to alleviate the effect of concurrent access
@@ -34,16 +31,30 @@ have to consider.
 
 \subsection{Type of I/O Workloads and Checkpointing Policy}
 
-Checkpointing can be a major source of I/O activities. However,
-unlike application I/O, the checkpointing volume and intensity is
-dependent upon multiple parameters, that also relate to the platform
-parameters.
-
-%TODO: Daly vs 1h fixed; explain how we select I/O vs CKPT I/O
-%\item For coherence, we use the same policy for input I/O, output I/O and checkpoint operations
-\todo[inline]{we may want to separate Input+recovery from output+checkpoint (bidirectional channels)}
-\todo[inline]{answer: we could but not sure it is 100\% independent; and it would complicate things without changing the story.}
-
+Both applications and checkpointing generate I/O requests. I/O workload
+are all scheduled using the same algorighm wether they
+are generated from an application I/O request or from a Checkpoint
+request. Note however that unlike application I/O, the checkpointing
+volume and intensity is dependent upon application external parameters.
+Some applications
+control their own checkpointing completely, and decide to checkpoint at
+fixed time steps or application defined time interval. However,
+Daly et al.~cite{daly} devised a formula to compute the optimal
+checkpoint period, $T=\sqrt(2 C \mu)$, where $C$ is the duration of the
+checkpoint transfer, and $\mu$ is the reliability of the platform.
+The parameters in this formula are dependent upon application features
+(the size of the checkpointed dataset) and platform values (the reliability
+of the system and the I/O bandwidth). In a system where interference
+can happen (from competing application I/O or checkpoints), determining
+the appropriate checkpointing period can be challenging, as the value of
+$C$ now depends on how much interference happen, on average. Similarly,
+in our algorithms, we will sometime postpone or delay the commit of
+a checkpoint to decrease interference, which entails that respecting
+exactly the Daly checkpointing period is not always possible.
+%TODO: expand on that
+%TODO: do we want to talk about that?
+%  {we may want to separate Input+recovery from output+checkpoint (bidirectional channels)}
+%  {answer: we could but not sure it is 100\% independent; and it would complicate things without changing the story.}
 
 \subsection{Non-cooperative I/O Scheduling}
 
@@ -60,6 +71,18 @@ observe a linear decrease in its own bandwidth. As the application is
 blocking on the completion of its I/O operations before it can continue,
 that decrease in observed bandwidth leads to a proportionate increase in
 I/O time that must be accounted as interference generated waste.
+
+In this scheduling, checkpoints are taken at exaclty the provided
+period, either a fixed period (later refered to as \propfixed), or at
+the Daly optimal period (\propdaly).
+The next checkpoint is requested as soon as the application has elapsed
+the checkpoint period, regardless of the actual time spent
+producing work during the period (\eg when interferences swell the
+checkpoint duration and thereby reduce effective work). While this is
+resulting in overcheckpointing with regards to the effective (\ie observed
+at runtime) value of $C$, this is consistent with the idea of a
+strategy that is applied blindly with respect to issues stemming from
+I/O resource sharing and interferences.
 
 \subsection{Blocking FIFO I/O Scheduling}
 
@@ -83,6 +106,8 @@ the I/O system and therefore still completes in $V*2/\bandtotal$. Thanks
 to reducing I/O interferences, the average completion time of the I/O
 has been reduced for the applications (altough fairness has been decreased).
 
+%TODO: something about bfifofixed and bfifodaly
+
 \subsection{Non-Blocking FIFO I/O Scheduling}
 
 In the previous strategy, the cost of I/O interferences has been
@@ -105,6 +130,8 @@ When the application finaly gets the token, the previously scratch-space
 stored checkpoint is transfered to the PFS without interference.
 %TODO: something about replacing with last ckpt if token doesn't come in fast enough
 
+%TODO: something about fifofixed and fifodaly if needed
+
 \subsection{Least-waste algorithm}
 
 The \leastwaste algorithm further refines on the \fifononblock algorithm
@@ -116,7 +143,7 @@ available information about the system status.
 
 
 
-\subsubsection{Strategy}
+
 
 \begin{itemize}
   \item We always use the blocking strategy but not the FCFS policy.
