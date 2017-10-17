@@ -84,6 +84,8 @@ PDF_EPS_FILES	= $(EPS_FILES:.eps=.pdf)
 
 pdf: $(MAIN_PDF)
 ps: $(MAIN_PS) 
+rubber: $(wildcard *.tex *.bib figures/*.pdf)
+	rubber -Wmisc -Wrefs -d ipdps18
 
 #
 # Make the dependencies so that things build when they need to
