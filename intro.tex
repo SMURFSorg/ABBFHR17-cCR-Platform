@@ -22,6 +22,7 @@ stored checkpoint is retrieved and used to restart the application from the
 intermediate point captured by the checkpoint. Typically, concurrently executing
 applications independently (non-cooperatively) decide when to take their own
 checkpoints.
+\todo[inline]{What if they use a pro-rata of the I/O bandwidth?}
 
 There are two widely-used, non-cooperative approaches to determine when an
 application should \emph{commit} a checkpoint: (i) using a fixed checkpoint period
