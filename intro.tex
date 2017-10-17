@@ -1,10 +1,6 @@
 \section{Introduction}
 \label{sec:intro}
 % Primary: George & Dorian
-\todo[inline]{DA: Resolve authorship order; UTK should decide.}
-
-\todo[inline]{kbf: What is with this arcane build .. rubbar or latexmk makes
-much more sense and are easy to install ... we are computer people ...}
 
 %space sharing but not quite
 \emph{Space-sharing} high-performance computing (HPC) platforms for the concurrent
@@ -25,7 +21,6 @@ stored checkpoint is retrieved and used to restart the application from the
 intermediate point captured by the checkpoint. Typically, concurrently executing
 applications independently (non-cooperatively) decide when to take their own
 checkpoints.
-\todo[inline]{What if they use a pro-rata of the I/O bandwidth?}
 
 There are two widely-used, non-cooperative approaches to determine when an
 application should \emph{commit} a checkpoint: (i) using a fixed checkpoint period
@@ -75,6 +70,43 @@ scheduling algorithm provides an optimal checkpoint process that maximizes platf
 throughput. This cooperative checkpoint process is calculated such that there is no
 I/O interference and minimal re-work to be done when failures occur.
 
-The main contributions of the paper are: ...
+The main contributions of the paper are to provide a model allowing to quantify
+the I/O interferences for applications sharing a common underlying I/O
+subsystem, and to estimate the costs on potential scientific throughput (thought
+a steady-state analysis as well as through simulations) of different I/O-aware
+scheduling strategies. The scheduling strategies included in this study cover a
+large range of I/O behaviors, going from non-cooperative algorithms, as those
+currently deployed on most large-scale platforms, to one that take advantage of
+application knowledge to minimize the total system waste by scheduling the
+application with the most critical I/O needs.
+% - a model to predict the shared I/O impact on multiple applications scenarios
+% - I/O scheduling algorithms for non-cooperative application scheduling
+%   - non-cooperative I/O scheduling: apps are selected to fill the gaps based on processor count (traditional approach)
+%   - blocking FIFO I/O scheduling: favor one of the I/O application
+%   - non-blocking FIFO I/O scheduling: same as above but the cost of the queueing the app is now independent of the interference pattern
+%   - least-waste algorithm: select the app that will minimize the system waste (I/O or C/R candidate)
+% - steady state analysis
+% - simulation
+% - results
 
-The rest of the paper is organized as follows ...
+The rest of the paper is organized as follows. The model assumed by our study is
+described in  Section~\ref{sec:model}, followed, in
+Section~\ref{sec:algorithms}, by an exhaustive description of the different
+scheduling strategies under consideration. The Section~\ref{sec:lowerbound}
+provide a theoretical analysis of the model under a steady-state scenario, and
+provides a necessary condition to reach a lower bound of the waste. The
+Section~\ref{sec:simulator} presents the discrete event simulator used to
+quantitatively compare the different scheduling strategies using a well-defined
+set of applications from LANL. Section~\ref{sec:results} presents the results of
+the simulation, on current systems, and provide hints of the necessary I/O
+bandwidth on prospective systems. The paper completes by describing a set of
+related works in Section~\ref{sec:related}, followed in
+Section~\ref{sec:conclusion} by a conclusion.
+
+% - Section~\ref{sec:model} describe the scenario under investigation
+% - Section~\ref{sec:algorithms} describe the different I/O scheduling algorithms that we plan to analyze, including one that is highly related to the default scheduling on most HPC platforms
+% - Section~\ref{sec:lowerbound} describe a theoretical scenario that allow us to derive the lower-bound
+% - Section~\ref{sec:simulator} describe the simulator used to validate the results
+% - Section~\ref{sec:results} present the results
+% - Section~\ref{sec:related} depicts the related work field
+% - Section~\ref{sec:conclusion} conclude

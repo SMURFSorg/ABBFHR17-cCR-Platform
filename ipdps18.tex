@@ -56,10 +56,30 @@
 \newcommand{\Catiocat}{\mathcal{C}_{IO}\xspace}
 \newcommand{\Catckptcat}{\mathcal{C}_{Ckpt}\xspace}
 
-\newcommand{\nocoop}{\textsc{Non-Cooperative Checkpointing}\xspace}
-\newcommand{\fifoblock}{\textsc{FIFO-Blocking Checkpointing}\xspace}
-\newcommand{\fifononblock}{\textsc{FIFO-NonBlocking Checkpointing}\xspace}
-\newcommand{\leastwaste}{\textsc{Least-waste Checkpointing}\xspace}
+\newcommand{\nocoop}{\emph{Oblivious}\xspace}
+\newcommand{\fifoblock}{\emph{Ordered}\xspace}
+\newcommand{\fifononblock}{\emph{Ordered-NB}\xspace}
+\newcommand{\leastwaste}{\emph{Least-Waste}\xspace}
+
+\def\propfixedlong{\nocoop, Fixed checkpointing period (1h)\xspace}
+\def\propfixed{\nocoop-Fixed\xspace}
+\def\propdalylong{\nocoop, Daly checkpointing period\xspace}
+\def\propdaly{\nocoop-Daly\xspace}
+
+\def\bfifofixedlong{\fifoblock, Fixed checkpointing period (1h)\xspace}
+\def\bfifofixed{\fifoblock-Fixed\xspace}
+\def\bfifodalylong{\fifoblock, Daly checkpointing period\xspace}
+\def\bfifodaly{\fifoblock-Daly\xspace}
+
+\def\fifofixedlong{\fifononblock, Fixed checkpointing period (1)\xspace}
+\def\fifofixed{\fifononblock-Fixed\xspace}
+\def\fifodalylong{\fifononblock, Daly checkpointing period\xspace}
+\def\fifodaly{\fifononblock-Daly\xspace}
+
+\def\cooperativelong{Cooperative \leastwaste Scheduling of Checkpoints and I/O\xspace}
+\def\cooperative{\leastwaste\xspace}
+
+
 
 \title{Optimal Cooperative Checkpointing for Shared High-Performance Computing Platforms
 \thanks{NSF Award \#1564133 Toward Extreme Scale Fault-Tolerance: Exploration Methods, Comparative Studies and Decision Processes.}
@@ -110,24 +130,6 @@ The University of Tennessee\\
 Knoxville, TN, USA\\
 \email{bosilca@icl.utk.edu}}
 }
-
-\def\propfixedlong{Proportional Interference, Fixed checkpointing period (1h)\xspace}
-\def\propfixed{PropFixed\xspace}
-\def\propdalylong{Proportional Interference, Daly checkpointing period\xspace}
-\def\propdaly{Prop\xspace}
-
-\def\bfifofixedlong{Blocking FIFO Interference, Fixed checkpointing period (1h)\xspace}
-\def\bfifofixed{BlockingFIFOFixed\xspace}
-\def\bfifodalylong{Blocking FIFO Interference, Daly checkpointing period\xspace}
-\def\bfifodaly{BlockingFIFO\xspace}
-
-\def\fifofixedlong{FIFO Interference, Fixed checkpointing period (1)\xspace}
-\def\fifofixed{FIFOFixed\xspace}
-\def\fifodalylong{FIFO Interference, Daly checkpointing period\xspace}
-\def\fifodaly{FIFO\xspace}
-
-\def\cooperativelong{Cooperative Scheduling of Checkpoints and I/O\xspace}
-\def\cooperative{Coopertative\xspace}
 
 \begin{document}
 
