@@ -14,13 +14,13 @@ time while other applications requesting I/O are blocked until their
 turn (FIFO) comes. The third algorithm (\fifononblock) is similar, except
 that applications that are waiting for the checkpointing token
 continue computing until their turn comes; note that unlike the
-non-cooperative and blocking algorithms, this optimization requires
+blocking algorithms, this optimization requires
 application code refactoring. Last, we propose an heuristic
 (\leastwaste) that improves on \fifononblock by giving the I/O token
 to the application that inflicts the least overhead on the system. Before
 presenting the algorithms, we further discuss the interactions between
-the checkpointing policy and the type of I/O workloads the algorithms
-have to consider.
+the checkpointing policy, the I/O workloads, the interferences that the
+algorithms have to consider.
 
 %Instead of following a FIFO order to select the next I/O application,
 %for each requesting application, the heuristic computes the prospective
@@ -31,8 +31,8 @@ have to consider.
 
 \subsection{Type of I/O Workloads and Checkpointing Policy}
 
-Both applications and checkpointing generate I/O requests. I/O workload
-are all scheduled using the same algorighm wether they
+Both applications and checkpointing generate I/O requests. I/O requests
+are all scheduled using the same algorithm wether they
 are generated from an application I/O request or from a Checkpoint
 request. Note however that unlike application I/O, the checkpointing
 volume and intensity is dependent upon application external parameters.
@@ -40,73 +40,106 @@ Some applications
 control their own checkpointing completely, and decide to checkpoint at
 fixed time steps or application defined time interval. However,
 Daly et al.~cite{daly} devised a formula to compute the optimal
-checkpoint period, $T=\sqrt(2 C \mu)$, where $C$ is the duration of the
+checkpoint period, $T=\sqrt{2 C \mu}$, where $C$ is the duration of the
 checkpoint transfer, and $\mu$ is the reliability of the platform.
 The parameters in this formula are dependent upon application features
 (the size of the checkpointed dataset) and platform values (the reliability
-of the system and the I/O bandwidth). In a system where interference
+of the system and the I/O bandwidth).
+
+In traditional periodic checkpointing, for an application $\app{i}$,
+every time a checkpoint completes, the next checkpoint is scheduled to
+happen at date $\period{i}-\ckpt{i}$ (and the first checkpoint is
+set at date $\period{i}$). $\period{i}$ can be 1) a \emph{fixed} period,
+either hardcoded in the application, or set as an arbitrary platform
+global setting, or 2) the \emph{Daly} optimal period for the
+application on that platform. Note that in a system where interference
 can happen (from competing application I/O or checkpoints), determining
-the appropriate checkpointing period can be challenging, as the value of
-$C$ now depends on how much interference happen, on average. Similarly,
-in our algorithms, we will sometime postpone or delay the commit of
-a checkpoint to decrease interference, which entails that respecting
-exactly the Daly checkpointing period is not always possible.
-%TODO: expand on that
-%TODO: do we want to talk about that?
+the appropriate checkpointing period can be challenging. The observed
+duration of checkpoints varies depending on how much interference happen,
+on average. Similarly, when employing I/O scheduling algorithms,
+checkpoints may include wait time delay or be postponed to decrease
+interference. The traditional strategy of rearming the next checkpoint at
+$\period{i}-\ckpt{i}$ yields the desired checkpointing period $\period{i}$
+only in interference free scenarios: when interferences (or scheduling
+introduced delays) swell the checkpoint duration to $C_{swollen}$, the effective
+period differs from the desired period by the difference $C_{swollen}-\ckpt{i}$.
+The details of how each algorithm accommodates for this discrepancy will
+be discussed later.
+
+%TODO: do we want to talk about that, if only to say we don't care?
 %  {we may want to separate Input+recovery from output+checkpoint (bidirectional channels)}
 %  {answer: we could but not sure it is 100\% independent; and it would complicate things without changing the story.}
 
 \subsection{Non-cooperative I/O Scheduling}
 
-In the non-cooperative I/O scheduling \nocoop, applications are selected to
-fill-up the system based on processor count availability. The I/O
+In the non-cooperative I/O scheduling \nocoop, applications
+fill-up the system based on processor count availability, and their I/O
 workload (including checkpointing activities) are not organized by any
-comprehensive system. Instead, it is assumed that concurrent access
+comprehensive system. Instead, applications use the PFS assuming they
+are the sole user and do not modify their access pattern to accommodate
+for possible interferences. In these conditions, it is assumed that
+concurrent access
 to I/O resources will cause a decrease in the application observed
 bandwidth for I/O operations. One can imagine multiple cost functions
 for the effect of that sharing; When the filesystem is scalable, the
 overall throughput of the platform should be maintained when multiple
-applications concurently access, and each application should thereby
+applications concurrently access, and each application should thereby
 observe a linear decrease in its own bandwidth. As the application is
 blocking on the completion of its I/O operations before it can continue,
 that decrease in observed bandwidth leads to a proportionate increase in
 I/O time that must be accounted as interference generated waste.
 
-In this scheduling, checkpoints are taken at exaclty the provided
-period, either a fixed period (later refered to as \propfixed), or at
-the Daly optimal period (\propdaly).
-The next checkpoint is requested as soon as the application has elapsed
-the checkpoint period, regardless of the actual time spent
-producing work during the period (\eg when interferences swell the
-checkpoint duration and thereby reduce effective work). While this is
-resulting in overcheckpointing with regards to the effective (\ie observed
-at runtime) value of $C$, this is consistent with the idea of a
-strategy that is applied blindly with respect to issues stemming from
-I/O resource sharing and interferences.
+Checkpoints are scheduled accordingly to the normal rearming strategy
+(\ie after each checkpoint completion, the next checkpoint is scheduled
+to start at $\period{i}-\ckpt{i}$). Given that checkpoints may actually
+last longer than $\ckpt{i}$, the resultant period may be larger than
+$\period{i}$. This is however consistent with the concept of a
+checkpointing strategy that is applied blindly, without consideration
+for issues stemming from I/O resource sharing and interferences.
+
+In this algorithm, we will consider two variants where checkpoints are
+tentatively taken at 1) fixed frequency (\propfixed), or 2) at the
+Daly frequency (\propdaly).
 
 \subsection{Blocking FIFO I/O Scheduling}
 
-A simple optimization to the aforementionned scheme is to favor one of
+A simple optimization to the aforementioned scheme is to favor one of
 the applications' I/O request over all others. While the overall throughput
 may remain unchanged (given an efficient PFS implementation), the favored
-application completes its I/O workload faster (\ie at nominal speed).
-Applications are favored in the order of their I/O requests, \ie
-as soon as an application starts blocking on an I/O operation it will
-take its place in the back of a FIFO queue (\fifoblock).
+application completes its I/O workload faster (\ie at nominal speed
+$\ckpt{i}$ for an application of class $\app{i}$).
+Applications are selected to perform I/O in the order of their requests,
+\ie as soon as an application starts blocking on an I/O operation it will
+take a place in the back of a FIFO queue. When the currently
+active application completes its I/O, the next application in  the
+queue starts.
+(\fifoblock).
 
 The advantage can be trivially seen in a simple workload with two
-applications and assuming a favorable linear interference model.
+applications (assuming a favorable linear interference model).
 If the two application start, simultaneously, an I/O requesting the
-transer of a similar volume $V$ of data, in the \nocoop strategy,
-both applications take $V*2/\bandtotal$ time to complete their I/O.
-In the \fifoblock strategy, the first (as serialized when inserting in
-the FIFO) application takes $V/\bandtotal$, while the second application
-waits $V/\bandtotal$ before the I/O starts, but then enjoys the full use of
-the I/O system and therefore still completes in $V*2/\bandtotal$. Thanks
+transfer of a similar volume $V$ of data, in the \nocoop strategy,
+both applications take $2 \times \frac{V}{\bandavail}$ time to complete
+their I/O. In the \fifoblock strategy, the first (as serialized when
+inserting in the FIFO) application takes only $\frac{V}{\bandavail}$
+as it enjoys exclusive access to the PFS, while the second application
+waits $\frac{V}{\bandavail}$ before its own I/O starts, but then in turn
+also complete at nominal speed, and therefore still completes in
+$2 \times \frac{V}{\bandavail}$. Thanks
 to reducing I/O interferences, the average completion time of the I/O
-has been reduced for the applications (altough fairness has been decreased).
+has been reduced for the applications (although fairness has been decreased).
 
-%TODO: something about bfifofixed and bfifodaly
+Similarly to the previous strategy, application observed checkpoint
+duration may swell past $\ckpt{i}$, this time not due to interference, but due to
+the time spent waiting for the first place in the I/O scheduling FIFO.
+As we have computed above, although the average $C-\ckpt{i}$
+difference is lower, for one application it is as large as in the
+previous strategy. In any case, again, the checkpointing period will
+be, in average, larger than the desired $\period{i}$ period.
+
+In this algorithm, we will consider two variants where checkpoints are
+tentatively taken at 1) fixed frequency (\bfifofixed), or 2) at the
+Daly frequency (\bfifodaly).
 
 \subsection{Non-Blocking FIFO I/O Scheduling}
 
@@ -114,49 +147,79 @@ In the previous strategy, the cost of I/O interferences has been
 exchanged for idle time when waiting for the I/O token in a blocking
 fashion. If the application programmer can refactor his code in order
 to continue computing while the I/O request is waiting in queue,
-then, it is possile to overlap that idle time with useful computation.
+then, it is possible to overlap that idle time with useful computation.
 While it may sometimes be difficult to overlap initial and final input
-and output, checkpointing I/O workload can be effectively time-shifted.
-Note that in coordinated checkpoints strategies, each individual node
-checkpoint is part of a set forming a coherent restart point for the
-whole application, and the state must be captured precisely at the
-requesting date for the global checkpoint to be correct. However, that
- state can be initially captured by copy-on-write mechanisms, or stored
-in local memory or in compute node-local burst buffers (\eg local SSD
-drives). Although node-local burst buffers do not offer protection
-against faults, they permit offsetting the transfer of the checkpoint
-data to a later date when the I/O token is available to the application.
-When the application finaly gets the token, the previously scratch-space
-stored checkpoint is transfered to the PFS without interference.
-%TODO: something about replacing with last ckpt if token doesn't come in fast enough
+and output, intermediate I/O as well as checkpointing I/O workload can
+be effectively time-shifted.
 
-%TODO: something about fifofixed and fifodaly if needed
+In this algorithm, at the end of the previous checkpoint, a tentative
+date for the next checkpoint is set at $t_{req}=t_{now}+\period{i}-\ckpt{i}$.
+When the application reaches date $t_{req}$, a non-blocking I/O request
+is sent to the scheduler. That request reserves a position in the
+I/O queue. The application keeps computing until the
+scheduler informs the application that the I/O system is exclusively
+available to the application. Then, the application initiates it's
+I/O (checkpointing or otherwise). When the active application completes
+its I/O, the next requesting application (in FIFO order) is in turn
+informed that it is now the active I/O application.
+
+When an application is informed that it can use the I/O system to
+checkpoint, the checkpointing library or application mechanism
+in charge of synchronizing the checkpoints may immediately (or after
+a short synchronization) start producing the checkpoint I/O workload
+(typical for system-based checkpoint),
+or finish the current computing block before allowing the checkpoint
+to proceed (typical for user-level checkpoint). In this work we consider
+that this resynchronization cost is negligible with respect to the
+checkpoint duration. Note that should a failure impact that application,
+it would restart from the date at which the checkpoint was taken, and
+not at $t_{req}$, which is another improvement when compared to
+\fifoblock and \nocoop.
+
+Again, we will consider two variants where checkpoints are
+tentatively taken at 1) fixed frequency (\fifofixed), or 2) at the
+Daly frequency (\fifodaly).
+
+%Aurelien: talked with Thomas and this is not what we want to study here.
+% However, that
+% state can be initially captured by copy-on-write mechanisms, or stored
+% in local memory or in compute node-local burst buffers (\eg local SSD
+% drives). Although node-local burst buffers do not offer protection
+% against faults, they permit offsetting the transfer of the checkpoint
+% data to a later date when the I/O token is available to the application.
+% When the application finaly gets the token, the previously scratch-space
+% stored checkpoint is transfered to the PFS without interference.
+
+%NOTODO: something about replacing with last ckpt if token doesn't come in fast enough;
+% there's something that doesn't work with the T-C after C depiction: we would rollback unbounded amounts now.
+% that's because we do not consider whats commented down here with local scratchpads
+% the checkpoint is taken at a date t_c posterior to t_req, and we will restart at t_c, not t_req.
 
 \subsection{Least-waste algorithm}
 
 The \leastwaste algorithm further refines on the \fifononblock algorithm
 by giving the I/O token to the application that generates the least
 waste, rather than simply in requesting order. Note that given the time
-dependent nature of that descision, the selection may
+dependent nature of that decision, the selection may
 not be the global optimum, but only an approximation given currently
 available information about the system status.
 
-
-
-
+In this algorithm, whenever an I/O operation completes at time $t$,
+we consider a pool of application candidates from two different categories:
 
 \begin{itemize}
-  \item We always use the blocking strategy but not the FCFS policy.
-  \item Instead, whenever an I/O operation completes at time $t$, we have a pool of application candidates:
-  \begin{itemize}
-   \item Category \IOcat $\Catiocat$: Applications $A_{i}$, $1\leq i \leq r$, which need to do input I/O, output I/O or recovery
-  \item Category \Ckptcat $\Catckptcat$: Applications $A_{i}$, $r+1\leq i \leq r+s$,
-  whose last checkpoint took place no later than time $t - \period{Daly}(A_{i})$, where $\period{Daly}(A_{i})$ is the Young/Daly period for $A_{i}$.
-  \end{itemize}
-  \item To decide which application is given priority among all $r+s$ candidates applications in $\Catiocat \cup \Catckptcat$, we select the one that minimizes the expected total waste induced by this choice, as explained below.
-  \end{itemize}
+ \item Category \IOcat $\Catiocat$: Applications $A_{i}$, $1\leq i \leq r$, which
+ need to do input I/O, output I/O or recovery
+ \item Category \Ckptcat $\Catckptcat$: Applications $A_{i}$, $r+1\leq i \leq r+s$,
+ whose last checkpoint took place no later than time $t - \period{Daly}(A_{i})$, where
+ $\period{Daly}(A_{i})$ is the Young/Daly period for $A_{i}$.
+\end{itemize}
 
- \subsubsection{Selection among candidate applications}
+To decide which application is given priority among all $r+s$ candidates
+applications in $\Catiocat \cup \Catckptcat$, we select the one that
+minimizes the expected total waste induced by this choice, as explained below.
+
+\subsubsection{Selection among candidate applications}
 
 At the current time-step, there are $r+s$ candidates in $\Catiocat \cup \Catckptcat$:
 \begin{itemize}
@@ -166,7 +229,7 @@ At the current time-step, there are $r+s$ candidates in $\Catiocat \cup \Catckpt
   and enrolls $q_{i}$ processors. At the current time-step, $A_{i}$ took its last checkpoint
   $d_{i}$ seconds ago, and keeps executing until it can checkpoint. For the record, we must have $d_{i} \geq \period{Daly}(A_{i})$
   since $A_{i}$ is a candidate.
-  \end{itemize}
+\end{itemize}
 
 If we select application $A_{i}$ to perform I/O,  the expected waste $\wap{i}$ incurred
 to the other $r+s-1$ candidate applications in  $\Catiocat \cup \Catckptcat$ is computed as follows.
@@ -175,7 +238,7 @@ Assume first that $A_{i} \in \Catiocat$. Then  $A_{i}$ will use the I/O resource
   \item Every other application $A_{j} \in \Catiocat$ will stay idle for $v_{i}$ additional seconds,
   hence its waste $\wapp{i}{j}$ is
   $$\wapp{i}{j} = q_{j} (d_{j} + v_{i})$$
-  since there are $q_{j}$ processors enrolled in $A_{j}$ and idle for $d_{j} + v_{i}$ seconds. Note that for $A_{j} \in \Catiocat$, the waste $\wapp{i}{j}$ is deterministic.
+  since there are $q_{j}$ processors enrolled in $A_{j}$ that idle for $d_{j} + v_{i}$ seconds. Note that for $A_{j} \in \Catiocat$, the waste $\wapp{i}{j}$ is deterministic.
   \item Every application $A_{j} \in \Catckptcat$ will continue executing for $v_{i}$ additional seconds, hence will be exposed to the risk of a failure that will strike within $v_{i}/2$ seconds on average. The probability of such a failure is $v_{i}/\mu_{j}$, where $\mu_{j}$ is the
   MTBF of application $A_{j}$. Since $A_{j}$ enrolls $q_{j}$ processors, we have $\mu_{j} = \muind/q_{j}$, where $\muind$ is the individual MTBF per processor. With this probability,
   the $q_{j}$ processors will have to recover and re-execute $d_{j} + v_{i}/2$ seconds of work,
@@ -204,34 +267,3 @@ We obtain
 
  Finally, we select the application $A_{i} \in \Catiocat \cup \Catckptcat$ whose waste
  $\wap{i}$ is minimal.
-
-
-%\subsubsection{Selection in category \IOcat}
-%\label{sec.iocat}
-%
-%  Let $(A_{i})_{1 \leq i \leq m}$ be the application candidates of category \IOcat.
-%  Application $A_{i}$ has an I/O request of volume $v_{i}$ and enrolls $q_{i}$ processors.
-%  Choosing $A_{i}$ makes every other candidate application $A_{j}$, $j \neq i$, keep $q_{j}$ processors idle during a time
-%  proportional to $v_{i}$, so we choose $i$ that minimizes
-%  $$(\sum_{j \neq i} q_{j}) \times v_{i}$$
-%
-%\subsubsection{Selection in category \Ckptcat}
-%\label{sec.ckptcat}
-%
-%Let $(A_{i})_{1 \leq i \leq m}$ be the application candidates of category \Ckptcat.
-%  Application $A_{i}$ has a checkpoint of duration $C_{i}$ seconds,
-%  and enrolls $q_{i}$ processors. At the current time-step, $A_{i}$ took its last checkpoint
-%  $d_{i}$ seconds ago (and for the record, we must have $d_{i} \geq \period{Daly}(A_{i})$
-%  since $A_{i}$ is a candidate).
-%   Choosing $A_{i}$ puts every other candidate application $A_{j}$, $j \neq i$,
-%   at the risk of a failure that will strike within $C_{i}/2$ seconds on average.
-%   Let $\bar{Q}_{i} = \sum_{j \neq i}q_{j}$ be the total number of
-%   processors belonging to applications that want to checkpoint.
-%   With probability $C_{i}/(\muind/\bar{Q}_{i})$ there will be a fault on one of these
-%   processors. Here $\muind$ is the individual MTBF, hence we divide it by $\bar{Q}_{i}$
-%   to get the MTBF over all processors at risk.
-%
-%   With probability $q_{j}/\bar{Q}_{i}$ the fault will strike application $A_{j}$ and incur a waste of duration $d_{j} + C_{i}/2$ for each of its $q_{j}$ processors. Altogether, the
-%   expected amount of wasted time is
-%   $$\frac{C_{i}}{(\muind/\bar{Q}_{i}) } \times \sum_{j \neq i}\frac{q_{j}}{\bar{Q}_{i}}(d_{j}+ \frac{C_{i}}{2})q_{j} = \frac{C_{i}}{\muind} \sum_{j \neq i} q_{j}^{2}(d_{j}+ \frac{C_{i}}{2})$$
-%    and we choose $i$ that minimizes the above quantity.
