@@ -1,54 +1,49 @@
 \section{I/O Scheduling Algorithms}\label{sec:algorithms}
 % Aurelien & George
-\dca{I think this section currently conflates general concepts with specific
-  algorithmic details. Whenever we believe the content is close to fixed, I'd like to
-  take a pass at refactoring the discussion.}
-
-  %TODO: again this is part of the model
-  %TODO: looks like I'm not using the right terminology for blocking/non-blocking/sharing...
-  \subsection{Dealing with interference for non-cooperative application scheduling}
+\begin{comment}
   \begin{itemize}
-    \item For coherence, we use the same policy for input I/O, output I/O and checkpoint operations \todo[inline]{we may want to separate Input+recovery from output+checkpoint (bidirectional channels)}
-    \todo[inline]{answer: we could but not sure it is 100\% independent; and it would complicate things without changing the story.}
-    \item Blocking: only one application can perform I/O operations at the given time-step.
-    I/O requests are served on a FCFS basis. When an application has requested an I/O
-    operation, it waits idle until being served. \dca{Technically, blocking is
-      cooperative!}
-    \item Sharing: the I/O resource is shared at every time-step to serve all concurrent requests. Sharing is fair, i.e., bandwidth is inversely proportional to number of requests.
-    \item Here is an example:
-    application $A_{1}$ wants to perform five gigabytes of I/O at time $t$,
-    and available bandwidth is
-    $1$ gigabyte per second. If there is no other request, the operation will take five seconds.
-    Now application $A_{2}$ (with same number of processors as $A_{1}$, hence with same assigned bandwidth in the sharing policy) wants to perform two gigabytes of I/O at time $t+1$.
-    \begin{itemize}
-    \item Blocking: $A_{2}$'s operation is delayed until time $t+5$ and will complete at $t+7$.
-    \item Sharing: Instead of taking $2$ seconds, $A_{2}$'s operation will take $4$ seconds, because the bandwidth is shared with $A_{1}$ during its whole transfer. As a results, $A_{2}$'s operation completes at $t+5$ while $A_{1}$'s  operation is slowed down during four units and now completes at $t+7$.
     \end{itemize}
   \end{itemize}
+\end{comment}
 
 In this section, we present the algorithms used to schedule applications
 and I/O workload in order to alleviate the effect of concurrent access
-to I/O resources. The first algorithm (\nocoop) represents the status-quo  in
-which applications are scheduled in a non-cooperative manner, which may
+to I/O resources. The first algorithm (\nocoop) represents the status-quo
+in which applications are scheduled in a non-cooperative manner, which may
 incur interference on I/O resource access and wait time. The second
 algorithm (\fifoblock) inserts some coordination to eliminate interference
 between I/O activities. Only one application performs I/O at any given
-time, other applications are blocked in their
-I/O routines. When the active application finishes its I/O, the head of
-the line application is granted the checkpointing token and can proceed.
-The third algorithm (\fifononblock) is similar, except that
-applications that are waiting for the checkpointing token do not block
-and may continue computing until their turn comes; note that unlike the
-non-cooperative and blocking algorithsm, this optimization requires
-application code refactoring. Last, we propose the an heuristic
-(\leastwaste) that improves on \fifononblock by selecting,
-the application that inflicts the least overhead on the system:
-Instead of following a FIFO order to select the next I/O application,
-for each requesting application, the heuristic computes the prospective
-waste incurred by delaying its I/O (considering checkpoint and
-probabilistic recovery costs, idle time, etc.) when selecting another
-application, and selects the one that minimizes the waste increase
-at the current instant.
+time while other applications requesting I/O are blocked until their
+turn (FIFO) comes. The third algorithm (\fifononblock) is similar, except
+that applications that are waiting for the checkpointing token
+continue computing until their turn comes; note that unlike the
+non-cooperative and blocking algorithms, this optimization requires
+application code refactoring. Last, we propose an heuristic
+(\leastwaste) that improves on \fifononblock by giving the I/O token
+to the application that inflicts the least overhead on the system. Before
+presenting the algorithms, we further discuss the interactions between
+the checkpointing policy and the type of I/O workloads the algorithms
+have to consider.
+
+%Instead of following a FIFO order to select the next I/O application,
+%for each requesting application, the heuristic computes the prospective
+%waste incurred by delaying its I/O (considering checkpoint and
+%probabilistic recovery costs, idle time, etc.) when selecting another
+%application, and selects the one that minimizes the waste increase
+%at the current instant.
+
+\subsection{Type of I/O Workloads and Checkpointing Policy}
+
+Checkpointing can be a major source of I/O activities. However,
+unlike application I/O, the checkpointing volume and intensity is
+dependent upon multiple parameters, that also relate to the platform
+parameters.
+
+%TODO: Daly vs 1h fixed; explain how we select I/O vs CKPT I/O
+%\item For coherence, we use the same policy for input I/O, output I/O and checkpoint operations
+\todo[inline]{we may want to separate Input+recovery from output+checkpoint (bidirectional channels)}
+\todo[inline]{answer: we could but not sure it is 100\% independent; and it would complicate things without changing the story.}
+
 
 \subsection{Non-cooperative I/O Scheduling}
 
