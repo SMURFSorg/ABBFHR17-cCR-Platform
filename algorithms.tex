@@ -1,8 +1,6 @@
 \section{I/O Scheduling Algorithms}\label{sec:algorithms}
 % Aurelien & George
 
-%TODO: general: use same notations as in model for C[i] etc.
-
 In this section, we present the algorithms used to schedule applications
 and I/O workload in order to alleviate the effect of concurrent access
 to I/O resources. The first algorithm (\nocoop) represents the status-quo
@@ -29,7 +27,7 @@ algorithms have to consider.
 %application, and selects the one that minimizes the waste increase
 %at the current instant.
 
-\subsection{Type of I/O Workloads and Checkpointing Policy}
+\subsection{Checkpoint Period and I/O Workload}
 
 Both applications and checkpointing generate I/O requests. I/O requests
 are all scheduled using the same algorithm wether they
@@ -70,7 +68,7 @@ be discussed later.
 %  {we may want to separate Input+recovery from output+checkpoint (bidirectional channels)}
 %  {answer: we could but not sure it is 100\% independent; and it would complicate things without changing the story.}
 
-\subsection{Non-cooperative I/O Scheduling}
+\subsection{Non-cooperative \nocoop I/O Scheduling}
 
 In the non-cooperative I/O scheduling \nocoop, applications
 fill-up the system based on processor count availability, and their I/O
@@ -101,7 +99,7 @@ In this algorithm, we will consider two variants where checkpoints are
 tentatively taken at 1) fixed frequency (\propfixed), or 2) at the
 Daly frequency (\propdaly).
 
-\subsection{Blocking FIFO I/O Scheduling}
+\subsection{Blocking \fifoblock FIFO I/O Scheduling}
 
 A simple optimization to the aforementioned scheme is to favor one of
 the applications' I/O request over all others. While the overall throughput
@@ -141,7 +139,7 @@ In this algorithm, we will consider two variants where checkpoints are
 tentatively taken at 1) fixed frequency (\bfifofixed), or 2) at the
 Daly frequency (\bfifodaly).
 
-\subsection{Non-Blocking FIFO I/O Scheduling}
+\subsection{Non-Blocking \fifononblock FIFO I/O Scheduling}
 
 In the previous strategy, the cost of I/O interferences has been
 exchanged for idle time when waiting for the I/O token in a blocking
@@ -173,8 +171,8 @@ to proceed (typical for user-level checkpoint). In this work we consider
 that this resynchronization cost is negligible with respect to the
 checkpoint duration. Note that should a failure impact that application,
 it would restart from the date at which the checkpoint was taken, and
-not at $t_{req}$, which is another improvement when compared to
-\fifoblock and \nocoop.
+not at $t_{req}$, which is another improvement when compared to the
+\fifoblock and \nocoop algorithms.
 
 Again, we will consider two variants where checkpoints are
 tentatively taken at 1) fixed frequency (\fifofixed), or 2) at the
@@ -195,7 +193,7 @@ Daly frequency (\fifodaly).
 % that's because we do not consider whats commented down here with local scratchpads
 % the checkpoint is taken at a date t_c posterior to t_req, and we will restart at t_c, not t_req.
 
-\subsection{Least-waste algorithm}
+\subsection{Least-waste Algorithm}
 
 The \leastwaste algorithm further refines on the \fifononblock algorithm
 by giving the I/O token to the application that generates the least
@@ -267,3 +265,8 @@ We obtain
 
  Finally, we select the application $A_{i} \in \Catiocat \cup \Catckptcat$ whose waste
  $\wap{i}$ is minimal.
+
+%TODO: rephrase that blurt.
+Because this algorithm is highly dependent upon the Daly approximation to
+estimate the cost of the choices, we will not consider the (suboptimal)
+case where the checkpointing frequency is arbitrarily set.
