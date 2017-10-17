@@ -5,3 +5,6 @@
 *.log
 ipdps18.pdf
 newtake.pdf
+*.fls
+*.fdb_latexmk
+auto/
