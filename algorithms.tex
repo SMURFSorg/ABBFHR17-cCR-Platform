@@ -26,98 +26,99 @@
     \end{itemize}
   \end{itemize}
 
-
-
-
 In this section, we present the algorithms used to schedule applications
 and I/O workload in order to alleviate the effect of concurrent access
 to I/O resources. The first algorithm (\nocoop) represents the status-quo  in
 which applications are scheduled in a non-cooperative manner, which may
 incur interference on I/O resource access and wait time. The second
-algorithm (\fifoblock) inserts some coordination between I/O activities purely at
-the filesystem level. Application that want to checkpoint are considered in
-a FIFO ordering. When an application finishes a checkpoint, the head of
-the line application is granted the checkpointing token and proceed,
-other applications in the queue remain blocked in the checkpointing
-routine. The third algorithm (\fifononblock) is similar, except it assumes
-that burst buffers are available to absorb the temporary influx of
-checkpoint data. In this case, the application blocks for the time it
-takes to stage the checkpoint on the burst buffer, however, the application
-receives full protection from fault only when the checkpoint is fully
-migrated to the PFS. Last, we propose an heuristic (\leastwaste) whose goal is to
-select the application that inflicts the least overhead on the system.
-Each application checkpoints in a non-blocking manner, and instead of
-following a FIFO order to select the next checkpointing application,
-we compute the prospective waste incurred by selecting one of the
-checkpointing applications, and select the best one at that moment. Note
-that given the time dependent nature of that descision, the selection may
-not be the global optimum, but only an approximation given currently
-available information about the system status.
+algorithm (\fifoblock) inserts some coordination to eliminate interference
+between I/O activities. Only one application performs I/O at any given
+time, other applications are blocked in their
+I/O routines. When the active application finishes its I/O, the head of
+the line application is granted the checkpointing token and can proceed.
+The third algorithm (\fifononblock) is similar, except that
+applications that are waiting for the checkpointing token do not block
+and may continue computing until their turn comes; note that unlike the
+non-cooperative and blocking algorithsm, this optimization requires
+application code refactoring. Last, we propose the an heuristic
+(\leastwaste) that improves on \fifononblock by selecting,
+the application that inflicts the least overhead on the system:
+Instead of following a FIFO order to select the next I/O application,
+for each requesting application, the heuristic computes the prospective
+waste incurred by delaying its I/O (considering checkpoint and
+probabilistic recovery costs, idle time, etc.) when selecting another
+application, and selects the one that minimizes the waste increase
+at the current instant.
 
 \subsection{Non-cooperative I/O Scheduling}
 
-In the non-cooperative I/O scheduling, applications are selected to
+In the non-cooperative I/O scheduling \nocoop, applications are selected to
 fill-up the system based on processor count availability. The I/O
 workload (including checkpointing activities) are not organized by any
 comprehensive system. Instead, it is assumed that concurrent access
 to I/O resources will cause a decrease in the application observed
 bandwidth for I/O operations. One can imagine multiple cost functions
 for the effect of that sharing; When the filesystem is scalable, the
-overall throughput of the platform is maintained when multiple applications
-concurently access, and each application observes a linear decrease in
-the per-application bandwidth. As the application is blocking on the
-completion of its I/O operations before it can continue, that decrease
-in observed bandwidth leads to a proportionate increase in I/O time,
-which in turn can generate a great amount of compute waste time
-(where processors are idle waiting on I/O to complete).
+overall throughput of the platform should be maintained when multiple
+applications concurently access, and each application should thereby
+observe a linear decrease in its own bandwidth. As the application is
+blocking on the completion of its I/O operations before it can continue,
+that decrease in observed bandwidth leads to a proportionate increase in
+I/O time that must be accounted as interference generated waste.
 
 \subsection{Blocking FIFO I/O Scheduling}
 
 A simple optimization to the aforementionned scheme is to favor one of
 the applications' I/O request over all others. While the overall throughput
 may remain unchanged (given an efficient PFS implementation), the favored
-application will complete its I/O workload faster (at nominal speed).
-Applications will be favored in the order of their I/O requests, \ie
+application completes its I/O workload faster (\ie at nominal speed).
+Applications are favored in the order of their I/O requests, \ie
 as soon as an application starts blocking on an I/O operation it will
-take its place in the queue.
+take its place in the back of a FIFO queue (\fifoblock).
 
-The advantage can be trivially seen in a simple workload with two applications
-starting an I/O workload of volume $V$. If the two I/O requests
-start simultaneously, in the previous strategy, and assuming a linear
-interference model, both applications would use $V*2/\bandtotal$ time
-to complete their I/O. In the \fifoblock strategy, the first application
-(as determined by the queue serialization mechanism)
-will take $V/\bandtotal$, while the second application will now wait
-$V/\bandtotal$ before the I/O starts, but then enjoys the full use of
-the I/O system and therefore complete in $V*2/\bandtotal$. In
-average, the duration of the I/O workload has been reduced accross
-applications (altough fairness has been decreased).
+The advantage can be trivially seen in a simple workload with two
+applications and assuming a favorable linear interference model.
+If the two application start, simultaneously, an I/O requesting the
+transer of a similar volume $V$ of data, in the \nocoop strategy,
+both applications take $V*2/\bandtotal$ time to complete their I/O.
+In the \fifoblock strategy, the first (as serialized when inserting in
+the FIFO) application takes $V/\bandtotal$, while the second application
+waits $V/\bandtotal$ before the I/O starts, but then enjoys the full use of
+the I/O system and therefore still completes in $V*2/\bandtotal$. Thanks
+to reducing I/O interferences, the average completion time of the I/O
+has been reduced for the applications (altough fairness has been decreased).
 
 \subsection{Non-Blocking FIFO I/O Scheduling}
 
-One of the major costs incurred stems from the fact that the I/O are
-blocking. When considering normal application I/O, it is often
-possible for the application programmer to refactor his code in order
-to enable non-blocking I/O operation whose cost can then be
-overlapped by other computing activities (although possibly less so
-for initial and final input and output). In stark contrast,
-checkpointing I/O workload is very time sensitive by nature.
-Most commonly used types of checkpoints coordinate the
-issuance of checkpoints from all processes of the application; when
-that consistent global state has been established, the I/O operations
-are initiated and no further application progress is possible until
-it has completed. There are however techniques that exchange memory,
-or the availability of a scratch space on the compute nodes (like a
-local SSD drive used as a scratch buffer) that permit making the
-checkpoint non-blocking. In the \fifononblock algorithm, the first
-requesting application is still given full priority, however, unlike
-in the previous algorithm, the cost of queueing the application is
-greatly reduced and independent of the interference pattern, as we
-consider that the application or the checkpointing system have been
-modified to perform non-blocking, copy-on-write, or copy-to-scratchpad
-mechanism.
+In the previous strategy, the cost of I/O interferences has been
+exchanged for idle time when waiting for the I/O token in a blocking
+fashion. If the application programmer can refactor his code in order
+to continue computing while the I/O request is waiting in queue,
+then, it is possile to overlap that idle time with useful computation.
+While it may sometimes be difficult to overlap initial and final input
+and output, checkpointing I/O workload can be effectively time-shifted.
+Note that in coordinated checkpoints strategies, each individual node
+checkpoint is part of a set forming a coherent restart point for the
+whole application, and the state must be captured precisely at the
+requesting date for the global checkpoint to be correct. However, that
+ state can be initially captured by copy-on-write mechanisms, or stored
+in local memory or in compute node-local burst buffers (\eg local SSD
+drives). Although node-local burst buffers do not offer protection
+against faults, they permit offsetting the transfer of the checkpoint
+data to a later date when the I/O token is available to the application.
+When the application finaly gets the token, the previously scratch-space
+stored checkpoint is transfered to the PFS without interference.
+%TODO: something about replacing with last ckpt if token doesn't come in fast enough
 
 \subsection{Least-waste algorithm}
+
+The \leastwaste algorithm further refines on the \fifononblock algorithm
+by giving the I/O token to the application that generates the least
+waste, rather than simply in requesting order. Note that given the time
+dependent nature of that descision, the selection may
+not be the global optimum, but only an approximation given currently
+available information about the system status.
+
 
 
 \subsubsection{Strategy}
@@ -167,14 +168,14 @@ to the other $r+s-1$ candidate applications is
 $$\wap{i} = \sum_{A_{j} \in \Catiocat, j\neq i} \wapp{i}{j} + \sum_{A_{j} \in \Catckptcat} \wapp{i}{j}$$
 We obtain
 \begin{equation}
-\label{eq.heuristicpart1}
+\label{eq.selection}
  \wap{i} = v_{i} \times \left( \sum_{1 \leq j \leq r, j\neq i} q_{j} (d_{j} + v_{i})
  + \sum_{r+1 \leq j \leq r+s}   \frac{q^{2}_{j}}{\muind} (R_{j} + d_{j} + \frac{v_{i}}{2}) \right)
 \end{equation}
 
- Assume now that the selected application $A_{i} \in \Catckptcat$. Then  $A_{i}$ will use the I/O resource for $C_{i}$ seconds instead of $v_{i}$ seconds for $A_{i} \in \Catiocat$. We directly obtain the counterpart of Equation~\eqref{eq.heuristicpart1} for its waste $\wap{i}$:
+ Assume now that the selected application $A_{i} \in \Catckptcat$. Then  $A_{i}$ will use the I/O resource for $C_{i}$ seconds instead of $v_{i}$ seconds for $A_{i} \in \Catiocat$. We directly obtain the counterpart of Equation~\eqref{eq.selection} for its waste $\wap{i}$:
  \begin{equation}
-  \label{eq.heuristicpart2}
+\label{eq.selection2}
  \wap{i} = C_{i} \times \left( \sum_{1 \leq j \leq r} q_{j} (d_{j} + C_{i})
  + \sum_{r+1 \leq j \leq r+s, j\neq i}   \frac{q^{2}_{j}}{\muind} (R_{j} + d_{j} + \frac{C_{i}}{2}) \right)
 \end{equation}
