@@ -4,7 +4,7 @@
 \label{sec:simulator}
 % Primary: Thomas
 
-In order to evaluate the performance of the proposed approach, we ran
+In order to evaluate the performance of the proposed approaches, we ran
 a large set of discrete event simulations that we describe in this
 section. Simulations are instantiated by a set of initial conditions
 that define a set of application classes, their distribution, and on
@@ -17,8 +17,8 @@ work to execute, number of nodes to use, quantity of diffuse I/O to
 execute during the entire life of the application, and execution time.
 Platforms are characterized by the number of nodes, a system Mean Time
 Between Failures, and an aggregated I/O subsystem bandwidth that is
-shared between the different nodes. We assume same bandwidth when
-reading from and writing to the filesystem, hence $\ckpt{i}=\reco{i}$
+shared between the different nodes. We assume that the bandwidth when reading from and
+writing to the filesystem is symmetric, hence $\ckpt{i}=\reco{i}$
 for each application $\app{i}$.
 
 A simulation first selects randomly a list (ordered) of applications
@@ -51,8 +51,9 @@ initial conditions of a simulation.
 \paragraph*{Job Scheduling}
 Then, an initial job schedule is computed: applications are set to
 start and end at planned dates and on planned nodes, depending on
-their characteristics, the job schedule and the order they appear in
-the ordered set. The job schedule follows a simple first-fit
+their characteristics, the order they appear in
+the ordered list, and resource availability. The job schedule follows a
+simple first-fit
 strategy. We simulate an online scheduling, and every time an
 application ends before its planned date (because of a failure, or
 because it reached the end of its execution before the planned date),
@@ -72,7 +73,7 @@ and a new application is added to the list of applications to
 schedule. That new application represents the restart of the failed
 application: it has similar characteristics as the failed application,
 but an initial input corresponding to the restart size, and a work
-time corresponding to what was remaining to do at the date of last
+time corresponding to the remaining work from the last
 successful checkpoint. To reflect a frequent policy on shared
 platforms, this restarting application is pushed in front of the
 ordered list of applications to execute, so that it gets a higher
@@ -98,12 +99,16 @@ applications doing I/O; for \bfifofixed and \bfifodaly, I/O requests
 and checkpoints are ordered in a first-come first-serve strategy, and
 when they are selected, obtain the full bandwidth; for \fifofixed and
 \fifodaly, I/O requests and checkpoints are served in order, but the
-simulation accounts all the time waiting for a checkpoint to start as
+simulation adds all the time waiting for a checkpoint to start as
 progress in the computation for the application; and for \cooperative,
-the same is implemented, but allowing the order to be reconsidered
-according to Equations~\ref{eq.selection} and~\ref{eq.selection2}.
-Note that this means that if a failure hits the application, it may
-have to re-execute from a checkpoint far in its past, if it was not
+the same is implemented, but I/O are ordered according to
+Equations~\ref{eq.selection} and~\ref{eq.selection2}.
+
+Note that in the scheduled I/O methods (\fifononblock and \cooperative),
+initial inputs and final outputs are blocking (the application
+cannot progress during the I/O until it is served), but checkpoints
+are non blocking, which entails that if a failure hits the application,
+it may have to re-execute from a checkpoint far in its past, if it was not
 granted access to the filesystem for a long time.
 
 \paragraph*{Method of statistics collection from simulations}
@@ -112,7 +117,8 @@ once per strategy with the same initial conditions (ordered list of
 applications and date and location of failures). Performance
 statistics are collected over each simulation. In order to consolidate
 these measures over many simulations, statistics are taken over a
-segment of fixed length of each simulation. This segment excludes both
+segment of fixed length of each simulation.  To capture steady-state,
+this segment excludes both
 the first day of the simulation (in which applications might be
 synchronized artificially because a subset starts at the same date),
 and the last day of the simulation (in which a large amount of
