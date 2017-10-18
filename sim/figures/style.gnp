@@ -1,0 +1,17 @@
+ls_cooperative=1
+ls_propfixed=2
+ls_propdaly=3
+ls_fifofixed=4
+ls_fifodaly=5
+ls_bfifofixed=6
+ls_bfifodaly=7
+ls_model=8
+
+set style line ls_cooperative linetype 1 linecolor rgb '#8b2992' linewidth 2 pointtype 13 pointsize .3
+set style line ls_propfixed linetype 2 linecolor rgb '#d95319' linewidth 2 pointtype 5 pointsize .3
+set style line ls_propdaly linetype 1 linecolor rgb '#edb120' linewidth 2 pointtype 5 pointsize .3
+set style line ls_fifofixed linetype 2 linecolor rgb '#0072bd' linewidth 2 pointtype 7 pointsize .3
+set style line ls_fifodaly linetype 1 linecolor rgb '#4dbeee' linewidth 2 pointtype 7 pointsize .3
+set style line ls_bfifofixed linetype 2 linecolor rgb '#1c5618' linewidth 2 pointtype 9 pointsize .3
+set style line ls_bfifodaly linetype 1 linecolor rgb '#77ac30' linewidth 2 pointtype 9 pointsize .3
+set style line ls_model linetype 1 linecolor rgb '#000000' linewidth 2 pointtype 1 pointsize .3
