@@ -77,27 +77,27 @@ fill-up the system based on processor count availability, and their I/O
 workload (including checkpointing activities) are not organized by any
 comprehensive system. Instead, applications use the PFS assuming they
 are the sole user and do not modify their access pattern to accommodate
-for possible interferences. In these conditions, it is assumed that
-concurrent access
+for possible interferences. In these conditions, it has been observed~\cite{Dorier2014}
+that concurrent access
 to I/O resources will cause a decrease in the application observed
-bandwidth for I/O operations. One can imagine multiple cost functions
-for the effect of that sharing; When the filesystem is scalable, the
-overall throughput of the platform should be maintained when multiple
-applications concurrently access, and each application should thereby
-observe a linear decrease in its own bandwidth. As the application is
-blocking on the completion of its I/O operations before it can continue,
-that decrease in observed bandwidth leads to a proportionate increase in
-I/O time that must be accounted as interference generated waste.
+I/O bandwidth.
+% One can imagine multiple cost functions for the effect of that sharing;
+When the filesystem is under-provisioned, the overall throughput of the platform
+would be maintained when multiple applications concurrently access I/O, and each
+application should thereby observe a linear decrease in its own bandwidth. As an
+application blocks on the I/O completion before it can continue, the decrease in
+observed bandwidth leads to a proportionate increase in I/O time that must be
+accounted as waste.
 
 Checkpoints are scheduled accordingly to the normal rearming strategy
 (\ie after each checkpoint completion, the next checkpoint is scheduled
-to start at $\period{i}-\ckpt{i}$). Given that checkpoints may actually
-last longer than $\ckpt{i}$, the resultant period may be larger than
+to start after $\period{i}-\ckpt{i}$). Given that checkpoints may actually
+last longer than $\ckpt{i}$, the resultant period may be longer than
 $\period{i}$. This is however consistent with the concept of a
 checkpointing strategy that is applied blindly, without consideration
 for issues stemming from I/O resource sharing and interferences.
 
-In this algorithm, we will consider two variants where checkpoints are
+In this algorithm, we consider two variants where checkpoints are
 tentatively taken at 1) fixed frequency (\propfixed), or 2) at the
 Daly frequency (\propdaly).
 
@@ -110,27 +110,27 @@ application completes its I/O workload faster (\ie at nominal speed
 $\ckpt{i}$ for an application of class $\app{i}$).
 Applications are selected to perform I/O in the order of their requests,
 \ie as soon as an application starts blocking on an I/O operation it will
-take a place in the back of a FIFO queue. When the currently
-active application completes its I/O, the next application in  the
-queue starts.
+take a place in the back of a I/O FIFO queue. When the currently
+active application completes its I/O, the next application waiting for I/O
+is granted access, and start making progress.
 (\fifoblock).
 
-The advantage can be trivially seen in a simple workload with two
+The advantage can be seen in a simple workload with two
 applications (assuming a favorable linear interference model).
-If the two application start, simultaneously, an I/O requesting the
+If the two applications simultaneously start an I/O requesting the
 transfer of a similar volume $V$ of data, in the \nocoop strategy,
 both applications take $2 \times \frac{V}{\bandavail}$ time to complete
 their I/O. In the \fifoblock strategy, the first (as serialized when
 inserting in the FIFO) application takes only $\frac{V}{\bandavail}$
 as it enjoys exclusive access to the PFS, while the second application
 waits $\frac{V}{\bandavail}$ before its own I/O starts, but then in turn
-also complete at nominal speed, and therefore still completes in
-$2 \times \frac{V}{\bandavail}$. Thanks
-to reducing I/O interferences, the average completion time of the I/O
+also complete at nominal speed $\frac{V}{\bandavail}$, and therefore still
+completes in $2 \times \frac{V}{\bandavail}$. Thanks
+to reducing I/O interferences, the average I/O completion time
 has been reduced for the applications (although fairness has been decreased).
 
 Similarly to the previous strategy, application observed checkpoint
-duration may swell past $\ckpt{i}$, this time not due to interference, but due to
+duration may increase past $\ckpt{i}$, this time not due to interference, but due to
 the time spent waiting for the first place in the I/O scheduling FIFO.
 As we have computed above, although the average $C-\ckpt{i}$
 difference is lower, for one application it is as large as in the
@@ -145,9 +145,9 @@ Daly frequency (\bfifodaly).
 
 In the previous strategy, the cost of I/O interferences has been
 exchanged for idle time when waiting for the I/O token in a blocking
-fashion. If the application programmer can refactor his code in order
-to continue computing while the I/O request is waiting in queue,
-then, it is possible to overlap that idle time with useful computation.
+fashion. If the application developer can refactor the code
+to continue computing while awaiting for the I/O request to be granted,
+it become possible to overlap the idle time with useful computation.
 While it may sometimes be difficult to overlap initial and final input
 and output, intermediate I/O as well as checkpointing I/O workload can
 be effectively time-shifted.
@@ -155,13 +155,13 @@ be effectively time-shifted.
 In this algorithm, at the end of the previous checkpoint, a tentative
 date for the next checkpoint is set at $t_{req}=t_{now}+\period{i}-\ckpt{i}$.
 When the application reaches date $t_{req}$, a non-blocking I/O request
-is sent to the scheduler. That request reserves a position in the
+is made and reserves a position in the
 I/O queue. The application keeps computing until the
 scheduler informs the application that the I/O system is exclusively
 available to the application. Then, the application initiates it's
 I/O (checkpointing or otherwise). When the active application completes
-its I/O, the next requesting application (in FIFO order) is in turn
-informed that it is now the active I/O application.
+its I/O, the next requesting application (in FIFO order)
+become the active I/O application.
 
 When an application is informed that it can use the I/O system to
 checkpoint, the checkpointing library or application mechanism
@@ -172,9 +172,10 @@ or finish the current computing block before allowing the checkpoint
 to proceed (typical for user-level checkpoint). In this work we consider
 that this resynchronization cost is negligible with respect to the
 checkpoint duration. Note that should a failure impact that application,
-it would restart from the date at which the checkpoint was taken, and
+it would restart from the date at which the last checkpoint was taken, and
 not at $t_{req}$, which is another improvement when compared to the
 \fifoblock and \nocoop algorithms.
+\todo[inline]{If we talk about the positive aspect we might also want to mention the negative one, when a fault trigger during the I/O introduced delay}.
 
 Again, we will consider two variants where checkpoints are
 tentatively taken at 1) fixed frequency (\fifofixed), or 2) at the
@@ -217,36 +218,51 @@ we consider a pool of application candidates from two different categories:
 
 To decide which application is given priority among all $r+s$ candidates
 applications in $\Catiocat \cup \Catckptcat$, we select the one that
-minimizes the expected total waste induced by this choice, as explained below.
+minimizes the total expected waste induced, as explained below.
 
 \subsubsection{Selection among candidate applications}
 
 At the current time-step, there are $r+s$ candidates in $\Catiocat \cup \Catckptcat$:
 \begin{itemize}
-  \item Application $A_{i} \in \Catiocat$, $1\leq i \leq r$,
-  has an I/O request of volume $v_{i}$ and enrolls $q_{i}$ processors. At the current time-step, $A_{i}$ initiated its I/O request $d_{i}$ seconds ago, and has been idle since $d_{i}$ seconds.
- \item Application $A_{i} \in  \Catckptcat$ has a checkpoint of duration $C_{i}$ seconds,
-  and enrolls $q_{i}$ processors. At the current time-step, $A_{i}$ took its last checkpoint
-  $d_{i}$ seconds ago, and keeps executing until it can checkpoint. For the record, we must have $d_{i} \geq \period{Daly}(A_{i})$
-  since $A_{i}$ is a candidate.
+%
+  \item Application $A_{i} \in \Catiocat$, $1\leq i \leq r$, has an I/O request
+  of volume $v_{i}$ and enrolls $q_{i}$ processors. At the current time-step,
+  $A_{i}$ initiated its I/O request $d_{i}$ seconds ago, and has been idle since
+  $d_{i}$ seconds.
+%
+ \item Application $A_{i} \in  \Catckptcat$ has a checkpoint of duration $C_{i}$
+ seconds, and enrolls $q_{i}$ processors. At the current time-step, $A_{i}$ took
+ its last checkpoint $d_{i}$ seconds ago, and keeps executing until it can
+ checkpoint. For the record, we must have $d_{i} \geq \period{Daly}(A_{i})$
+ since $A_{i}$ is a candidate.
+%
 \end{itemize}
 
-If we select application $A_{i}$ to perform I/O,  the expected waste $\wap{i}$ incurred
-to the other $r+s-1$ candidate applications in  $\Catiocat \cup \Catckptcat$ is computed as follows.
-Assume first that $A_{i} \in \Catiocat$. Then  $A_{i}$ will use the I/O resource for $v_{i}$ seconds.
+If we select application $A_{i}$ to perform I/O, the expected waste $\wap{i}$
+incurred to the other $r+s-1$ candidate applications in  $\Catiocat \cup
+\Catckptcat$ is computed as follows. Assume first that $A_{i} \in \Catiocat$.
+Then  $A_{i}$ will use the I/O resource for $v_{i}$ seconds.
 \begin{itemize}
-  \item Every other application $A_{j} \in \Catiocat$ will stay idle for $v_{i}$ additional seconds,
-  hence its waste $\wapp{i}{j}$ is
-  $$\wapp{i}{j} = q_{j} (d_{j} + v_{i})$$
-  since there are $q_{j}$ processors enrolled in $A_{j}$ that idle for $d_{j} + v_{i}$ seconds. Note that for $A_{j} \in \Catiocat$, the waste $\wapp{i}{j}$ is deterministic.
-  \item Every application $A_{j} \in \Catckptcat$ will continue executing for $v_{i}$ additional seconds, hence will be exposed to the risk of a failure that will strike within $v_{i}/2$ seconds on average. The probability of such a failure is $v_{i}/\mu_{j}$, where $\mu_{j}$ is the
-  MTBF of application $A_{j}$. Since $A_{j}$ enrolls $q_{j}$ processors, we have $\mu_{j} = \muind/q_{j}$, where $\muind$ is the individual MTBF per processor. With this probability,
-  the $q_{j}$ processors will have to recover and re-execute $d_{j} + v_{i}/2$ seconds of work,
-  hence the waste $\wapp{i}{j}$ is
-     $$\wapp{i}{j} = \frac{v_{i}}{\mu_{j} } q_{j} (R_{j} + d_{j} + \frac{v_{i}}{2}) =
-     \frac{v_{i}}{\muind} q^{2}_{j} (R_{j} + d_{j} + \frac{v_{i}}{2})$$
-     where $R_{j}$ is the recovery time for $A_{j}$.
-Note that for $A_{j} \in \Catckptcat$, the waste $\wapp{i}{j}$ is probabilistic.
+%
+  \item Every other application $A_{j} \in \Catiocat$ will stay idle for $v_{i}$
+  additional seconds, hence its waste $\wapp{i}{j}$ is $$\wapp{i}{j} = q_{j}
+  (d_{j} + v_{i})$$ since there are $q_{j}$ processors enrolled in $A_{j}$ that
+  idle for $d_{j} + v_{i}$ seconds. Note that for $A_{j} \in \Catiocat$, the
+  waste $\wapp{i}{j}$ is deterministic.
+%
+  \item Every application $A_{j} \in \Catckptcat$ will continue executing for
+  $v_{i}$ additional seconds, hence will be exposed to the risk of a failure
+  that will strike within $v_{i}/2$ seconds on average. The probability of such
+  a failure is $v_{i}/\mu_{j}$, where $\mu_{j}$ is the MTBF of application
+  $A_{j}$. Since $A_{j}$ enrolls $q_{j}$ processors, we have $\mu_{j} =
+  \muind/q_{j}$, where $\muind$ is the individual MTBF per processor. With this
+  probability, the $q_{j}$ processors will have to recover and re-execute $d_{j} +
+  v_{i}/2$ seconds of work, hence the waste $\wapp{i}{j}$ is $$\wapp{i}{j} =
+  \frac{v_{i}}{\mu_{j} } q_{j} (R_{j} + d_{j} + \frac{v_{i}}{2}) =
+  \frac{v_{i}}{\muind} q^{2}_{j} (R_{j} + d_{j} + \frac{v_{i}}{2})$$ where
+  $R_{j}$ is the recovery time for $A_{j}$. Note that for $A_{j} \in
+  \Catckptcat$, the waste $\wapp{i}{j}$ is probabilistic.
+%
  \end{itemize}
  Altogether, the expected waste $\wap{i}$ incurred
 to the other $r+s-1$ candidate applications is
