@@ -56,7 +56,7 @@ the point in the middle is the mean value.
 
 \begin{figure}
   \begin{center}
-    \includegraphics[width=\linewidth]{sim/figures/synthetic-01hMTBF-waste-celio.pdf}
+    \resizebox{\linewidth}{!}{\input{sim/figures/synthetic-01hMTBF-waste-cielo.tex}}
   \end{center}
   \caption{Waste ratio as a function of the system bandwidth for the
     seven I/O and Checkpointing scheduling strategies, and the Cielo
@@ -103,7 +103,7 @@ experienced a significantly higher waste.
 
 \begin{figure}
   \begin{center}
-    \includegraphics[width=\linewidth]{sim/figures/synthetic-040gbs-waste-celio.pdf}
+    \resizebox{\linewidth}{!}{\input{sim/figures/synthetic-040gbs-waste-cielo.tex}}
   \end{center}
   \caption{Waste ratio as a function of the system MTBF for the
     seven I/O and Checkpointing scheduling strategies, and the Cielo
@@ -142,5 +142,14 @@ as the number of restarting applications decreases, the filesystem
 sollicitation decreases sufficiently to avoid long delays in non blocking
 approaches, as is illustrated by the performance of \fifofixed at 2h
 of MTBF.
+
+
+\begin{figure}
+  \begin{center}
+    \resizebox{\linewidth}{!}{\input{sim/figures/prosp.tex}}
+  \end{center}
+  \caption{TBD \label{fig:prosp}}
+\end{figure}
+
 
 \subsection{Prospective Systems}
