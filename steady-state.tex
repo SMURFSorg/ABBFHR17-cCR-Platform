@@ -6,18 +6,21 @@
 In this section we envision a (theoretical) scenario when the platform operates in steady-state,
 with a constant number of applications per class spanning the whole platform. We also assume that
 the I/O bandwidth $\bandavail$  that is available for CR operations remains constant throughout
-execution.  Given the above, we determine the optimal checkpointing period for each application
+execution.  Given the above, we determine the optimal checkpointing period for each application class
 when the objective is to minimize the total waste incurred  by the platform, or equivalently,
 to maximize the total throughput of the platform.
+\todo[inline]{The text does not reflect my understanding (based on what Thomas described) of the problem.}
 
 In steady-state operation, there are $\nbapp{i}$ applications of class $\app{i}$,
 each using $\nbnodes{i}$ nodes, and with checkpoint time $\ckpt{i}$. Because we orchestrate
 checkpoints to avoid CR-CR interferences, we have $\ckpt{i} = \frac{\size{i}}{\bandavail}$,
-where $\size{i}$ denote the size of the checkpoint file of each application of class $\app{i}$.
+where $\size{i}$ denote the size of the checkpoint file of all applications of class $\app{i}$.
 
-The waste of an application is the ratio of time that the application spends doing
-resilience operations by the time that it does useful work. The time
-spent doing resilience operations include the time spend during each period to checkpoint, and in case of failure, the time to rollback to the previous checkpoint, and the time to recompute lost work.
+The waste of an application is the ratio of time the application spends doing
+resilience operations by the time it does useful work. The time spent doing
+resilience operations include the time spend during each period to checkpoint,
+and in case of failure, the time to rollback to the previous checkpoint, and the
+time to recompute lost work.
 %We assume
 %that the recovery time $\reco{i}$ is equivalent to the checkpoint time  $\ckpt{i}$.
 We
@@ -33,7 +36,7 @@ as follows~\cite{springer-monograph}:
 Let $\wasteplat$ be the waste of the platform. We define this as the
 weighted arithmetic mean of the $\wasteapp{i}$ for all applications,
 where each application is weighted by the number of computing nodes
-it uses):
+it uses:
 
 \begin{equation}
 \wasteplat = \sum_i \frac{\nbapp{i} \nbnodes{i}}{\nbnodesplat} \wasteapp{i}
