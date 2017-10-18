@@ -8,9 +8,9 @@
 \emph{Space-sharing} high-performance computing (HPC) platforms for the concurrent
 execution of parallel applications is today's de-facto standard HPC execution
 mode. In fact, space-sharing in this fashion is more common than \emph{capability
-  application runs} that span entire platforms~\cite{xx}. However, while
+  application runs} that span entire platforms~\cite{xx}. Meanwhile, while
 computational nodes are completely dedicated to particular application instances,
-most often the networks that interconnect computational nodes, as well as storage
+most often, the networks that interconnect computational nodes, as well as storage
 devices, are shared amongst application instances. In other words, without careful
 consideration, network and storage contention can reduce individual application and
 overall system performance.
@@ -61,7 +61,7 @@ namely the I/O system.  There are two major reasons for this:
   checkpoint commit time) and overall platform throughput.
 \end{enumerate}
 
-In this work, we study cooperative CR scheduling strategies for concurrently
+In this work, we design and study cooperative CR scheduling strategies for concurrently
 executing HPC applications.  Our objective is to assess the impact of such
 interferences and to design scheduling algorithms that optimize I/O bandwidth
 availability for CR activity.  Using our cooperative algorithms, applications checkpoint
@@ -76,7 +76,7 @@ The main contributions of the paper are to provide a model allowing to quantify
 the I/O interferences for applications sharing a common underlying I/O
 subsystem, and to estimate the costs on potential scientific throughput of different I/O-aware
 scheduling strategies, through
-a steady-state analysis as well as detailed simulations. 
+a steady-state analysis as well as detailed simulations.
 The scheduling strategies included in this study cover a
 large range of I/O behaviors, going from non-cooperative algorithms, as those
 currently deployed on most large-scale platforms, to ones that take advantage of

@@ -35,28 +35,27 @@
   extend its original wall-time). \dca{Put in model section?}
   \item When an application fails, we resubmit it with a new wall-time equal to the fraction that remains from the last checkpoint.  Input I/O becomes recovery. Output I/O is not modified.
 
-We put back the restarted application at the head of the scheduling queue
-  (so that it has a chance to finish it's previously allotted wall time
-  immediately, given that the resources it previously occupied are
-  presumably available), and force a reschedule with every application that
-  has not started yet (already running applications are left to continue
-  their work).
 \end{itemize}
 \end{comment}
 
 
 In this work, we consider a shared platform that comprises a set of computational
-nodes, storage resources in the form of a parallel file system, and a network that
+nodes, storage resources in the form of a parallel file system (PFS), and a network that
 interconnects the nodes as well as the storage resources. Applications are scheduled
 on the platform by a job scheduler such that computational nodes are space-shared
 (dedicated) amongst concurrent application instances. However, the I/O subsystem is
-time-shared (contended) amongst the application instances.
+time-shared (contended) amongst the application instances, \ie multiple applications
+performing I/O simultaneously results in a per-application reduction in commit speed;
+in this work we will consider, without loss of generality, a linear interference
+model (in which the global throughput remains constant and is fairly shared
+between applications currently performing I/O), but more adversarial interference
+models could be substituted.
 
 Our \emph{application I/O} model entails loading an input file at startup, performing
 regular I/O operations during their main execution phase, and finally dumping an
 output file at completion. Because applications are long-running (typically, several
 hours or days) and the platform is failure-prone, applications are protected using
-coordinated CR that incur periodic \emph{CR I/O}.
+coordinated CR that incurs periodic \emph{CR I/O}.
 Applications can vary in size (number of computational nodes), application I/O
 pattern and requirements, and CR I/O requirements. To model these behavioral
 variations with minimal parameters, we make the following simplifying assumptions
@@ -68,15 +67,15 @@ variations with minimal parameters, we make the following simplifying assumption
   \item Other than initialization and finalization I/O, an application's (non-CR) I/O
     activity is evenly distributed over its entire makespan.
 \end{compactitem}
-We model the specific numbers and characteristics of the application classes based on
-real benchmark data, such as the APEX benchmark on the Cielo platform~\cite{apex2016}.
+In instantiations, the specific numbers and characteristics of the application classes
+are based on real benchmark data, such as the APEX benchmark on the Cielo platform~\cite{apex2016}.
 
 To evaluate the scheduling policies, we consider a finite segment, typically lasting
 a small number of days, of a representative schedule where the number of applications
 in each class remains approximately constant at every instant. Of course, with
 different application execution times, we cannot enforce a fixed proportion of each
 application class at every instant. However, we ensure the proper proportion is
-enforced in average throughout across schedule execution. Similarly, we enforce
+enforced in average throughout the schedule execution. Similarly, we enforce
 that at every instant during the finite segment, at least 98\% of the nodes
 are enrolled for the execution. This allows us to compare actual
 (simulated) performance with the theoretical performance of a co-scheduling policy
@@ -99,9 +98,15 @@ $\nbnodesplat$ nodes. Application class $\app{i}$ specifies:
 %is no interference with other I/O operation.
 %
 At every instant, we schedule as many applications as possible.
-In the theoretical analysis, we assume that
-$\sum_{i}\nbapp{i} \nbnodes{i} = \nbnodesplat$, where $\nbnodesplat$ is the total
-number of nodes in the platform.
+Application that are subject to failures are restarted at the head of
+the scheduling queue, so that (given that in most cases only one
+node has failed and can be replaced by a hot spare) it may restart
+immediately on essentially the same compute nodes it previously occupied.
+
+For simplicity, in the theoretical analysis, we ignore the hot spare
+nodes (presumably an insignificant fraction of the total),
+and assume that $\sum_{i}\nbapp{i} \nbnodes{i} = \nbnodesplat$, 
+where $\nbnodesplat$ is the total number of nodes in the platform.
 
 %\todo[inline]{the portfolio of available and scheduled applications are not the same, no reason for available applications to match that constraints on node count, only on scheduled ones. }
 
