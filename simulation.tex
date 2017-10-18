@@ -39,7 +39,7 @@ count the resource allocated for this application class, until A) the
 simulated execution would necessarily run for at least 2 months, and B) the
 amount of resource used by the selected class is within 1\% of the
 target goal of the representative workload percentage defined in the
-APEX workflows report.
+APEX workflows report (see Table~\ref{table:apex}).
 
 Once this set of applications is defined, a set of node failures dates
 is computed. Dates of failures are placed following an Exponential
@@ -116,8 +116,8 @@ application, it may have to re-execute from a checkpoint far in its
 past, if it was not granted access to the filesystem for a long time.
 
 \paragraph*{Method of statistics collection from simulations}
-As we compare the four different filesystem sharing strategies, each
-simulation is ran four times with the same initial conditions (ordered
+As we compare all the schedulings strategies, each
+simulation is run once per strategy with the same initial conditions (ordered
 set of applications and date and location of failures). Performance
 statistics are collected over each simulation. In order to consolidate
 these measures over many simulations, statistics are taken over a
