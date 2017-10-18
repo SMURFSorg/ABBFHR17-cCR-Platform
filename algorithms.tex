@@ -150,9 +150,7 @@ fashion. If the application developer can refactor the code
 to continue computing while awaiting for the I/O request to be granted,
 it becomes possible to overlap the idle time with useful computation.
 Indeed, checkpointing I/O operations can
-be effectively time-shifted, at he risk of increasing the exposure to failures.
-\todo[inline]{YR2AB: removed intermediate I/O operations because we neglect them and 
-concentrate on CR, input and output for optimizing available bandwidth $\bandavail$}
+be effectively time-shifted, at the risk of increasing the exposure to failures.
  In the \fifononblock algorithm, at the end of the previous checkpoint, a tentative
 date for the next checkpoint is set at $t_{req}=t_{now}+\period{i}-\ckpt{i}$.
 When the application reaches date $t_{req}$, a non-blocking I/O request
@@ -160,7 +158,7 @@ is made and reserves a position in the
 I/O queue. The application keeps computing until the
 scheduler informs the application that the I/O system is exclusively
 available to the application. Then, the application initiates its
-I/O (checkpointing, initial input, or final output). When the active application completes
+I/O (checkpointing, initial input, final output or recovery). When the active application completes
 its I/O, the next requesting application (in FIFO order)
 become the active I/O application.
 
@@ -201,30 +199,25 @@ Daly frequency (\fifodaly).
 
 The \leastwaste algorithm further refines on the \fifononblock algorithm
 by giving the I/O token to the application that generates the least
-waste, rather than simply in requesting order. Note that given the time
-dependent nature of that decision, the selection may
+waste, rather than simply in requesting order. Note that given the time-dependent nature of that decision, the selection may
 not be the global optimum, but only an approximation given currently
 available information about the system status.
 
-In this algorithm, whenever an I/O operation completes at time $t$,
+In the \leastwaste algorithm, whenever an I/O operation completes at time $t$,
 we consider a pool of application candidates from two different categories:
-
-\begin{itemize}
+\begin{compactitem}
  \item Category \IOcat $\Catiocat$: Applications $A_{i}$, $1\leq i \leq r$, which
  need to do input I/O, output I/O or recovery
  \item Category \Ckptcat $\Catckptcat$: Applications $A_{i}$, $r+1\leq i \leq r+s$,
  whose last checkpoint took place no later than time $t - \period{Daly}(A_{i})$, where
  $\period{Daly}(A_{i})$ is the Young/Daly period for $A_{i}$.
-\end{itemize}
+\end{compactitem}
 
 To decide which application is given priority among all $r+s$ candidates
 applications in $\Catiocat \cup \Catckptcat$, we select the one that
-minimizes the total expected waste induced, as explained below.
-
-\subsubsection{Selection among candidate applications}
-
+minimizes the total expected waste induced, as explained hereafter.
 At the current time-step, there are $r+s$ candidates in $\Catiocat \cup \Catckptcat$:
-\begin{itemize}
+\begin{compactitem}
 %
   \item Application $A_{i} \in \Catiocat$, $1\leq i \leq r$, has an I/O request
   of volume $v_{i}$ and enrolls $q_{i}$ processors. At the current time-step,
@@ -237,13 +230,13 @@ At the current time-step, there are $r+s$ candidates in $\Catiocat \cup \Catckpt
  checkpoint. For the record, we must have $d_{i} \geq \period{Daly}(A_{i})$
  since $A_{i}$ is a candidate.
 %
-\end{itemize}
+\end{compactitem}
 
 If we select application $A_{i}$ to perform I/O, the expected waste $\wap{i}$
 incurred to the other $r+s-1$ candidate applications in  $\Catiocat \cup
 \Catckptcat$ is computed as follows. Assume first that $A_{i} \in \Catiocat$.
 Then  $A_{i}$ will use the I/O resource for $v_{i}$ seconds.
-\begin{itemize}
+\begin{compactitem}
 %
   \item Every other application $A_{j} \in \Catiocat$ will stay idle for $v_{i}$
   additional seconds, hence its waste $\wapp{i}{j}$ is $$\wapp{i}{j} = q_{j}
@@ -264,28 +257,28 @@ Then  $A_{i}$ will use the I/O resource for $v_{i}$ seconds.
   $R_{j}$ is the recovery time for $A_{j}$. Note that for $A_{j} \in
   \Catckptcat$, the waste $\wapp{i}{j}$ is probabilistic.
 %
- \end{itemize}
+ \end{compactitem}
  Altogether, the expected waste $\wap{i}$ incurred
 to the other $r+s-1$ candidate applications is
 $$\wap{i} = \sum_{A_{j} \in \Catiocat, j\neq i} \wapp{i}{j} + \sum_{A_{j} \in \Catckptcat} \wapp{i}{j}$$
 We obtain
 \begin{equation}
 \label{eq.selection}
- \wap{i} = v_{i} \times \left( \sum_{1 \leq j \leq r, j\neq i} q_{j} (d_{j} + v_{i})
- + \sum_{r+1 \leq j \leq r+s}   \frac{q^{2}_{j}}{\muind} (R_{j} + d_{j} + \frac{v_{i}}{2}) \right)
+\begin{array}{ll}
+ \wap{i} = & v_{i} \times \left( \sum_{1 \leq j \leq r, j\neq i} q_{j} (d_{j} + v_{i}) \right.\\
+& + \left. \sum_{r+1 \leq j \leq r+s}   \frac{q^{2}_{j}}{\muind} (R_{j} + d_{j} + \frac{v_{i}}{2}) \right)
+ \end{array}
 \end{equation}
 
  Assume now that the selected application $A_{i} \in \Catckptcat$. Then  $A_{i}$ will use the I/O resource for $C_{i}$ seconds instead of $v_{i}$ seconds for $A_{i} \in \Catiocat$. We directly obtain the counterpart of Equation~\eqref{eq.selection} for its waste $\wap{i}$:
  \begin{equation}
 \label{eq.selection2}
- \wap{i} = C_{i} \times \left( \sum_{1 \leq j \leq r} q_{j} (d_{j} + C_{i})
- + \sum_{r+1 \leq j \leq r+s, j\neq i}   \frac{q^{2}_{j}}{\muind} (R_{j} + d_{j} + \frac{C_{i}}{2}) \right)
+ \begin{array}{ll}
+ \wap{i} = & C_{i} \times \left( \sum_{1 \leq j \leq r} q_{j} (d_{j} + C_{i}) \right.\\
+& + \left. \sum_{r+1 \leq j \leq r+s, j\neq i}   \frac{q^{2}_{j}}{\muind} (R_{j} + d_{j} + \frac{C_{i}}{2}) \right)
+ \end{array}
 \end{equation}
 
  Finally, we select the application $A_{i} \in \Catiocat \cup \Catckptcat$ whose waste
  $\wap{i}$ is minimal.
-
-%TODO: rephrase that blurt.
-Because this algorithm is highly dependent upon the Daly approximation to
-estimate the cost of the choices, we will not consider the (suboptimal)
-case where the checkpointing frequency is arbitrarily set.
+Contrarily to the previous scenarios, we do not consider the variant where the checkpointing frequency is arbitrarily set, because the \leastwaste algorithm is designed to optimize checkpoint frequencies across applications.
