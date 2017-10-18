@@ -146,12 +146,65 @@ sufficiently to avoid long delays in non blocking approaches, as is
 illustrated by the performance of \fifofixed at 2h of system MTBF (4
 years of node MTBF).
 
+\subsection{Prospective System}
+
 \begin{figure}
   \begin{center}
     \resizebox{\linewidth}{!}{\input{sim/figures/prosp.tex}}
   \end{center}
-  \caption{TBD \label{fig:prosp}}
+  \caption{Minimum aggregated filesystem bandwidth to reach 80\%
+    efficiency with the different approaches on the prospective
+    future system \label{fig:prosp}}
 \end{figure}
 
+In this section, we use the simulations to explore a prospective
+system and define the impact of I/O and checkpoint scheduling when the
+problem size and the machine size will increase. Based on the APEX
+workflow report, we extrapolate the increase in problem size expected
+for the class of applications we have considered in the section above,
+and project these applications on a system that has the main
+characteristics of expected future systems. We consider a system with
+7PB of main memory and 50,000 nodes. We simulate of the workload of
+Table~:ref{table:lanl} on this machine, for different values of the
+system MTBF, and for each strategy, we find (by dichotomic search) the
+required system aggregated bandwidth necessary to observe 20\% of
+waste (or 80\% of efficiency). The waste is computed, as previously,
+by dividing the amount of resource used for checkpoints and lost due
+to failures by the amount of resource used in a fault-free /
+resilience-free run of the same initial conditions.
 
-\subsection{Prospective Systems}
+Figure~\ref{fig:prosp} shows the impact of the MTBF and of the
+different strategies on this system. When failures are not a chronic
+event, i.e. as soon as the node MTBF is at least 15 years
+(corresponding to a system MTBF of 2.6h), a hierarchy of the different
+approaches stabilizes: the two blocking strategies that rely on
+frequent checkpoints (\propfixed and \bfifofixed) are the ones
+requiring the highest bandwidth to reach 80\%
+efficiency. % 6.4TB/s at 24 years
+\fifofixed, that uses a fixed checkpoint interval comes second, with a
+requirement around three quarter of the one required by \propfixed and
+\fifofixed. It benefits from the capacity to continue working when the
+filesystem is not available to checkpoint, which is sufficient when
+failures are rare to obtain a significant performance
+gain. % 4.9TB/s at 24 years
+Then the four strategies that use the Daly optimal checkpointing
+period, alleviating significantly the I/O pressure, are the ones that
+require the lowest bandwidth to reach 80\% of efficiency, at about
+half the required bandwidth of the current
+situation. %coop: 2.9 TB/s at 24 years
+
+When the failures are frequent (under 10 years of node MTBF), the
+hierarchy changes as the critical element is solely to reduce the I/O
+pressure: all strategies that use a fixed and frequent checkpoint
+interval require a much higher system bandwidth to reach the 80\%
+efficiency goal.  As noted before, the \cooperative approach is the
+first to reach the bar in all cases. This is because it takes
+advantage of the nonblocking approaches, integrates the Daly optimal
+period optimization and schedules the I/O to reduce the waste.
+This approach exhibits a strong resilience to failures, with a
+bandwidth requirement that increases only by a factor 3 between the
+very unstable simulations (at less than 1h of system MTBF), and the
+most stable one (at 8h of sysstem MTBF). Compared to this, the other
+strategies are much more dependent on the frequency of failures, with
+the \propfixed strategy requiring up to 50 times the bandwidth of
+\cooperative in unstable conditions to reach the same efficiency.
