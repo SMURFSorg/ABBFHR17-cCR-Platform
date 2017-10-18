@@ -6,10 +6,11 @@
 
 We survey related work in this section. We first discuss papers related to I/O
 pressure due to checkpointing, followed by those related to avoiding I/O
-interference.  We note that techniques are not necessarily independent; reducing
-I/O pressure will generally reduce the likelihood of interference.  Therefore,
-we limit our I/O interference discussion to those techniques which consider the
-global scheduling of checkpoints across a platform.
+interference.  We note that these techniques are not necessarily independent;
+reducing I/O pressure will generally reduce the likelihood of interference.
+Therefore, we attempt to limit our I/O interference discussion to those
+techniques which consider the global scheduling of checkpoints and/or general
+I/O across a platform.
 
 \todo[inline]{kbf: I am unsure about this breakdown.  These two things do not
 seem independent; reducing pressure seems to al reduce interference ...}
@@ -50,7 +51,7 @@ non-transient node failures. Similarly, multi-level checkpoint protocols like
 SCR~\cite{Moody10SCR,Vaidya95TwoLevel} attempt to hide checkpoint commit times
 by writing checkpoints to RAM, flash storage, or local disk on the compute
 nodes~\cite{Kougkas2016} in addition to the parallel file system thereby
-improving checkpoint or generak I/O bandwidth.  Finally, checkpoint-specific
+improving checkpoint or general I/O bandwidth.  Finally, checkpoint-specific
 file systems like PLFS~\cite{Bent09PLFS} leverage the I/O patterns and
 characteristics specific to checkpoint data to optimize checkpoint data
 transfers to/from parallel file systems and therefore reduce checkpoint commit
@@ -88,11 +89,13 @@ taking advantage of the observed periodic and deterministic nature of HPC
 application checkpoints and I/O.  This technique allows the job scheduler to
 pre-define each application’s I/O behavior for their entire execution.
 Similarly, a number of works have investigated the efficiency of online
-schedulers for data intensive~\cite{Groot2013,Sim:2015:AnalyzeThis} and HPC workload
+schedulers for data intensive~\cite{Groot2013,Sim:2015:AnalyzeThis} and HPC
+workload
 I/O~\cite{Dorier2014,Gainaru:2015:Scheduling,Zhou:2015:IOAware,Herbein2016}.
-Finally, Oliner et al.~\cite{Oliner:2006:Cooperative} investigated utilizing
-system reliability information recorded within the system to determine
-effective checkpoint intervals for the portion of the system used by each
+Finally, a number of works have investigated utilizing system reliability
+information recorded on the system~\cite{Oliner:2006:Cooperative} and the
+statistical properties of these failures~\cite{Tiwari:2014:Lazy} to determine
+effective checkpoint intervals for the portion of the system used by the
 workload.
 
 \subsection{Summary}
@@ -100,6 +103,8 @@ workload.
 This present work distinguishes itself from these previous studies in a number
 of important ways.  First, this technique is agnostic to the I/O patterns of
 the considered applications and does not require deterministic I/O behavior.
-In addition, this approach can be used in environments where I/O is highly
-constrained and Daly/Young's formula is not appropriate.  Finally,
-\todo[inline]{kbf: Add more here on novelty ...}
+Also, this technique attempts to optimize the efficiency of the entire
+platform, with the changing workloads and failures running on that platform,
+rather than just considering one workload. In addition, this approach can be
+used in environments where I/O is highly constrained and Daly/Young's formula
+is not appropriate.  Finally, \todo[inline]{kbf: Add more here on novelty ...}
