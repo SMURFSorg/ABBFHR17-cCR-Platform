@@ -12,7 +12,7 @@ incur interference on I/O resource access and wait time. The second
 algorithm (\fifoblock) coordinate applications to eliminate interference
 between their I/O activities: only one application performs I/O at any given
 time while other applications requesting I/O are blocked until their
-turn (FIFO) comes. The third algorithm (\fifononblock) is similar, except
+turn comes (First Come First Serve, FCFS). The third algorithm (\fifononblock) is similar, except
 that applications that are waiting for the I/O token
 continue computing until their turn comes; note that unlike the
 blocking algorithms, this optimization requires
@@ -23,7 +23,7 @@ presenting the algorithms, we further discuss the interactions between
 the checkpointing policy, the I/O workloads, and the interferences that the
 algorithms have to consider.
 
-%Instead of following a FIFO order to select the next I/O application,
+%Instead of following a FCFS order to select the next I/O application,
 %for each requesting application, the heuristic computes the prospective
 %waste incurred by delaying its I/O (considering checkpoint and
 %probabilistic recovery costs, idle time, etc.) when selecting another
@@ -103,8 +103,8 @@ In the \nocoop algorithm, we consider two variants where checkpoints are
 tentatively taken at 1) fixed frequency (\propfixed), or 2) at the
 Daly frequency (\propdaly).
 
-\subsection{Blocking \fifoblock FIFO I/O Scheduling}
-\label{sec:fifoblock}
+\subsection{Blocking \fifoblock FCFS I/O Scheduling}
+\label{sec:fcfsblock}
 
 A simple optimization to the aforementioned scheme is to favor one of
 the applications' I/O request over all others. While the overall throughput
@@ -113,7 +113,7 @@ application completes its I/O workload faster (\ie, at nominal speed
 $\ckpt{i}$ for an application of class $\app{i}$).
 Applications are selected to perform I/O in the order of their requests,
 \ie ,as soon as an application starts blocking on an I/O operation it will
-take a place in the back of an  I/O FIFO queue. When the currently
+take a place in the back of an  I/O queue. When the currently
 active application completes its I/O, the next application waiting for I/O
 is granted access, and starts making progress. We denote this scheme as
 \fifoblock.
@@ -124,7 +124,7 @@ If the two applications simultaneously start an I/O requesting the
 transfer of a similar volume $V$ of data, in the \nocoop strategy,
 both applications take $2 \times \frac{V}{\bandavail}$ time to complete
 their I/O. In the \fifoblock strategy, the first (as serialized when
-inserting in the FIFO) application takes only $\frac{V}{\bandavail}$
+inserting in the queue) application takes only $\frac{V}{\bandavail}$
 as it enjoys exclusive access to the PFS, while the second application
 waits $\frac{V}{\bandavail}$ before its own I/O starts, but then in turn
 also complete at nominal speed $\frac{V}{\bandavail}$, and therefore still
@@ -134,7 +134,7 @@ has been reduced for the applications (although fairness has been decreased).
 
 Similarly to the previous strategy, application observed checkpoint
 duration may increase past $\ckpt{i}$, no longer because of interference, but now because
-of  the time spent waiting for the first place in the I/O scheduling FIFO.
+of  the time spent waiting for the first place in the I/O FCFS scheduling.
 As we have computed above, although the average $C-\ckpt{i}$
 difference is lower, for one application it is as large as in the
 previous strategy. In any case, again, the checkpointing period will
@@ -144,8 +144,8 @@ In the \fifoblock algorithm, we consider two variants where checkpoints are
 tentatively taken at 1) fixed frequency (\bfifofixed), or 2) at the
 Daly frequency (\bfifodaly).
 
-\subsection{Non-Blocking \fifononblock FIFO I/O Scheduling}
-\label{sec:fifononblock}
+\subsection{Non-Blocking \fifononblock FCFS I/O Scheduling}
+\label{sec:fcfsnonblock}
 
 In the previous strategy, the cost of I/O interferences has been
 exchanged for idle time when waiting for the I/O token in a blocking
@@ -162,7 +162,7 @@ I/O queue. The application keeps computing until the
 scheduler informs the application that the I/O system is exclusively
 available to the application. Then, the application initiates its
 I/O (checkpointing, initial input, final output or recovery). When the active application completes
-its I/O, the next requesting application (in FIFO order)
+its I/O, the next requesting application (in FCFS order)
 become the active I/O application.
 
 When an application is informed that it can use the I/O system to
