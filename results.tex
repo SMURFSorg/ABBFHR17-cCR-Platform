@@ -1,13 +1,16 @@
+% !TEX root =  ipdps18.tex
+
 \section{Results}\label{sec:results}
 % Primary: Thomas & all
 
 \subsection{LANL APEX Simulation Workflows on Cielo}
 
 We consider the workload from LANL found in the APEX Workflows
-report~\cite{apex} that consists of four simulation applications
+report~\cite{apex2016} that consists of four simulation applications
 classes: EAP, LAP, Silverton and VPIC. The main characteristics of
 these classes are reported in Table~\ref{table:lanl}. We simulate the
-behavior of these applications over the Cielo Platform. \todo{Describe
+behavior of these applications over the Cielo Platform. 
+\todo[inline]{Describe
   Cielo here}
 
 \begin{table}
@@ -28,28 +31,27 @@ Enough applications are randomly chosen to ensure that the workload
 percentage of each class is met within 1\% of its goal, and to gather
 a simulated time of at least 2 months (62 days). To serve as the
 baseline of comparison, we simulate the execution of each list of
-applications without introducing checkpoints, faults, or
+applications without introducing checkpoints, faults, nor
 interference. In this simulation, we select a segment of the execution
 that is 60 days long (to exclude the beginning and end of the
 simulation that present uncharacteristic behaviors), and compute
 the resource used by the applications during that time. Since we
 consider efficiency from a platform perspective and each application
 has a different resource usage, we use the following metric to measure
-resource usage: the sum of time each node spends doing a specific
-operation. Application usage sums the time spent doing I/O or
-computation that was not wasted by a restart due to a failure.
+resource usage: the total time each node spends doing a specific
+operation. Application usage sums the time spent doing regular (non CR) I/O
+and computation that was not wasted by a restart due to a failure.
 
 For each checkpointing and I/O scheduling technique presented in
-Section~\ref{sec:algorithm}, we then compute the resource waste, as
-the sum of application computation or I/O that was wasted due to
-failures, and of time checkpointing. We represent below the
+Section~\ref{sec:algorithms}, we then compute the resource waste, as
+the total time spent either checkpointing or executing application computation and I/O that were lost due to failures. In the figures, we represent the
 performance of each technique by computing the waste ratio, i.e. the
-waste resource over a segment of 60 hours divided by the application
+resource waste over a segment of 60 hours divided by the application
 usage resource over that same segment for the baseline
-simulation. Each simulation is conducted 2,000 times, and the
-candelstick extremes represent the first and last decile of the
+simulation. Each simulation is conducted 2,000 times; the
+candlestick extremes represent the first and last decile of the
 measures, while the boxes represent the second and third quartile, and
-the point in the middle the mean value.
+the point in the middle is the mean value.
 
 \begin{figure}
   \begin{center}
