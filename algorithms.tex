@@ -2,12 +2,12 @@
 % Aurelien & George
 
 In this section, we present the algorithms used to schedule applications
-and I/O workload in order to alleviate the effect of concurrent access
+I/O workloads in order to assess and alleviate the effect of concurrent access
 to I/O resources. The first algorithm (\nocoop) represents the status-quo
 in which applications are scheduled in a non-cooperative manner, which may
 incur interference on I/O resource access and wait time. The second
-algorithm (\fifoblock) inserts some coordination to eliminate interference
-between I/O activities. Only one application performs I/O at any given
+algorithm (\fifoblock) coordinate applications to eliminate interference
+between their I/O activities: only one application performs I/O at any given
 time while other applications requesting I/O are blocked until their
 turn (FIFO) comes. The third algorithm (\fifononblock) is similar, except
 that applications that are waiting for the checkpointing token
@@ -15,9 +15,9 @@ continue computing until their turn comes; note that unlike the
 blocking algorithms, this optimization requires
 application code refactoring. Last, we propose an heuristic
 (\leastwaste) that improves on \fifononblock by giving the I/O token
-to the application that inflicts the least overhead on the system. Before
+to the application that imposes the least overhead on the system. Before
 presenting the algorithms, we further discuss the interactions between
-the checkpointing policy, the I/O workloads, the interferences that the
+the checkpointing policy, the I/O workloads, and the interferences that the
 algorithms have to consider.
 
 %Instead of following a FIFO order to select the next I/O application,
@@ -30,14 +30,15 @@ algorithms have to consider.
 \subsection{Checkpoint Period and I/O Workload}
 
 Both applications and checkpointing generate I/O requests. I/O requests
-are all scheduled using the same algorithm wether they
+are all scheduled using the same algorithm whether they
 are generated from an application I/O request or from a Checkpoint
 request. Note however that unlike application I/O, the checkpointing
-volume and intensity is dependent upon application external parameters.
+volume and frequency is dependent upon application external parameters.
+\todo{I do not understand the external part}
 Some applications
 control their own checkpointing completely, and decide to checkpoint at
 fixed time steps or application defined time interval. However,
-Daly et al.~cite{daly} devised a formula to compute the optimal
+Daly et al.~\cite{daly} devised a formula to compute the optimal
 checkpoint period, $T=\sqrt{2 C \mu}$, where $C$ is the duration of the
 checkpoint transfer, and $\mu$ is the reliability of the platform.
 The parameters in this formula are dependent upon application features
@@ -46,21 +47,22 @@ of the system and the I/O bandwidth).
 
 In traditional periodic checkpointing, for an application $\app{i}$,
 every time a checkpoint completes, the next checkpoint is scheduled to
-happen at date $\period{i}-\ckpt{i}$ (and the first checkpoint is
+happen in at least $\period{i}-\ckpt{i}$ (and the first checkpoint is
 set at date $\period{i}$). $\period{i}$ can be 1) a \emph{fixed} period,
 either hardcoded in the application, or set as an arbitrary platform
 global setting, or 2) the \emph{Daly} optimal period for the
 application on that platform. Note that in a system where interference
 can happen (from competing application I/O or checkpoints), determining
-the appropriate checkpointing period can be challenging. The observed
-duration of checkpoints varies depending on how much interference happen,
-on average. Similarly, when employing I/O scheduling algorithms,
+the appropriate checkpointing period can be challenging.
+% The observed duration of checkpoints varies depending on how much
+% interference happen, on average.
+Similarly, when employing I/O scheduling algorithms,
 checkpoints may include wait time delay or be postponed to decrease
 interference. The traditional strategy of rearming the next checkpoint at
 $\period{i}-\ckpt{i}$ yields the desired checkpointing period $\period{i}$
 only in interference free scenarios: when interferences (or scheduling
-introduced delays) swell the checkpoint duration to $C_{swollen}$, the effective
-period differs from the desired period by the difference $C_{swollen}-\ckpt{i}$.
+introduced delays) dilate the checkpoint duration to $C_{dilated}$, the effective
+period differs from the desired period by the difference $C_{dilated}-\ckpt{i}$.
 The details of how each algorithm accommodates for this discrepancy will
 be discussed later.
 
