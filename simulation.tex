@@ -42,7 +42,7 @@ target goal of the representative workload percentage defined in the
 APEX workflows report.
 
 Once this set of applications is defined, a set of node failures dates
-is computed. Dates of failures are placed following an exponential
+is computed. Dates of failures are placed following an Exponential
 distribution with the MTBF required for the simulation. The nodes that
 are hit by failures are chosen uniformly between all nodes of the
 simulated platform. The ordered set of applications and the date and
@@ -57,7 +57,7 @@ strategy. We simulate an online scheduling, and everytime an
 application ends before its planned date (because of a failure, or
 because it reached the end of its execution before the planned date),
 the schedule is amended by de-scheduling all applications that were
-not started yet and re-scheduling them following the current order of
+not started yet, and re-scheduling them following the current order of
 applications.
 
 \paragraph*{Execution Simulation}
@@ -66,14 +66,14 @@ input. It then executes some work for a certain period and
 checkpoints. These two steps are repeated until all planned work is
 executed, after which the final output is executed by the application,
 before it ends. At any time during the execution, a node hosting the
-application may be subject to a failure (happening at pre-computed
+application may be subject to a failure (striking at pre-computed
 dates and places). When that happens, this application is terminated,
 and a new application is added to the list of applications to
 schedule. That new application represents the restarting application:
 it has similar characteristics as the failed application, but an
 initial input corresponding to the checkpoint size, and a work time
 corresponding to what was remaining to do at the last successful
-checkpoint date. To reflect a frequent policy of platforms, this
+checkpoint date. To reflect a frequent policy on shared platforms, this
 restarting application is pushed in front of the ordered set of
 applications to execute, so that it gets a higher priority to obtain
 resources and complete its execution.
@@ -83,10 +83,9 @@ define a fixed period based on their own experience on the
 platform. An ordinary heuristic is to take a checkpoint every hour,
 with the reasoning that in the worst case, only 1h of work can be
 lost. We also consider a dynamic period that is defined for each
-application. We set for this the period given by the Young/Daly
-approximations, that assumes that chekpoints last for a fixed
-computable time. For this checkpoint time, we take the time it would
-take to checkpoint the application if there was no interference.
+application. We use for this period the Young/Daly
+approximation~\cite{young74,daly04}, where the checkpoint time is taken as
+the time it would take to checkpoint the application if there were no interference.
 
 \paragraph*{Interference Models}
 Depending on the simulation, applications filesystem operations can
@@ -95,17 +94,17 @@ or checkpoint access is dynamically computed during the simulation. We
 implemented 4 interference models: 1) a theoretically perfectly scalable
 filesystem, where the duration is only function of the aggregated
 bandwidth and the amount of data to transmit for a single application
-(as if there was no inteference); 2) a simple interference model,
+(as if there was no interference); 2) a simple interference model,
 where all applications using the filesystem at a given time get a
 portion of the available aggregated bandwidth proportional to the
-number of nodes they use and inversely proportional to the number of
+number of nodes they use, and inversely proportional to the number of
 nodes involved for all applications doing I/O; 3) a first-come
 first-served I/O scheduling, where applications are served in order,
 the first receiving all the filesystem bandwidth until termination of
 its execution, and the others waiting for their turn; and 4) an
 ordering of the I/O scheduling similar to first-come first-served, but
-implementing the prioriterizing described in
-Section~\ref{sec:algorithms} (Cooperative I/O).
+implementing the priority algorithm \leastwaste described in
+Section~\ref{sec:least-waste}.
 
 In the case of scheduled I/O (first-come first-served and Cooperative
 I/O), initial inputs and final outputs are blocking (the application
