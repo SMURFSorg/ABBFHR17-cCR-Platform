@@ -5,13 +5,13 @@ DAT:=1h-ckpt-cielo.dat daly-ckpt-cielo.dat model.dat prosp.dat
 
 all: $(TEXs)
 
-synthetic-01hMTBF-waste-cielo.tex: synthetic-MTBFhMTBF-waste-cielo.egnp 1h-ckpt-cielo.dat daly-ckpt-cielo.dat model.dat
+synthetic-01hMTBF-waste-cielo.tex: synthetic-MTBFhMTBF-waste-cielo.egnp 1h-ckpt-cielo.dat daly-ckpt-cielo.dat model.dat style.gnp
 	gnuplot -e "MTBF=1" synthetic-MTBFhMTBF-waste-cielo.egnp
 
-synthetic-040gbs-waste-cielo.tex: synthetic-BWgbs-waste-cielo.egnp 1h-ckpt-cielo.dat daly-ckpt-cielo.dat model.dat
+synthetic-040gbs-waste-cielo.tex: synthetic-BWgbs-waste-cielo.egnp 1h-ckpt-cielo.dat daly-ckpt-cielo.dat model.dat style.gnp
 	gnuplot -e "BW=40" synthetic-BWgbs-waste-cielo.egnp
 
-prosp.tex: prosp.dat prosp.gnp
+prosp.tex: prosp.dat prosp.gnp style.gnp
 	gnuplot prosp.gnp
 
 prosp.dat: prosp.csv prosp-csv2dat.py
