@@ -1,3 +1,5 @@
+% !TEX root =  ipdps18.tex
+
 \section{I/O Scheduling Algorithms}\label{sec:algorithms}
 % Aurelien & George
 
@@ -31,14 +33,13 @@ algorithms have to consider.
 
 Both applications and checkpointing generate I/O requests. I/O requests
 are all scheduled using the same algorithm whether they
-are generated from an application I/O request or from a Checkpoint
+are generated from an application I/O request or from a CR
 request. Note however that unlike application I/O, the checkpointing
-volume and frequency is dependent upon application external parameters.
-\todo{I do not understand the external part}
+volume and frequency is dependent upon scheduling decisions.
 Some applications
 control their own checkpointing completely, and decide to checkpoint at
-fixed time steps or application defined time interval. However,
-Daly et al.~\cite{daly} devised a formula to compute the optimal
+fixed time steps or application-defined time intervals.
+Young and Daly~\cite{young74,daly04} devised a formula to compute the optimal
 checkpoint period, $T=\sqrt{2 C \mu}$, where $C$ is the duration of the
 checkpoint transfer, and $\mu$ is the reliability of the platform.
 The parameters in this formula are dependent upon application features
@@ -60,7 +61,7 @@ Similarly, when employing I/O scheduling algorithms,
 checkpoints may include wait time delay or be postponed to decrease
 interference. The traditional strategy of rearming the next checkpoint at
 $\period{i}-\ckpt{i}$ yields the desired checkpointing period $\period{i}$
-only in interference free scenarios: when interferences (or scheduling
+only in interference-free scenarios: when interferences (or scheduling
 introduced delays) dilate the checkpoint duration to $C_{dilated}$, the effective
 period differs from the desired period by the difference $C_{dilated}-\ckpt{i}$.
 The details of how each algorithm accommodates for this discrepancy will
@@ -75,8 +76,8 @@ be discussed later.
 In the non-cooperative I/O scheduling \nocoop, applications
 fill-up the system based on processor count availability, and their I/O
 workload (including checkpointing activities) are not organized by any
-comprehensive system. Instead, applications use the PFS assuming they
-are the sole user and do not modify their access pattern to accommodate
+comprehensive system. Instead, applications use the Parallel FileSystem (PFS) assuming they
+are the sole user, and do not modify their access pattern to accommodate
 for possible interferences. In these conditions, it has been observed~\cite{Dorier2014}
 that concurrent access
 to I/O resources will cause a decrease in the application observed
@@ -97,7 +98,7 @@ $\period{i}$. This is however consistent with the concept of a
 checkpointing strategy that is applied blindly, without consideration
 for issues stemming from I/O resource sharing and interferences.
 
-In this algorithm, we consider two variants where checkpoints are
+In the \nocoop algorithm, we consider two variants where checkpoints are
 tentatively taken at 1) fixed frequency (\propfixed), or 2) at the
 Daly frequency (\propdaly).
 
@@ -106,17 +107,17 @@ Daly frequency (\propdaly).
 A simple optimization to the aforementioned scheme is to favor one of
 the applications' I/O request over all others. While the overall throughput
 may remain unchanged (given an efficient PFS implementation), the favored
-application completes its I/O workload faster (\ie at nominal speed
+application completes its I/O workload faster (\ie, at nominal speed
 $\ckpt{i}$ for an application of class $\app{i}$).
 Applications are selected to perform I/O in the order of their requests,
-\ie as soon as an application starts blocking on an I/O operation it will
-take a place in the back of a I/O FIFO queue. When the currently
+\ie ,as soon as an application starts blocking on an I/O operation it will
+take a place in the back of an  I/O FIFO queue. When the currently
 active application completes its I/O, the next application waiting for I/O
-is granted access, and start making progress.
-(\fifoblock).
+is granted access, and starts making progress. We denote this scheme as
+\fifoblock.
 
-The advantage can be seen in a simple workload with two
-applications (assuming a favorable linear interference model).
+The advantage of \fifoblock over \nocoop can be seen in a simple workload with two
+applications, assuming a favorable linear interference model.
 If the two applications simultaneously start an I/O requesting the
 transfer of a similar volume $V$ of data, in the \nocoop strategy,
 both applications take $2 \times \frac{V}{\bandavail}$ time to complete
@@ -130,14 +131,14 @@ to reducing I/O interferences, the average I/O completion time
 has been reduced for the applications (although fairness has been decreased).
 
 Similarly to the previous strategy, application observed checkpoint
-duration may increase past $\ckpt{i}$, this time not due to interference, but due to
-the time spent waiting for the first place in the I/O scheduling FIFO.
+duration may increase past $\ckpt{i}$, no longer because of interference, but now because
+of  the time spent waiting for the first place in the I/O scheduling FIFO.
 As we have computed above, although the average $C-\ckpt{i}$
 difference is lower, for one application it is as large as in the
 previous strategy. In any case, again, the checkpointing period will
 be, in average, larger than the desired $\period{i}$ period.
 
-In this algorithm, we will consider two variants where checkpoints are
+In the \fifoblock algorithm, we consider two variants where checkpoints are
 tentatively taken at 1) fixed frequency (\bfifofixed), or 2) at the
 Daly frequency (\bfifodaly).
 
@@ -147,19 +148,19 @@ In the previous strategy, the cost of I/O interferences has been
 exchanged for idle time when waiting for the I/O token in a blocking
 fashion. If the application developer can refactor the code
 to continue computing while awaiting for the I/O request to be granted,
-it become possible to overlap the idle time with useful computation.
-While it may sometimes be difficult to overlap initial and final input
-and output, intermediate I/O as well as checkpointing I/O workload can
-be effectively time-shifted.
-
-In this algorithm, at the end of the previous checkpoint, a tentative
+it becomes possible to overlap the idle time with useful computation.
+Indeed, checkpointing I/O operations can
+be effectively time-shifted, at he risk of increasing the exposure to failures.
+\todo[inline]{YR2AB: removed intermediate I/O operations because we neglect them and 
+concentrate on CR, input and output for optimizing available bandwidth $\bandavail$}
+ In the \fifononblock algorithm, at the end of the previous checkpoint, a tentative
 date for the next checkpoint is set at $t_{req}=t_{now}+\period{i}-\ckpt{i}$.
 When the application reaches date $t_{req}$, a non-blocking I/O request
 is made and reserves a position in the
 I/O queue. The application keeps computing until the
 scheduler informs the application that the I/O system is exclusively
-available to the application. Then, the application initiates it's
-I/O (checkpointing or otherwise). When the active application completes
+available to the application. Then, the application initiates its
+I/O (checkpointing, initial input, or final output). When the active application completes
 its I/O, the next requesting application (in FIFO order)
 become the active I/O application.
 
@@ -169,15 +170,15 @@ in charge of synchronizing the checkpoints may immediately (or after
 a short synchronization) start producing the checkpoint I/O workload
 (typical for system-based checkpoint),
 or finish the current computing block before allowing the checkpoint
-to proceed (typical for user-level checkpoint). In this work we consider
+to proceed (typical for user-level checkpoint). In this work, we consider
 that this resynchronization cost is negligible with respect to the
-checkpoint duration. Note that should a failure impact that application,
+checkpoint duration. Should a failure impact that application,
 it would restart from the date at which the last checkpoint was taken, and
 not at $t_{req}$, which is another improvement when compared to the
 \fifoblock and \nocoop algorithms.
-\todo[inline]{If we talk about the positive aspect we might also want to mention the negative one, when a fault trigger during the I/O introduced delay}.
+%\todo[inline]{If we talk about the positive aspect we might also want to mention the negative one, when a fault trigger during the I/O introduced delay}.
 
-Again, we will consider two variants where checkpoints are
+Again, we consider two variants in the \fifononblock algorithm where checkpoints are
 tentatively taken at 1) fixed frequency (\fifofixed), or 2) at the
 Daly frequency (\fifodaly).
 
