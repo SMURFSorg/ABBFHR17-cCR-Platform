@@ -10,7 +10,7 @@ algorithm (\fifoblock) coordinate applications to eliminate interference
 between their I/O activities: only one application performs I/O at any given
 time while other applications requesting I/O are blocked until their
 turn (FIFO) comes. The third algorithm (\fifononblock) is similar, except
-that applications that are waiting for the checkpointing token
+that applications that are waiting for the I/O token
 continue computing until their turn comes; note that unlike the
 blocking algorithms, this optimization requires
 application code refactoring. Last, we propose an heuristic
