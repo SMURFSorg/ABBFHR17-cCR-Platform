@@ -11,7 +11,7 @@ when the objective is to minimize the total waste incurred  by the platform, or 
 to maximize the total throughput of the platform.
 
 In steady-state operation, there are $\nbapp{i}$ applications of class $\app{i}$,
-each using $\nbnodes{i}$, and with checkpoint time $\ckpt{i}$. Because we orchestrate
+each using $\nbnodes{i}$ nodes, and with checkpoint time $\ckpt{i}$. Because we orchestrate
 checkpoints to avoid CR-CR interferences, we have $\ckpt{i} = \frac{\size{i}}{\bandavail}$,
 where $\size{i}$ denote the size of the checkpoint file of each application of class $\app{i}$.
 
@@ -19,7 +19,7 @@ The waste of an application is the ratio of time that the application spends doi
 resilience operations by the time that it does useful work. The time
 spent doing resilience operations include the time spend during each period to checkpoint, and in case of failure, the time to rollback to the previous checkpoint, and the time to recompute lost work.
 %We assume
-%that the recovery time $\reco{i}$ is equivalent to the checkpoint time  $\ckpt{i}$. 
+%that the recovery time $\reco{i}$ is equivalent to the checkpoint time  $\ckpt{i}$.
 We
 can express the waste $\wasteapp{i}$ of an application of class
 $\app{i}$ that checkpoints with period $\period{i}$
@@ -91,11 +91,11 @@ we choose for $\lambda$ the minimum value such that Equation~\eqref{eq.IOconstra
    \begin{theorem}
   In the presence of I/O constraints, the optimal values of the checkpointing periods are given
   by Equation~\eqref{eq.KKT}, where $\lambda$ is the smallest nonnegative value such that
-  Equation~\eqref{eq.IOconstraint} holds. The total platform waste is then given by 
+  Equation~\eqref{eq.IOconstraint} holds. The total platform waste is then given by
   Equation~\eqref{eq.totalwaste}.
 \end{theorem}
 
 The optimal periods may not be achievable, because Equation~\eqref{eq.IOconstraint} is a necessary condition, but is may not be sufficient:
 even though the total I/O bandwidth is not exceeded, meaning there is enough capacity to take all the checkpoints at the given periods, we still need to orchestrate these checkpoints into a periodic pattern that repeats over time. Furthermore, we have neglected initial input and final output I/O operations,
-because otherwise, we would need to account for application durations, which renders the 
+because otherwise, we would need to account for application durations, which renders the
 steady-state analysis intractable. In other words, we have derived a lower bound of the optimal waste.
