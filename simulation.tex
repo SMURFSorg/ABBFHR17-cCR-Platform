@@ -31,15 +31,14 @@ As an example, we consider the subset of application classes given by
 the APEX workflows report for the subset of application classes of
 LANL (EAP, LAP, Silverton and VPIC), simulated as running over the
 Cielo supercomputer, for a minimal execution time of 60h. A simulation
-will in a loop, randomly instantiate one of the four classes, assign a
-work duration uniformly distributed between $0.8w$ and $1.2w$, where
-$w$ is the typical walltime specified for the chosen application
-class, and count the resource allocated for this application class,
-until A) the simulated execution would necessarily run for at least 2
-months, and B) the amount of resource used by the selected class is
-within 1\% of the target goal of the representative workload
-percentage defined in the APEX workflows report (see
-Table~\ref{table:apex}).
+will randomly instantiate one of the four classes, assigning a work
+duration uniformly distributed between $0.8w$ and $1.2w$, where $w$ is
+the typical walltime specified for the chosen application class, and
+count the resource allocated for this application class, until A) the
+simulated execution would necessarily run for at least 2 months, and B) the
+amount of resource used by the selected class is within 1\% of the
+target goal of the representative workload percentage defined in the
+APEX workflows report (see Table~\ref{table:lanl}).
 
 Once this list of applications is defined, a set of node failures
 dates is computed. Dates of failures are placed following an
