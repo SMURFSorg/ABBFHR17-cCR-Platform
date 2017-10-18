@@ -67,16 +67,16 @@ the middle is the mean value.
 
 First, we explore the performance of each approach under heavy risks
 of failures. Figure~\ref{fig:cielo-1hmtbf} represents the waste ratio
-on Cielo, assuming the Node MTBF was 2 years (i.e. a system MTBF of 1h). We vary the
-filesystem bandwidth from 40 GB/s to 160GB/s in order to evaluate the
-impact of this parameter. We observe 3 classes of behavior: \propfixed
-and \bfifofixed exhibit a waste ratio that decrease as the bandwidth
-increases, but remains above 40\% even with a high available
-bandwidth; \fifodaly, \fifofixed, and \cooperative quickly decrese at
-only 20\% of waste or less, and reach the theoretical model
-performance; and \propdaly and \bfifodaly start at the same level of
-efficiency as \propfixed and \bfifofixed, and reach the 20\% of waste
-as the bandwidth increases.
+on Cielo, assuming the Node MTBF was 2 years (i.e. a system MTBF of
+1h). We vary the filesystem bandwidth from 40 GB/s to 160GB/s in order
+to evaluate the impact of this parameter. We observe 3 classes of
+behavior: \propfixed and \bfifofixed exhibit a waste ratio that
+decrease as the bandwidth increases, but remains above 40\% even with
+a high available bandwidth; \fifodaly, \fifofixed, and \cooperative
+quickly decrese at only 20\% of waste or less, and reach the
+theoretical model performance; and \propdaly and \bfifodaly start at
+the same level of efficiency as \propfixed and \bfifofixed, and reach
+the 20\% of waste as the bandwidth increases.
 
 This figure shows that with a high frequency of failures, providing
 each application with the appropriate checkpoint interval is central
@@ -97,7 +97,7 @@ Notably, \cooperative remains the most efficient technique under all
 conditions, and reaches the theoretical performance given by
 Equation~\eqref{eq.totalwaste} in the case of a stead state
 analysis. This illustrates the efficiency of the proposed heuristic
-(Equations~\eqref{eq.heuristicpart1} and~\eqref{eq.heuristicpart2}) to
+(Equations~\eqref{eq.selection} and~\eqref{eq.selection2}) to
 schedule checkpoints and I/O in a way that avoids interferences,
 allowing the system to behave as if no interference was experienced,
 in most cases. The high variation shows that a minority of the runs
