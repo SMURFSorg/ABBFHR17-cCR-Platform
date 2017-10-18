@@ -1,3 +1,5 @@
+% !TEX root =  ipdps18.tex
+
 \section{Simulation Framework}
 \label{sec:simulator}
 % Primary: Thomas
@@ -5,7 +7,7 @@
 In order to evaluate the performance of the proposed approach, we
 ran a large set of discrete event simulations that we describe in this
 section. Simulations are instantiated by a set of initial conditions
-that define a set of application classes, and their distribution, and
+that define a set of application classes, their distribution, and
 on what platform these applications will execute.
 
 \paragraph*{High level parameters}
@@ -16,7 +18,8 @@ execute during the entire life of the application, and proportion of
 the available CPU-hours to use overall.  Platforms are characterized
 by the number of nodes, a system Mean Time Between Failures, and an
 aggregated I/O subsystem bandwidth that is shared between the
-different nodes.
+different nodes. We assume same bandwidth when reading from and writing to the filesystem,
+hence $\ckpt{i}=\reco{i}$ for each application $\app{i}$.
 
 A simulation first selects randomly an ordered set of applications
 that are instances of the different application classes. The set of
