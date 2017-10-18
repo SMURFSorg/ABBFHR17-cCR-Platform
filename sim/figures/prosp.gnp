@@ -132,7 +132,7 @@ set x2label ""
 set x2label  font "" textcolor lt -1 norotate
 set xrange [ 3 : 25 ] noreverse nowriteback
 set x2range [ * : * ] noreverse nowriteback
-set ylabel "Minimum Bandwidth to reach 0.8 efficiency (TB/s)" 
+set ylabel 'Min. bandwidth to reach 80\% efficiency (TB/s)'
 set ylabel  font "" textcolor lt -1 rotate by -270
 set y2label "" 
 set y2label  font "" textcolor lt -1 rotate by -270
@@ -171,13 +171,14 @@ set psdir
 set fit brief errorvariables nocovariancevariables errorscaling prescale nowrap v5
 GNUTERM = "aqua"
 x = 0.0
-plot "<awk '$1==\"Prop1h\" {print}' prosp.dat" u ($2/3600.0/24.0/365.0):($4/1e12) w l  t "Proportional Interference (1h Checkpoint Interval)" ls 2  \
-   , "<awk '$1==\"PropDaly\" {print}' prosp.dat" u ($2/3600.0/24.0/365.0):($4/1e12) w l t "Proportional Interference (Daly Checkpoint Interval)" ls 3 \
-   , "<awk '$1==\"FCFS1h\" {print}' prosp.dat" u ($2/3600.0/24.0/365.0):($4/1e12) w l t "FIFO (1h Checkpoint Interval)" ls 4  \
-   , "<awk '$1==\"FCFSDaly\" {print}' prosp.dat" u ($2/3600.0/24.0/365.0):($4/1e12) w l t "FIFO (Daly Checkpoint Interval)" ls 5  \
-   , "<awk '$1==\"BlockingFCFS1h\" {print}' prosp.dat" u ($2/3600.0/24.0/365.0):($4/1e12) w l t "Blocking FIFO (1h Checkpoint Interval)" ls 6  \
-   , "<awk '$1==\"BlockingFCFSDaly\" {print}' prosp.dat" u ($2/3600.0/24.0/365.0):($4/1e12) w l t "Blocking FIFO (Daly Checkpoint Interval)" ls 7 \
-   , "<awk '$1==\"Coop\" {print}' prosp.dat" u ($2/3600.0/24.0/365.0):($4/1e12) w l t "Cooperative Checkpointing" ls 1
+set key vertical maxrows 3 width 12 at screen .5,-.07
+plot "<awk '$1==\"Prop1h\" {print}' prosp.dat" u ($2/3600.0/24.0/365.0):($4/1e12) w l  t '\propfixed' ls 2  \
+   , "<awk '$1==\"PropDaly\" {print}' prosp.dat" u ($2/3600.0/24.0/365.0):($4/1e12) w l t '\propdaly' ls 3 \
+   , "<awk '$1==\"FCFS1h\" {print}' prosp.dat" u ($2/3600.0/24.0/365.0):($4/1e12) w l t '\fifofixed' ls 4  \
+   , "<awk '$1==\"FCFSDaly\" {print}' prosp.dat" u ($2/3600.0/24.0/365.0):($4/1e12) w l t '\fifodaly' ls 5  \
+   , "<awk '$1==\"BlockingFCFS1h\" {print}' prosp.dat" u ($2/3600.0/24.0/365.0):($4/1e12) w l t '\bfifofixed' ls 6  \
+   , "<awk '$1==\"BlockingFCFSDaly\" {print}' prosp.dat" u ($2/3600.0/24.0/365.0):($4/1e12) w l t '\bfifodaly' ls 7 \
+   , "<awk '$1==\"Coop\" {print}' prosp.dat" u ($2/3600.0/24.0/365.0):($4/1e12) w l t '\cooperative' ls 1
 
 #plot "<awk '$1==\"Prop1h\" {print}' prosp.dat" u ($2/3600.0/24.0/365.0-.3):($8/1e12):($7/1e12):($11/1e12):($10/1e12) w candlestick t "Proportional Interference (1h Checkpoint Interval)" ls 2 \
 #   , "" u ($2/3600.0/24.0/365.0):($4/1e12) w l t "" ls 2  \

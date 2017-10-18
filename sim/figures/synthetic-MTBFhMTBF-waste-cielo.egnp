@@ -117,7 +117,7 @@ unset paxis 4 tics
 unset paxis 5 tics
 unset paxis 6 tics
 unset paxis 7 tics
-set title sprintf("System: Cielo; System MTBF: %dh", MTBF) 
+set title sprintf("System: Cielo; Node MTBF: 2 years", MTBF) 
 set title  font "" norotate
 set timestamp bottom 
 set timestamp "" 
@@ -175,19 +175,20 @@ x = 0.0
 #base =40
 base=50
 mtbfstr = sprintf("%d", MTBF*3600)
-plot "<awk '$1==\"Simple\" && $3==".mtbfstr." {print}' 1h-ckpt-cielo.dat" u ($2/1e9-2.25):(1-column(base+9)):(1-column(base+7)):(1-column(base+13)):(1-column(base+11)) w candlestick t "Proportional Interference (1h Checkpoint Interval)" ls 2 \
+set key vertical maxrows 3 width 4 at screen .5,-.07
+plot "<awk '$1==\"Simple\" && $3==".mtbfstr." {print}' 1h-ckpt-cielo.dat" u ($2/1e9-2.25):(1-column(base+9)):(1-column(base+7)):(1-column(base+13)):(1-column(base+11)) w candlestick t '\propfixed' ls 2 \
    ,                                                          "" u ($2/1e9-2.25):(1-column(base+5)) w p t "" ls 2 ps .2  \
-   , "<awk '$1==\"Simple\" && $3==".mtbfstr." {print}' daly-ckpt-cielo.dat" u ($2/1e9-1.5):(1-column(base+9)):(1-column(base+7)):(1-column(base+13)):(1-column(base+11)) w candlestick t "Proportional Interference (Daly Checkpoint Interval)" ls 3 \
+   , "<awk '$1==\"Simple\" && $3==".mtbfstr." {print}' daly-ckpt-cielo.dat" u ($2/1e9-1.5):(1-column(base+9)):(1-column(base+7)):(1-column(base+13)):(1-column(base+11)) w candlestick t '\propdaly' ls 3 \
    ,                                                          "" u ($2/1e9-1.5):(1-column(base+5)) w p t "" ls 3 ps .2  \
-   , "<awk '$1==\"FCFS\" && $3==".mtbfstr." {print}' 1h-ckpt-cielo.dat" u ($2/1e9-.75):(1-column(base+9)):(1-column(base+7)):(1-column(base+13)):(1-column(base+11)) w candlestick t "FIFO (1h Checkpoint Interval)" ls 4 \
+   , "<awk '$1==\"FCFS\" && $3==".mtbfstr." {print}' 1h-ckpt-cielo.dat" u ($2/1e9-.75):(1-column(base+9)):(1-column(base+7)):(1-column(base+13)):(1-column(base+11)) w candlestick t '\fifofixed' ls 4 \
    ,                                                           "" u ($2/1e9-.75):(1-column(base+5)) w p t "" ls 4 ps .2 \
-   , "<awk '$1==\"FCFS\" && $3==".mtbfstr." {print}' daly-ckpt-cielo.dat" u ($2/1e9):(1-column(base+9)):(1-column(base+7)):(1-column(base+13)):(1-column(base+11)) w candlestick t "FIFO (Daly Checkpoint Interval)" ls 5 \
+   , "<awk '$1==\"FCFS\" && $3==".mtbfstr." {print}' daly-ckpt-cielo.dat" u ($2/1e9):(1-column(base+9)):(1-column(base+7)):(1-column(base+13)):(1-column(base+11)) w candlestick t '\fifodaly' ls 5 \
    ,                                                           "" u ($2/1e9):(1-column(base+5)) w p t "" ls 5 ps .2 \
-   , "<awk '$1==\"BLOCKING_FCFS\" && $3==".mtbfstr." {print}' 1h-ckpt-cielo.dat" u ($2/1e9+.75):(1-column(base+9)):(1-column(base+7)):(1-column(base+13)):(1-column(base+11)) w candlestick t "Blocking FIFO (1h Checkpoint Interval)" ls 6 \
+   , "<awk '$1==\"BLOCKING_FCFS\" && $3==".mtbfstr." {print}' 1h-ckpt-cielo.dat" u ($2/1e9+.75):(1-column(base+9)):(1-column(base+7)):(1-column(base+13)):(1-column(base+11)) w candlestick t '\bfifofixed' ls 6 \
    ,                                                           "" u ($2/1e9+.75):(1-column(base+5)) w p t "" ls 6 ps .2 \
-   , "<awk '$1==\"BLOCKING_FCFS\" && $3==".mtbfstr." {print}' daly-ckpt-cielo.dat" u ($2/1e9+1.5):(1-column(base+9)):(1-column(base+7)):(1-column(base+13)):(1-column(base+11)) w candlestick t "Blocking FIFO (Daly Checkpoint Interval)" ls 7 \
+   , "<awk '$1==\"BLOCKING_FCFS\" && $3==".mtbfstr." {print}' daly-ckpt-cielo.dat" u ($2/1e9+1.5):(1-column(base+9)):(1-column(base+7)):(1-column(base+13)):(1-column(base+11)) w candlestick t '\bfifodaly' ls 7 \
    ,                                                           "" u ($2/1e9+1.5):(1-column(base+5)) w p t "" ls 7 ps .2 \
-   ,  "<awk '$1==\"Coop\" && $3==".mtbfstr." {print}' daly-ckpt-cielo.dat" u ($2/1e9+2.25):(1-column(base+9)):(1-column(base+7)):(1-column(base+13)):(1-column(base+11)) w candlestick t "Cooperative Checkpointing" ls 1 \
+   ,  "<awk '$1==\"Coop\" && $3==".mtbfstr." {print}' daly-ckpt-cielo.dat" u ($2/1e9+2.25):(1-column(base+9)):(1-column(base+7)):(1-column(base+13)):(1-column(base+11)) w candlestick t '\cooperative' ls 1 \
    ,                                                          "" u ($2/1e9+2.25):(1-column(base+5)) w p t "" ls 1 ps .2 \
    ,  "<awk '$2==" . MTBF . " {print}' model.dat" u ($1/1e9):3 w lines ls 8 t "Theoretical Model"
 							      

@@ -65,7 +65,7 @@ the point in the middle is the mean value.
 
 First, we explore the performance of each approach under heavy risks
 of failures. Figure~\ref{fig:cielo-1hmtbf} represents the waste ratio
-on Cielo, assuming the MTBF of the system was 1h. We vary the
+on Cielo, assuming the Node MTBF was 2 years (i.e. a system MTBF of 1h). We vary the
 filesystem bandwidth from 40 GB/s to 160GB/s in order to evaluate the
 impact of this parameter. We observe 3 classes of behavior: \propfixed
 and \bfifofixed exhibit a waste ratio that decrease as the bandwidth
@@ -114,8 +114,8 @@ Second, we explore the performance of each approach under low
 bandwidth (and thus high risk of
 interference). Figure~\ref{fig:cielo-40gbs} represents the waste ratio
 on Cielo, assuming the aggregated filesystem bandwidth of the system
-was 40GB/s. We vary the system MTBF from 1h (2 years of node MTBF) to
-24h (48 years of node MTBF) in order to evaluate the impact of this
+was 40GB/s. We vary the system MTBF from 2 years (1h of system MTBF) to
+50 years (24h of system MTBF) in order to evaluate the impact of this
 parameter. Similarly to Figure~\ref{fig:cielo-1hmtbf}, we observe 3
 classes of behavior: \propfixed and \bfifofixed exhibit a waste ratio
 that remains constant around 80\% for all values of the MTBF. These
@@ -137,12 +137,12 @@ suprisingly, the simple FIFO scheduling of checkpoints with fixed
 chekpoint interval (\bfifofixed) is capable of reaching a performance
 comparable to the one of the strategies that reduce the number of
 checkpoints. This is due to the significant reduction in interference
-due to the reduction of number of restarts with an MTBF of 8h. As soon
-as the number of restarting applications decreases, the filesystem
-sollicitation decreases sufficiently to avoid long delays in non blocking
-approaches, as is illustrated by the performance of \fifofixed at 2h
-of MTBF.
-
+due to the reduction of number of restarts with a system MTBF of 8h
+(16 years of node MTBF). As soon as the number of restarting
+applications decreases, the filesystem sollicitation decreases
+sufficiently to avoid long delays in non blocking approaches, as is
+illustrated by the performance of \fifofixed at 2h of system MTBF (4
+years of node MTBF).
 
 \begin{figure}
   \begin{center}

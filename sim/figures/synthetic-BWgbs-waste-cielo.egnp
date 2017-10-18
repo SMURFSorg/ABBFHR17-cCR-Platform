@@ -101,7 +101,6 @@ set mcbtics default
 set mrtics default
 set xtics border in scale 1,0.5 mirror norotate  autojustify
 set xtics  norangelimit 
-set xtics   ("1" 3600.00, "2" 7200.00, "4" 14400.0, "8" 28800.0, "16" 57600.0)
 set ytics border in scale 1,0.5 mirror norotate  autojustify
 set ytics  norangelimit autofreq 
 set ztics border in scale 1,0.5 nomirror norotate  autojustify
@@ -128,11 +127,11 @@ set rrange [ * : * ] noreverse nowriteback
 set trange [ * : * ] noreverse nowriteback
 set urange [ * : * ] noreverse nowriteback
 set vrange [ * : * ] noreverse nowriteback
-set xlabel "System MTBF (h)" 
+set xlabel "Node MTBF (years)" 
 set xlabel  font "" textcolor lt -1 norotate
 set x2label "" 
 set x2label  font "" textcolor lt -1 norotate
-set xrange [ 1800.00 : 115200. ] noreverse nowriteback
+set xrange [ 1 : 100 ] noreverse nowriteback
 set x2range [ * : * ] noreverse nowriteback
 set ylabel "Waste Ratio" 
 set ylabel  font "" textcolor lt -1 rotate by -270
@@ -177,21 +176,21 @@ x = 0.0
 #base =40
 base=50
 bwstr = sprintf("%g", BW*1e9)
-
-plot "<awk '$1==\"Simple\" && $2==" . bwstr . " {print}' 1h-ckpt-cielo.dat" u (0.925*$3):(1-column(base+9)):(1-column(base+7)):(1-column(base+13)):(1-column(base+11)) w candlestick t "Proportional Interference (1h Checkpoint Interval)" ls 2 \
-   ,                                                          "" u (0.925*$3):(1-column(base+5)) w p t "" ls 2 ps .2  \
-   , "<awk '$1==\"Simple\" && $2==" . bwstr . " {print}' daly-ckpt-cielo.dat" u (0.95*$3):(1-column(base+9)):(1-column(base+7)):(1-column(base+13)):(1-column(base+11)) w candlestick t "Proportional Interference (Daly Checkpoint Interval)" ls 3 \
-   ,                                                          "" u (0.95*$3):(1-column(base+5)) w p t "" ls 3 ps .2  \
-   , "<awk '$1==\"FCFS\" && $2==" . bwstr . " {print}' 1h-ckpt-cielo.dat" u (0.975*$3):(1-column(base+9)):(1-column(base+7)):(1-column(base+13)):(1-column(base+11)) w candlestick t "FIFO (1h Checkpoint Interval)" ls 4 \
+set key vertical maxrows 3 width 4 at screen .5,-.07
+plot "<awk '$1==\"Simple\" && $2==" . bwstr . " {print}' 1h-ckpt-cielo.dat" u (0.925*$3*17784.0/3600.0/24.0/365.0):(1-column(base+9)):(1-column(base+7)):(1-column(base+13)):(1-column(base+11)) w candlestick t '\propfixed' ls 2 \
+   ,                                                          "" u (0.925*$3*17784.0/3600.0/24.0/365.0):(1-column(base+5)) w p t "" ls 2 ps .2  \
+   , "<awk '$1==\"Simple\" && $2==" . bwstr . " {print}' daly-ckpt-cielo.dat" u (0.95*$3*17784.0/3600.0/24.0/365.0):(1-column(base+9)):(1-column(base+7)):(1-column(base+13)):(1-column(base+11)) w candlestick t '\propdaly' ls 3 \
+   ,                                                          "" u (0.95*$3*17784.0/3600.0/24.0/365.0):(1-column(base+5)) w p t "" ls 3 ps .2  \
+   , "<awk '$1==\"FCFS\" && $2==" . bwstr . " {print}' 1h-ckpt-cielo.dat" u (0.975*$3*17784.0/3600.0/24.0/365.0):(1-column(base+9)):(1-column(base+7)):(1-column(base+13)):(1-column(base+11)) w candlestick t '\fifofixed' ls 4 \
    ,                                                           "" u (0.975*$3):(1-column(base+5)) w p t "" ls 4 ps .2 \
-   , "<awk '$1==\"FCFS\" && $2==" . bwstr . " {print}' daly-ckpt-cielo.dat" u ($3):(1-column(base+9)):(1-column(base+7)):(1-column(base+13)):(1-column(base+11)) w candlestick t "FIFO (Daly Checkpoint Interval)" ls 5 \
-   ,                                                           "" u ($3):(1-column(base+5)) w p t "" ls 5 ps .2 \
-   , "<awk '$1==\"BLOCKING_FCFS\" && $2==" . bwstr . " {print}' 1h-ckpt-cielo.dat" u (1.025*$3):(1-column(base+9)):(1-column(base+7)):(1-column(base+13)):(1-column(base+11)) w candlestick t "Blocking FIFO (1h Checkpoint Interval)" ls 6 \
-   ,                                                           "" u (1.025*$3):(1-column(base+5)) w p t "" ls 6 ps .2 \
-   , "<awk '$1==\"BLOCKING_FCFS\" && $2==" . bwstr . " {print}' daly-ckpt-cielo.dat" u (1.05*$3):(1-column(base+9)):(1-column(base+7)):(1-column(base+13)):(1-column(base+11)) w candlestick t "Blocking FIFO (Daly Checkpoint Interval)" ls 7 \
-   ,                                                           "" u (1.05*$3):(1-column(base+5)) w p t "" ls 7 ps .2 \
-   ,  "<awk '$1==\"Coop\" && $2==" . bwstr . " {print}' daly-ckpt-cielo.dat" u (1.075*$3):(1-column(base+9)):(1-column(base+7)):(1-column(base+13)):(1-column(base+11)) w candlestick t "Cooperative Checkpointing" ls 1 \
-   ,                                                          "" u (1.075*$3):(1-column(base+5)) w p t "" ls 1 ps .2 \
-   ,  "<awk '$1==" . bwstr . " {print}' model.dat" u ($2*3600):3 w lines ls 8 t "Theoretical Model"
+   , "<awk '$1==\"FCFS\" && $2==" . bwstr . " {print}' daly-ckpt-cielo.dat" u ($3*17784.0/3600.0/24.0/365.0):(1-column(base+9)):(1-column(base+7)):(1-column(base+13)):(1-column(base+11)) w candlestick t '\fifodaly' ls 5 \
+   ,                                                           "" u ($3*17784.0/3600.0/24.0/365.0):(1-column(base+5)) w p t "" ls 5 ps .2 \
+   , "<awk '$1==\"BLOCKING_FCFS\" && $2==" . bwstr . " {print}' 1h-ckpt-cielo.dat" u (1.025*$3*17784.0/3600.0/24.0/365.0):(1-column(base+9)):(1-column(base+7)):(1-column(base+13)):(1-column(base+11)) w candlestick t '\bfifofixed' ls 6 \
+   ,                                                           "" u (1.025*$3*17784.0/3600.0/24.0/365.0):(1-column(base+5)) w p t "" ls 6 ps .2 \
+   , "<awk '$1==\"BLOCKING_FCFS\" && $2==" . bwstr . " {print}' daly-ckpt-cielo.dat" u (1.05*$3*17784.0/3600.0/24.0/365.0):(1-column(base+9)):(1-column(base+7)):(1-column(base+13)):(1-column(base+11)) w candlestick t '\bfifodaly' ls 7 \
+   ,                                                           "" u (1.05*$3*17784.0/3600.0/24.0/365.0):(1-column(base+5)) w p t "" ls 7 ps .2 \
+   ,  "<awk '$1==\"Coop\" && $2==" . bwstr . " {print}' daly-ckpt-cielo.dat" u (1.075*$3*17784.0/3600.0/24.0/365.0):(1-column(base+9)):(1-column(base+7)):(1-column(base+13)):(1-column(base+11)) w candlestick t '\cooperative' ls 1 \
+   ,                                                          "" u (1.075*$3*17784.0/3600.0/24.0/365.0):(1-column(base+5)) w p t "" ls 1 ps .2 \
+   ,  "<awk '$1==" . bwstr . " {print}' model.dat" u ($2*3600*17784.0/3600.0/24.0/365.0):3 w lines ls 8 t "Theoretical Model"
 							      
 #    EOF
