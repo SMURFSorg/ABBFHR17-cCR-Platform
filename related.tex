@@ -12,8 +12,8 @@ Therefore, we attempt to limit our I/O interference discussion to those
 techniques which consider the global scheduling of checkpoints and/or general
 I/O across a platform.
 
-\todo[inline]{kbf: I am unsure about this breakdown.  These two things do not
-seem independent; reducing pressure seems to al reduce interference ...}
+%\todo[inline]{kbf: I am unsure about this breakdown.  These two things do not
+%seem independent; reducing pressure seems to al reduce interference ...}
 
 \subsection{Checkpointing and I/O}
 
@@ -77,8 +77,12 @@ compression~\cite{Plank94ICKP}, and related, Plank et al. proposed
 checkpoints~\cite{Plank95CompressedDiff}.  Tanzima et al. have shown that
 similarities amongst checkpoint data from different processes can be exploited
 to compress and reduce checkpoint data volumes~\cite{tanzima12mcrengine}.
+Sasaki   et   al  proposed   a   lossy
+compression method based on wavelet transform
+and  vector  quantization and   applied  their  compression
+method  to   checkpoints of a   production   climate  application~\cite{sasaki2015}.
 
-\subsection{Avoiding I/O interference}
+ \subsection{Avoiding I/O interference}
 
 Most closely related to our work, a number of studies have considered the
 global scheduling of checkpoints and other I/O across the platform to reduce
