@@ -252,9 +252,9 @@ Then  $A_{i}$ will use the I/O resource for $v_{i}$ seconds.
   \muind/q_{j}$, where $\muind$ is the individual MTBF per processor. With this
   probability, the $q_{j}$ processors will have to recover and re-execute $d_{j} +
   v_{i}/2$ seconds of work, hence the waste $\wapp{i}{j}$ is $$\wapp{i}{j} =
-  \frac{v_{i}}{\mu_{j} } q_{j} (R_{j} + d_{j} + \frac{v_{i}}{2}) =
-  \frac{v_{i}}{\muind} q^{2}_{j} (R_{j} + d_{j} + \frac{v_{i}}{2})$$ where
-  $R_{j}$ is the recovery time for $A_{j}$. Note that for $A_{j} \in
+  \frac{v_{i}}{\mu_{j} } q_{j} (\reco{j} + d_{j} + \frac{v_{i}}{2}) =
+  \frac{v_{i}}{\muind} q^{2}_{j} (\reco{j} + d_{j} + \frac{v_{i}}{2})$$ where
+  $\reco{j}$ is the recovery time for $A_{j}$. Note that for $A_{j} \in
   \Catckptcat$, the waste $\wapp{i}{j}$ is probabilistic.
 %
  \end{compactitem}
@@ -266,16 +266,16 @@ We obtain
 \label{eq.selection}
 \begin{array}{ll}
  \wap{i} = & v_{i} \times \left( \sum_{1 \leq j \leq r, j\neq i} q_{j} (d_{j} + v_{i}) \right.\\
-& + \left. \sum_{r+1 \leq j \leq r+s}   \frac{q^{2}_{j}}{\muind} (R_{j} + d_{j} + \frac{v_{i}}{2}) \right)
+& + \left. \sum_{r+1 \leq j \leq r+s}   \frac{q^{2}_{j}}{\muind} (\reco{j} + d_{j} + \frac{v_{i}}{2}) \right)
  \end{array}
 \end{equation}
 
- Assume now that the selected application $A_{i} \in \Catckptcat$. Then  $A_{i}$ will use the I/O resource for $C_{i}$ seconds instead of $v_{i}$ seconds for $A_{i} \in \Catiocat$. We directly obtain the counterpart of Equation~\eqref{eq.selection} for its waste $\wap{i}$:
+ Assume now that the selected application $A_{i} \in \Catckptcat$. Then  $A_{i}$ will use the I/O resource for $\ckpt{i}$ seconds instead of $v_{i}$ seconds for $A_{i} \in \Catiocat$. We directly obtain the counterpart of Equation~\eqref{eq.selection} for its waste $\wap{i}$:
  \begin{equation}
 \label{eq.selection2}
  \begin{array}{ll}
- \wap{i} = & C_{i} \times \left( \sum_{1 \leq j \leq r} q_{j} (d_{j} + C_{i}) \right.\\
-& + \left. \sum_{r+1 \leq j \leq r+s, j\neq i}   \frac{q^{2}_{j}}{\muind} (R_{j} + d_{j} + \frac{C_{i}}{2}) \right)
+ \wap{i} = & \ckpt{i} \times \left( \sum_{1 \leq j \leq r} q_{j} (d_{j} + \ckpt{i}) \right.\\
+& + \left. \sum_{r+1 \leq j \leq r+s, j\neq i}   \frac{q^{2}_{j}}{\muind} (\reco{j} + d_{j} + \frac{C_{i}}{2}) \right)
  \end{array}
 \end{equation}
 
