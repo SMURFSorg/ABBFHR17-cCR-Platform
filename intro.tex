@@ -1,3 +1,5 @@
+% !TEX root =  ipdps18.tex
+
 \section{Introduction}
 \label{sec:intro}
 % Primary: George & Dorian
@@ -8,14 +10,14 @@ execution of parallel applications is today's de-facto standard HPC execution
 mode. In fact, space-sharing in this fashion is more common than \emph{capability
   application runs} that span entire platforms~\cite{xx}. However, while
 computational nodes are completely dedicated to particular application instances,
-most often the networks that interconnect computational nodes as well as storage
-devices are shared amongst application instances. In other words, without careful
+most often the networks that interconnect computational nodes, as well as storage
+devices, are shared amongst application instances. In other words, without careful
 consideration, network and storage contention can reduce individual application and
-overall system performance efficiencies.
+overall system performance.
 
 In HPC, checkpoint/restart (CR) is the most common strategy employed to protect
 applications from underlying faults and failures. Generally, a parallel application
-protected by CR periodically outputs snapshots (aka checkpoints) of its global,
+protected by CR periodically outputs snapshots (a.k.a checkpoints) of its global,
 distributed state to some remote storage device. If an application failure occurs, a
 stored checkpoint is retrieved and used to restart the application from the
 intermediate point captured by the checkpoint. Typically, concurrently executing
@@ -25,10 +27,10 @@ checkpoints.
 There are two widely-used, non-cooperative approaches to determine when an
 application should \emph{commit} a checkpoint: (i) using a fixed checkpoint period
 (typically one hour) for each application; and (ii) using application-specific
-features to determine its checkpoint periods. In the second approach, the well-known
-Young/Daly formula~\cite{young74,daly04} yields an application's optimal checkpoint
+features to determine its checkpoint period. In the second approach, the well-known
+Young/Daly formula~\cite{young74,daly04} yields an application optimal checkpoint
 period, $\sqrt{2 \mu C}$ seconds, where $C$ is the time to commit a checkpoint and
-$\mu$ the application's mean time between failures (MTBF). $\mu = \frac{\muind}{q}$,
+$\mu$ the application Mean Time Between Failures (MTBF). We have $\mu = \frac{\muind}{q}$,
 where $q$ is the number of processors enrolled by the application and $\muind$ is the
 MTBF of an individual processor~\cite{springer-monograph}. As a consequence, both
 $\mu$ and $C$ in the Young/Daly formula are application-dependent, and optimal
@@ -62,7 +64,7 @@ namely the I/O system.  There are two major reasons for this:
 In this work, we study cooperative CR scheduling strategies for concurrently
 executing HPC applications.  Our objective is to assess the impact of such
 interferences and to design scheduling algorithms that optimize I/O bandwidth
-availability CR activity.  Using our cooperative algorithms, applications checkpoint
+availability for CR activity.  Using our cooperative algorithms, applications checkpoint
 sequentially, with a dynamic, priority-dependent frequency dictated by a cooperative
 scheduler.  When enough I/O bandwidth is available, each application checkpoints with
 its optimal, Young/Daly, period. However, when I/O bandwidth is scarce, our
@@ -72,11 +74,12 @@ I/O interference and minimal re-work to be done when failures occur.
 
 The main contributions of the paper are to provide a model allowing to quantify
 the I/O interferences for applications sharing a common underlying I/O
-subsystem, and to estimate the costs on potential scientific throughput (thought
-a steady-state analysis as well as through simulations) of different I/O-aware
-scheduling strategies. The scheduling strategies included in this study cover a
+subsystem, and to estimate the costs on potential scientific throughput of different I/O-aware
+scheduling strategies, through
+a steady-state analysis as well as detailed simulations. 
+The scheduling strategies included in this study cover a
 large range of I/O behaviors, going from non-cooperative algorithms, as those
-currently deployed on most large-scale platforms, to one that take advantage of
+currently deployed on most large-scale platforms, to ones that take advantage of
 application knowledge to minimize the total system waste by scheduling the
 application with the most critical I/O needs.
 % - a model to predict the shared I/O impact on multiple applications scenarios
@@ -101,7 +104,7 @@ set of applications from LANL. Section~\ref{sec:results} presents the results of
 the simulation, on current systems, and provide hints of the necessary I/O
 bandwidth on prospective systems. The paper completes by describing a set of
 related works in Section~\ref{sec:related}, followed in
-Section~\ref{sec:conclusion} by a conclusion.
+Section~\ref{sec:conclusion} by a conclusion and directions for future work.
 
 % - Section~\ref{sec:model} describe the scenario under investigation
 % - Section~\ref{sec:algorithms} describe the different I/O scheduling algorithms that we plan to analyze, including one that is highly related to the default scheduling on most HPC platforms
