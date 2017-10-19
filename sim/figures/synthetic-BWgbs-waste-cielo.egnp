@@ -176,7 +176,7 @@ x = 0.0
 #base =40
 base=50
 bwstr = sprintf("%g", BW*1e9)
-set key vertical maxrows 3 width 4 at screen .5,-.07
+set key horizontal maxrows 3 width 4 at screen .5,-.07
 load "style.gnp"
 plot "<awk '$1==\"Simple\" && $2==" . bwstr . " {print}' 1h-ckpt-cielo.dat" u (0.925*$3*17784.0/3600.0/24.0/365.0):(1-column(base+9)):(1-column(base+7)):(1-column(base+13)):(1-column(base+11)) w candlestick t '\propfixed' ls ls_propfixed \
    ,                                                                     "" u (0.925*$3*17784.0/3600.0/24.0/365.0):(1-column(base+5)) w p t "" ls ls_whitepoint \

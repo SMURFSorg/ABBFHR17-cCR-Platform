@@ -172,7 +172,7 @@ set fit brief errorvariables nocovariancevariables errorscaling prescale nowrap 
 GNUTERM = "aqua"
 x = 0.0
 load "style.gnp"
-set key vertical maxrows 3 width 20 at screen .5,-.07
+set key horizontal maxrows 3 width 20 at screen .5,-.07
 plot "<awk '$1==\"Prop1h\" {print}' prosp.dat" u ($2/3600.0/24.0/365.0):($4/1e12) w l  t '\propfixed' ls ls_propfixed  \
    , "<awk '$1==\"PropDaly\" {print}' prosp.dat" u ($2/3600.0/24.0/365.0):($4/1e12) w l t '\propdaly' ls ls_propdaly \
    , "<awk '$1==\"FCFS1h\" {print}' prosp.dat" u ($2/3600.0/24.0/365.0):($4/1e12) w l t '\fifofixed' ls ls_fifofixed  \
