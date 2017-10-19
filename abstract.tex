@@ -1,11 +1,12 @@
 \begin{abstract}
 % Primary: George & Dorian
-  In high-performance computing environments, input/output (I/O) from various
-  sources often contend for I/O or network resources. Adding to these
-  traditional I/O operations the I/O loads resulting from checkpoint/restart
-  (CR) services used to protect the parallel applications from platform faults,
-  increases the contention and will lead to an additional increase in platforms
-  performance degradation.
+  In high-performance computing environments, input/output (I/O) from
+  various sources often contend for I/O or network resources. Adding
+  to these I/O operations necessary to the completion of the
+  applications, I/O loads resulting from checkpoint/restart (CR)
+  services used to protect the parallel applications from platform
+  faults increase the contention and will lead to an additional
+  degradation of platforms performance.
 %  aggravates the problem. Without careful consideration, contending I/O from
 %  independently operating sources will lead to significant performance
 %  degradation.
@@ -23,12 +24,13 @@
 %  the scientific throughput of these platforms. Using
 %  this cooperative policy, application checkpoints are cooperatively
 %  orchestrated to prevent congestion and to minimize the global waste.
-   Our results show that the optimal checkpoint interval as defined by
-   Young/Daly provide a sensible metric for a single application, but fails to
-   address a larger problem, the resource contention at the platform scale.  We
-   demonstrate how other, I/O scheduling strategies can provide a significant
-   improvement on the overall application performance, maximizing the platform
-   throughput.
+  Our results show that the optimal checkpoint interval as defined by
+  Young/Daly provide a sensible metric for a single application, but
+  is not sufficient to address a larger problem, the resource
+  contention at the platform scale.  We demonstrate how combining
+  optimal checkpointing periods with I/O scheduling strategies can
+  provide a significant improvement on the overall application
+  performance, maximizing the platform throughput.
 %   sequentially, with a dynamic, priority-dependent frequency dictated by the
 %   scheduler. When enough I/O bandwidth is available, each application
 %   checkpoints with its optimal period. However, when I/O bandwidth is scarce,
