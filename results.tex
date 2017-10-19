@@ -197,17 +197,17 @@ half the required bandwidth of the current
 situation. %coop: 2.9 TB/s at 24 years
 
 When the failures are frequent (under 10 years of node MTBF), the
-hierarchy changes as the critical element is solely to reduce  I/O
+hierarchy changes as the critical element is solely to reduce I/O
 pressure: all strategies that use a fixed and frequent checkpoint
 interval require a much higher system bandwidth to reach the 80\%
-efficiency goal.  As noted before, the \cooperative approach is the
-first to reach the bar in all cases. This is because it takes
-advantage of the nonblocking approaches, integrates the Daly optimal
-period optimization and schedules the I/O to reduce the waste.
-This approach exhibits a strong resilience to failures, with a
-bandwidth requirement that increases only by a factor 3 between the
-very unstable simulations (at less than 1h of system MTBF), and the
-most stable one (at 8h of system MTBF). Compared to this, the other
-strategies are much more dependent upon the frequency of failures, with
-the \propfixed strategy requiring up to 50 times the bandwidth of
+efficiency goal.  In this case, both strategies that combine an
+optimal checkpointing period with I/O and checkpoint scheduling
+(\cooperative and \fifodaly) perform similarly and better than all
+other approaches. These approaches
+exhibit a strong resilience to failures, with a bandwidth requirement
+that increases only by a factor 3 between the very unstable
+simulations (at less than 1h of system MTBF), and the most stable one
+(at 8h of system MTBF). Compared to this, the other strategies are
+much more dependent upon the frequency of failures, with the
+\propfixed strategy requiring up to 50 times the bandwidth of
 \cooperative to reach the same efficiency in unstable conditions.
