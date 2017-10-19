@@ -11,7 +11,9 @@ may incur slowdowns due to I/O resource contentions. \dca{I think we be careful 
   the term ``non-cooperative'', which to some can suggest adversarial and
   maliciious. Oblvious or independent is much more accurate, the I/O schedulers are
   simply indifferent, not malicious. Or we should at least define precisely what we
-  mean when we use the term ``non-cooperative''.}
+  mean when we use the term ``non-cooperative''.}%
+ \todo[inline]{GB: I agree with the outcome but not with the reason:
+  non-cooperative signal a refusal, but not adversarial}
 
 The second
 algorithm (\fifoblock) coordinates applications to eliminate interference
@@ -118,7 +120,7 @@ to continue computing while awaiting for the I/O request to be granted,
 it becomes possible to overlap the idle time with useful computation.
 Indeed, checkpointing I/O operations can
 be effectively time-shifted, at the risk of increasing the exposure to failures.
- In the \fifononblock algorithm, when the previous checkpoint ends at time $t_{now}$, 
+ In the \fifononblock algorithm, when the previous checkpoint ends at time $t_{now}$,
  a tentative date for the next checkpoint is set at $t_{req}=t_{now}+\period{i}-\ckpt{i}$.
  When the application reaches date $t_{req}$, a non-blocking I/O request
 is made and reserves a position in the
