@@ -61,6 +61,7 @@ consider for issues stemming from potential I/O contention.
 % TODO: I deleted this discussion since I think it is redundant with what we already
 % said in the model section. Please double-check. - DCA
 
+% GB: The variants are described in the Simulation
 % In the \nocoop algorithm, we consider two variants where checkpoints are
 % tentatively taken at 1) fixed frequency (\propfixed), or 2) at the Daly frequency
 % (\propdaly).
@@ -89,6 +90,7 @@ checkpoint durations may increase past $\ckpt{i}$, due to I/O scheduling wait ti
 and the checkpointing period may be, on average, larger than the desired
 $\period{i}$.
 
+% GB: The variants are described in the Simulation
 % In the \fifoblock algorithm, we again consider two variants, where checkpoints are
 % tentatively taken at 1) fixed frequency (\bfifofixed), or 2) at the Daly frequency
 % (\bfifodaly).
@@ -112,10 +114,10 @@ be effectively time-shifted, at the risk of increasing the exposure to failures.
 is made and reserves a position in the
 I/O queue. The application keeps computing until the
 scheduler informs the application that the I/O system is exclusively
-available to the application. Then, the application initiates its
-I/O (checkpointing, initial input, final output or recovery). When the active application completes
-its I/O, the next requesting application (in FCFS order)
-become the active I/O application.
+available to the application.
+% Then, the application initiates its I/O (checkpointing, initial input, final
+% output or recovery). When the active application completes its I/O, the next
+% requesting application (in FCFS order) become the active I/O application.
 
 When an application is informed that it can use the I/O system to
 checkpoint, the checkpointing library or application mechanism
@@ -129,11 +131,11 @@ checkpoint duration. Should a failure impact that application,
 it would restart from the date at which the last checkpoint was taken, and
 not at $t_{req}$, which is another improvement when compared to the
 \fifoblock and \nocoop algorithms.
-%\todo[inline]{If we talk about the positive aspect we might also want to mention the negative one, when a fault trigger during the I/O introduced delay}.
 
-Again, we consider two variants in the \fifononblock algorithm where checkpoints are
-tentatively taken at 1) fixed frequency (\fifofixed), or 2) at the
-Daly frequency (\fifodaly).
+% GB: The variants are described in the Simulation
+% Again, we consider two variants in the \fifononblock algorithm where checkpoints
+% are tentatively taken at 1) fixed frequency (\fifofixed), or 2) at the Daly
+% frequency (\fifodaly).
 
 %Aurelien: talked with Thomas and this is not what we want to study here.
 % However, that

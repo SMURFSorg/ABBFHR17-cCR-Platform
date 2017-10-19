@@ -124,10 +124,11 @@ the scheduling queue, so that (given that in most cases only one
 node has failed and can be replaced by a hot spare) it may restart
 immediately on essentially the same compute nodes it previously occupied.
 
-For simplicity, in the theoretical analysis, we ignore the hot spare
-nodes (presumably an insignificant fraction of the total),
-and assume that $\sum_{i}\nbapp{i} \nbnodes{i} = \nbnodesplat$, 
-where $\nbnodesplat$ is the total number of nodes in the platform.
+% This is not true in general
+% For simplicity, in the theoretical analysis, we ignore the hot spare
+% nodes (presumably an insignificant fraction of the total),
+% and assume that $\sum_{i}\nbapp{i} \nbnodes{i} = \nbnodesplat$,
+% where $\nbnodesplat$ is the total number of nodes in the platform.
 
 %\todo[inline]{the portfolio of available and scheduled applications are not the same, no reason for available applications to match that constraints on node count, only on scheduled ones. }
 
