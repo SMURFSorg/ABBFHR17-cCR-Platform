@@ -163,13 +163,12 @@ In this section, we use the simulations to explore a prospective
 system and define the impact of I/O and checkpoint scheduling when the
 problem size and the machine size will increase. Based on the APEX
 workflow report, we extrapolate the increase in problem size expected
-for the application classes considered above,
-and project these applications on a system that has the main
-characteristics of expected future systems. We consider a future system with
-7PB of main memory and 50,000 nodes. We simulate the workload of
-Table~\ref{table:lanl} on this machine, 
-\todo[inline]{I understood the apps would be scaled. How is that done?}
-for different values of the
+for the application classes considered above, and project these
+applications on a system that has the main characteristics of expected
+future systems. We consider a future system with 7PB of main memory
+and 50,000 nodes. We simulate the workload of Table~\ref{table:lanl}
+on this machine, weak scaling the problem size proportionally to the
+change in machine memory size. We consider different values of the
 system MTBF; for each strategy, we find (by binary search) the
 required system aggregated bandwidth necessary to observe 20\% of
 waste (or 80\% of efficiency). The waste is computed, as previously,
