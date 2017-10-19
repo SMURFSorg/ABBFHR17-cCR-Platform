@@ -1,24 +1,34 @@
 \begin{abstract}
 % Primary: George & Dorian
   In high-performance computing environments, input/output (I/O) from various
-  sources often contend for I/O bandwidth or network resources. Without careful
-  consideration, contending I/O from independently operating sources can lead to
-  significant performance degradation, especially for capacity I/O loads such as
-  the I/O from checkpoint/restart (CR) services used to protect these
-  computations from platform faults.
+  sources often contend for I/O or network resources. Adding to these
+  traditional I/O operations the I/O loads resulting from checkpoint/restart
+  (CR) services used to protect the parallel applications from platform faults,
+  increases the contention and will lead to an additional increase in platforms
+  performance degradation.
+%  aggravates the problem. Without careful consideration, contending I/O from
+%  independently operating sources will lead to significant performance
+%  degradation.
+% especially for capacity I/O loads such as
+%  the I/O from checkpoint/restart (CR) services used to protect these
+%  computations from platform faults.
 %   For example, I/O from concurrently running applications can contend with each
 %   other as well as with other I/O loads, such as the I/O from
 %   checkpoint/restart (CR) services used to protect these computations from
 %   platform faults.
-  In this work, we consider a cooperative I/O scheduling policy that optimizes
-  the way concurrently executing, CR-based applications share I/O resources.
-  Using this cooperative policy, application checkpoints are cooperatively
-  orchestrated to prevent congestion and to minimize the global waste. Our
-  results show that the optimal checkpoint interval as defined by Young/Daly
-  provide a sensible metric for a single application, but fails to address a
-  larger problem, the resource contention at the platform scale.  Other,
-  potentially suboptimal, I/O scheduling strategies can provide a significant improvement
-  on the overall application performance, maximizing the platform throughput.
+  In this work, we consider how a cooperative scheduling policy that optimizes
+  the way concurrently executing CR-based applications share I/O resources,
+  would impact congestion, and therefore performance. We provide a theoretical
+  model, and derive a set of necessary constraints to minimize the global waste.
+%  the scientific throughput of these platforms. Using
+%  this cooperative policy, application checkpoints are cooperatively
+%  orchestrated to prevent congestion and to minimize the global waste.
+   Our results show that the optimal checkpoint interval as defined by
+   Young/Daly provide a sensible metric for a single application, but fails to
+   address a larger problem, the resource contention at the platform scale.  We
+   demonstrate how other, I/O scheduling strategies can provide a significant
+   improvement on the overall application performance, maximizing the platform
+   throughput.
 %   sequentially, with a dynamic, priority-dependent frequency dictated by the
 %   scheduler. When enough I/O bandwidth is available, each application
 %   checkpoints with its optimal period. However, when I/O bandwidth is scarce,
