@@ -65,22 +65,26 @@ utilizing the OS's memory page protection facilities to detect and save only
 pages that have been updated between consecutive
 checkpoints~\cite{Bronevetsky09Compiler,
 Chen97CLIP,Elnozahy92ConsistentCheckpointing,Li94ConcurrentCheckpointing,
-Plank94Libckpt,Paun10IncrementalWeibull,Kiswany08stdchk}.  Similarly, page-based
-hashing techniques can also be used to avoid checkpointing pages that have been
-written to but whose content has not changed~\cite{Ferreira11Libhashckpt}.
-Finally, compression-based techniques use standard compression algorithms to
-reduce checkpoint volumes.  Li and Fuchs implemented a compiler-based
-checkpointing approach, which exploited compile time information to compress
-checkpoints~\cite{Li90CATCH}.  Plank and Li proposed in-memory checkpoint
-compression~\cite{Plank94ICKP}, and related, Plank et al. proposed
-\textit{differential compression} to reduce checkpoint sizes for incremental
-checkpoints~\cite{Plank95CompressedDiff}.  Tanzima et al. have shown that
-similarities amongst checkpoint data from different processes can be exploited
-to compress and reduce checkpoint data volumes~\cite{tanzima12mcrengine}.
-Sasaki   et   al  proposed   a   lossy
-compression method based on wavelet transform
-and  vector  quantization and   applied  their  compression
-method  to   checkpoints of a   production   climate  application~\cite{sasaki2015}.
+Plank94Libckpt,Paun10IncrementalWeibull,Kiswany08stdchk}.  Similarly,
+page-based hashing techniques can also be used to avoid checkpointing pages
+that have been written to but whose content has not
+changed~\cite{Ferreira11Libhashckpt}.  Finally, compression-based techniques
+use standard compression algorithms to reduce checkpoint volumes.  Li and Fuchs
+implemented a compiler-based checkpointing approach, which exploited compile
+time information to compress checkpoints~\cite{Li90CATCH}.  Plank and Li
+proposed in-memory checkpoint compression~\cite{Plank94ICKP}, similarly
+Ibtesham et al~\cite{Ibtesham12Compression} investigated the viability of
+standard text compression algorithms in compressing checkpoints, and related,
+Plank et al. proposed \textit{differential compression} to reduce checkpoint
+sizes for incremental checkpoints~\cite{Plank95CompressedDiff}.  Tanzima et al.
+have shown that similarities amongst checkpoint data from different processes
+can be exploited to compress and reduce checkpoint data
+volumes~\cite{tanzima12mcrengine}.  Sasaki et al proposed a lossy compression
+method based on wavelet transform and  vector  quantization and applied  their
+compression method  to   checkpoints of a  production climate
+application~\cite{sasaki2015}.  Finally, Ni et al~cite{Ni2014} study the trade-off
+between the loss of precision, compression ratio, and application correctness
+due to lossy compression.
 
  \subsection{Avoiding I/O interference}
 
