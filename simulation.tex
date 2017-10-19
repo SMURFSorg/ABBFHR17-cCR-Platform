@@ -85,7 +85,8 @@ platform. An ordinary heuristic is to take a checkpoint every hour,
 with the reasoning that in the worst case, only one hour of work can
 be lost. We also consider a dynamic period that is defined for each
 application. We use for this period the Young/Daly
-approximation~\cite{young74,daly04}, where the checkpoint time is
+approximation~\cite{young74,daly04} (see Section~\ref{sec:algorithms}), 
+where the checkpoint time is
 taken as the time it would take to checkpoint the application if there
 were no interference.
 
@@ -101,8 +102,8 @@ when they are selected, obtain the full bandwidth; for \fifofixed and
 \fifodaly, I/O requests and checkpoints are served in order, but the
 simulation adds all the time waiting for a checkpoint to start as
 progress in the computation for the application; and for \cooperative,
-the same is implemented, but I/O are ordered according to
-Equations~\ref{eq.selection} and~\ref{eq.selection2}.
+the same is implemented, but I/O are ordered to minimize the waste in
+Equations~\eqref{eq.selection} and~\eqref{eq.selection2}.
 
 Note that in the scheduled I/O methods (\fifononblock and \cooperative),
 initial inputs and final outputs are blocking (the application
