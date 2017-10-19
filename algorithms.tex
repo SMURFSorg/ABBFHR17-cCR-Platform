@@ -11,12 +11,8 @@
 In this section, we present the applications I/O scheduling algorithms used to study
 the effects of concurrent I/O activities.  The first algorithm (\nocoop) represents
 the status-quo in which I/O activities are scheduled independently and may incur
-slowdowns due to I/O resource contentions. \dca{I think we be careful of the term
-  ``non-cooperative'', which to some can suggest adversarial and maliciious. Oblvious
-  or independent is much more accurate, the I/O schedulers are simply indifferent,
-  not malicious. Or we should at least define precisely what we mean when we use the
-  term ``non-cooperative''.}  The second algorithm (\fifoblock) coordinates I/O
-activity to eliminate interference: I/O operations are scheduled in a
+slowdowns due to I/O resource contentions. The second algorithm (\fifoblock)
+coordinates I/O activity to eliminate interference: I/O operations are scheduled in a
 First-Come-First-Serve (FCFS) fashion, and only one I/O operation executes at any
 given while other I/O requests are blocked until their turn comes.  The third
 algorithm (\fifononblock) is similar, except that job applications that are waiting
@@ -36,7 +32,6 @@ system efficiency).
 %probabilistic recovery costs, idle time, etc.) when selecting another
 %application, and selects the one that minimizes the waste increase
 %at the current instant.
-
 
 \subsection{\nocoop I/O Scheduling}
 
@@ -100,7 +95,7 @@ to continue computing while awaiting for the I/O request to be granted,
 it becomes possible to overlap the idle time with useful computation.
 Indeed, checkpointing I/O operations can
 be effectively time-shifted, at the risk of increasing the exposure to failures.
- In the \fifononblock algorithm, when the previous checkpoint ends at time $t_{now}$, 
+ In the \fifononblock algorithm, when the previous checkpoint ends at time $t_{now}$,
  a tentative date for the next checkpoint is set at $t_{req}=t_{now}+\period{i}-\ckpt{i}$.
  When the application reaches date $t_{req}$, a non-blocking I/O request
 is made and reserves a position in the
