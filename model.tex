@@ -11,78 +11,62 @@
 %  shouldn't be far from finite apps being scheduled eagerly over
 %  finite resource for a long time, in average'.}
 
-
-
-%TODO: moved out of "algorithms" as this is describing the model; My
-% opinion is that the current text already captures these points, but
-% please check
-\begin{comment}
-\begin{itemize}
-\item We take a large number of applications. These applications belong to a few
-  classes (say 4 classes). We enforce the percentage per class that is reported in
-  the APEX paper.  Each application comes with: class, number of processors, input
-  I/O size, output I/O size, checkpoint size, CPU time (equal to wall-time reported
-  in APEX paper). To avoid side effects induced by having hundreds of completely
-  identical applications, we use normal distributions for CPU time with mean equal to
-  original APEX value and small standard deviation (say 10\%). \dca{Put in model
-    section?}
-  \item We shuffle the applications and present them all in a big queue to the scheduler,
-  which uses a simple first-fit algorithm. No user reservation, plain greedy. But we do assume the scheduler has access to the entire list of pending applications.
-\item We also make the assumption that the applications know precisely
-  the necessary wall-time. This diverges from a real scenario but
-  allow us to only take in account one type of disturbance: an
-  application is slower than expected due to C/R overheads (and will
-  extend its original wall-time). \dca{Put in model section?}
-  \item When an application fails, we resubmit it with a new wall-time equal to the fraction that remains from the last checkpoint.  Input I/O becomes recovery. Output I/O is not modified.
-
-\end{itemize}
-\end{comment}
-
-
+\paragraph{Computational Platform Model}
 In this work, we consider a shared platform that comprises a set of computational
-nodes, storage resources in the form of a parallel file system (PFS), and a network that
-interconnects the nodes as well as the storage resources. Applications are scheduled
-on the platform by a job scheduler such that computational nodes are space-shared
-(dedicated) amongst concurrent application instances. However, the I/O subsystem is
-time-shared (contended) amongst the application instances, \ie multiple applications
-performing I/O simultaneously results in a per-application reduction in commit speed;
-in this work we will consider, without loss of generality, a linear interference
-model (in which the global throughput remains constant and is fairly shared
-between applications currently performing I/O), but more adversarial interference
-models could be substituted.
+nodes, storage resources in the form of a parallel file system (PFS), and a network
+that interconnects the nodes as well as the storage resources. Applications are
+scheduled on the platform by a job scheduler such that computational nodes are
+space-shared (dedicated) amongst concurrent application instances. However, the I/O
+subsystem is time-shared (contended) amongst the application instances, \ie multiple
+applications performing I/O simultaneously can result in a per-application reduction
+in commit speed. Without loss of generality, we consider a straightforward linear
+interference model in which the global throughput remains constant and is evenly
+shared among contending applications. (A more adversarial interference models could
+be substituted.)
 
-Our \emph{application I/O} model entails loading an input file at startup, performing
-regular I/O operations during their main execution phase, and finally dumping an
-output file at completion. Because applications are long-running (typically, several
-hours or days) and the platform is failure-prone, applications are protected using
-coordinated CR that incurs periodic \emph{CR I/O}.
-Applications can vary in size (number of computational nodes), application I/O
-pattern and requirements, and CR I/O requirements. To model these behavioral
-variations with minimal parameters, we make the following simplifying assumptions
-(that we validate in the experimental section):
+\paragraph{Application Workload Model}
+Applications can vary in size (number of computational nodes), duration, memory
+footprint and I/O requirements.  \emph{Application I/O} entails loading an input file
+at startup, performing regular I/O operations during their main execution phase and
+storing an output file at completion. Because applications are long-running
+(typically, several hours or days) and the platform is failure-prone, applications
+are protected using coordinated CR that incurs periodic \emph{CR I/O}.
+
+To model these behavioral variations with minimal parameters, we make the following
+simplifying assumptions (that we validate in the experimental section):
 \begin{compactitem}
-  \item There is a large number of applications, but only a small number of
-    application classes, i.e., sets of applications with similar duration, size,
-    application I/O and CR I/O requirements;
-  \item Other than initialization and finalization I/O, an application's (non-CR) I/O
-    activity is evenly distributed over its entire makespan.
+\item There is a large number of applications, but only a small number of application
+  classes, \ie, sets of applications with similar sizes, durations, footprints and
+  I/O requirements;
+\item Other than initialization and finalization I/O, an application's regular
+  (non-CR) I/O operations are evenly distributed over its makespan.
+\item Job makespans are precisely known a priori. This allow us to ignore all other
+  sources of job disturbance except C/R overheads.
 \end{compactitem}
-In instantiations, the specific numbers and characteristics of the application classes
-are based on real benchmark data, such as the APEX benchmark on the Cielo platform~\cite{apex2016}.
+We used specific numbers and characteristics of application classes based on real
+benchmark data, such as the APEX benchmark on the Cielo platform~\cite{apex2016}.  To
+avoid the side effects induced by hundreds of completely identical application
+instances, we use normal distributions for job durations with mean equal to original
+APEX value and small (10\%) standard deviation.
 
+\paragraph{Job Scheduling Model}
 To evaluate the scheduling policies, we consider a finite segment, typically lasting
-a small number of days, of a representative schedule where the number of applications
-in each class remains approximately constant at every instant. Of course, with
-different application execution times, we cannot enforce a fixed proportion of each
-application class at every instant. However, we ensure the proper proportion is
-enforced in average throughout the schedule execution. Similarly, we enforce
-that at every instant during the finite segment, at least 98\% of the nodes
-are enrolled for the execution. This allows us to compare actual
-(simulated) performance with the theoretical performance of a co-scheduling policy
-that optimizes the steady-state I/O behavior of the application portfolio, assuming
-that all processors are used.
+a small number of days, of a representative schedule where the number of application
+instances (jobs) in each class remains approximately constant at every instant. Of
+course, with different job execution times, we cannot enforce a fixed proportion of
+each application class at every instant. However, we ensure the proper proportion is
+enforced in average throughout the schedule execution. Similarly, we enforce that at
+every instant during the finite segment, at least 98\% of the nodes are enrolled for
+the execution. This allows us to compare actual (simulated) performance with the
+theoretical performance of a co-scheduling policy that optimizes the steady-state I/O
+behavior of the job portfolio, assuming that all processors are used. We shuffle and
+simultaneously present all jobs to the scheduler, which uses a simple, greedy
+first-fit algorithm.  We resubmit failed jobs with a new wall-time equal to the
+fraction that remained when the last checkpoint was committed. Input I/O becomes
+recovery I/O; output I/O is unmodified.
 
-Formally, we consider a set $\appset$ of $\nbapps$ applications classes
+\paragraph{The Formal Model}
+We consider a set $\appset$ of $\nbapps$ applications classes
 $\app{1}, \ldots \app{\nbapps}$ that execute concurrently on a platform with
 $\nbnodesplat$ nodes. Application class $\app{i}$ specifies:
 \begin{compactitem}
