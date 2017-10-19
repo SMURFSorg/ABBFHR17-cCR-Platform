@@ -1,12 +1,12 @@
 #!/opt/local/bin/gnuplot -persist
 #
-#    
+#
 #    	G N U P L O T
 #    	Version 5.0 patchlevel 6    last modified 2017-03-18
-#    
+#
 #    	Copyright (C) 1986-1993, 1998, 2004, 2007-2017
 #    	Thomas Williams, Colin Kelley and many others
-#    
+#
 #    	gnuplot home:     http://www.gnuplot.info
 #    	faq, bugs, etc:   type "help FAQ"
 #    	immediate help:   type "help"  (plot window: hit 'h')
@@ -17,24 +17,24 @@ set clip one
 unset clip two
 set bar 1.000000 front
 set border 31 front lt black linewidth 1.000 dashtype solid
-set zdata 
-set ydata 
-set xdata 
-set y2data 
-set x2data 
+set zdata
+set ydata
+set xdata
+set y2data
+set x2data
 set boxwidth
 set style fill  empty border
 set style rectangle back fc  bgnd fillstyle   solid 1.00 border lt -1
-set style circle radius graph 0.02, first 0.00000, 0.00000 
+set style circle radius graph 0.02, first 0.00000, 0.00000
 set style ellipse size graph 0.05, 0.03, first 0.00000 angle 0 units xy
 set dummy x, y
-set format x "% h" 
-set format y "% h" 
-set format x2 "% h" 
-set format y2 "% h" 
-set format z "% h" 
-set format cb "% h" 
-set format r "% h" 
+set format x "% h"
+set format y "% h"
+set format x2 "% h"
+set format y2 "% h"
+set format z "% h"
+set format cb "% h"
+set format r "% h"
 set timefmt "%d/%m/%y,%H:%M"
 set angles radians
 set tics back
@@ -46,7 +46,7 @@ set raxis
 set style parallel front  lt black linewidth 2.000 dashtype solid
 set key title "" center
 set key bmargin center horizontal Right noreverse enhanced autotitle nobox
-set key noinvert samplen 4 spacing 1 width 0 height 0 
+set key noinvert samplen 4 spacing 1 width 0 height 0
 set key maxcolumns 0 maxrows 0
 set key noopaque
 unset label
@@ -70,7 +70,7 @@ unset minussign
 set view 60, 30, 1, 1
 set samples 100, 100
 set isosamples 10, 10
-set surface 
+set surface
 unset contour
 set cntrlabel  format '%8.3g' font '' start 5 interval 20
 set mapping cartesian
@@ -99,17 +99,17 @@ set my2tics default
 set mcbtics default
 set mrtics default
 set xtics border in scale 1,0.5 mirror norotate  autojustify
-set xtics  norangelimit 
+set xtics  norangelimit
 set ytics border in scale 1,0.5 mirror norotate  autojustify
-set ytics  norangelimit autofreq 
+set ytics  norangelimit autofreq
 set ztics border in scale 1,0.5 nomirror norotate  autojustify
-set ztics  norangelimit autofreq 
+set ztics  norangelimit autofreq
 unset x2tics
 unset y2tics
 set cbtics border in scale 1,0.5 mirror norotate  autojustify
-set cbtics  norangelimit autofreq 
+set cbtics  norangelimit autofreq
 set rtics axis in scale 1,0.5 nomirror norotate  autojustify
-set rtics  norangelimit autofreq 
+set rtics  norangelimit autofreq
 unset paxis 1 tics
 unset paxis 2 tics
 unset paxis 3 tics
@@ -117,31 +117,31 @@ unset paxis 4 tics
 unset paxis 5 tics
 unset paxis 6 tics
 unset paxis 7 tics
-set title sprintf("System: Cielo; Node MTBF: 2 years", MTBF) 
+set title sprintf("System: Cielo; Node MTBF: 2 years", MTBF)
 set title  font "" norotate
-set timestamp bottom 
-set timestamp "" 
+set timestamp bottom
+set timestamp ""
 set timestamp  font "" norotate
 set rrange [ * : * ] noreverse nowriteback
 set trange [ * : * ] noreverse nowriteback
 set urange [ * : * ] noreverse nowriteback
 set vrange [ * : * ] noreverse nowriteback
-set xlabel "System Aggregated Bandwidth (GB/s)" 
+set xlabel "System Aggregated Bandwidth (GB/s)"
 set xlabel  font "" textcolor lt -1 norotate
-set x2label "" 
+set x2label ""
 set x2label  font "" textcolor lt -1 norotate
 set xrange [ 30 : 170 ] noreverse nowriteback
 set x2range [ * : * ] noreverse nowriteback
-set ylabel "Waste Ratio" 
+set ylabel "Waste Ratio"
 set ylabel  font "" textcolor lt -1 rotate by -270
-set y2label "" 
+set y2label ""
 set y2label  font "" textcolor lt -1 rotate by -270
 set yrange [ 0.00000 : 1.00000 ] noreverse nowriteback
 set y2range [ * : * ] noreverse nowriteback
-set zlabel "" 
+set zlabel ""
 set zlabel  font "" textcolor lt -1 norotate
 set zrange [ * : * ] noreverse nowriteback
-set cblabel "" 
+set cblabel ""
 set cblabel  font "" textcolor lt -1 rotate by -270
 set cbrange [ * : * ] noreverse nowriteback
 set paxis 1 range [ * : * ] noreverse nowriteback
@@ -160,13 +160,13 @@ set locale "en_US.UTF-8"
 set pm3d explicit at s
 set pm3d scansautomatic
 set pm3d interpolate 1,1 flush begin noftriangles noborder corners2color mean
-set palette positive nops_allcF maxcolors 0 gamma 1.5 color model RGB 
+set palette positive nops_allcF maxcolors 0 gamma 1.5 color model RGB
 set palette rgbformulae 7, 5, 15
 set colorbox default
 set colorbox vertical origin screen 0.9, 0.2, 0 size screen 0.05, 0.6, 0 front  noinvert bdefault
 set style boxplot candles range  1.50 outliers pt 7 separation 1 labels auto unsorted
-set loadpath 
-set fontpath 
+set loadpath
+set fontpath
 set psdir
 set fit brief errorvariables nocovariancevariables errorscaling prescale nowrap v5
 GNUTERM = "aqua"
@@ -179,14 +179,15 @@ load "style.gnp"
 set key horizontal maxrows 3 width 4 at screen .5,-.07
 set style fill empty
 #set boxwidth 1
-plot"<awk '$1==\"FCFS\" && $3==".mtbfstr." {print}' daly-ckpt-cielo.dat" u ($2/1e9):(1-column(base+9)):(1-column(base+7)):(1-column(base+13)):(1-column(base+11)) w candlestick t '\fifodaly' ls ls_fifodaly \
-   ,                                                                   "" u ($2/1e9):(1-column(base+5)) w p t "" ls ls_whitepoint \
-   , "<awk '$1==\"FCFS\" && $3==".mtbfstr." {print}' 1h-ckpt-cielo.dat" u ($2/1e9-.75):(1-column(base+9)):(1-column(base+7)):(1-column(base+13)):(1-column(base+11)) w candlestick t '\fifofixed' ls ls_fifofixed \
-   ,                                                                 "" u ($2/1e9-.75):(1-column(base+5)) w p t "" ls ls_whitepoint \
-   , "<awk '$1==\"Simple\" && $3==".mtbfstr." {print}' 1h-ckpt-cielo.dat" u ($2/1e9-2.25):(1-column(base+9)):(1-column(base+7)):(1-column(base+13)):(1-column(base+11)) w candlestick t '\propfixed' ls ls_propfixed \
+plot \
+     "<awk '$1==\"Simple\" && $3==".mtbfstr." {print}' 1h-ckpt-cielo.dat" u ($2/1e9-2.25):(1-column(base+9)):(1-column(base+7)):(1-column(base+13)):(1-column(base+11)) w candlestick t '\propfixed' ls ls_propfixed \
    ,                                                                   "" u ($2/1e9-2.25):(1-column(base+5)) w p t "" ls ls_whitepoint  \
    , "<awk '$1==\"Simple\" && $3==".mtbfstr." {print}' daly-ckpt-cielo.dat" u ($2/1e9-1.5):(1-column(base+9)):(1-column(base+7)):(1-column(base+13)):(1-column(base+11)) w candlestick t '\propdaly' ls ls_propdaly \
    ,                                                                    "" u ($2/1e9-1.5):(1-column(base+5)) w p t "" ls ls_whitepoint  \
+   , "<awk '$1==\"FCFS\" && $3==".mtbfstr." {print}' daly-ckpt-cielo.dat" u ($2/1e9):(1-column(base+9)):(1-column(base+7)):(1-column(base+13)):(1-column(base+11)) w candlestick t '\fifodaly' ls ls_fifodaly \
+   ,                                                                   "" u ($2/1e9):(1-column(base+5)) w p t "" ls ls_whitepoint \
+   , "<awk '$1==\"FCFS\" && $3==".mtbfstr." {print}' 1h-ckpt-cielo.dat" u ($2/1e9-.75):(1-column(base+9)):(1-column(base+7)):(1-column(base+13)):(1-column(base+11)) w candlestick t '\fifofixed' ls ls_fifofixed \
+   ,                                                                 "" u ($2/1e9-.75):(1-column(base+5)) w p t "" ls ls_whitepoint \
    , "<awk '$1==\"BLOCKING_FCFS\" && $3==".mtbfstr." {print}' 1h-ckpt-cielo.dat" u ($2/1e9+.75):(1-column(base+9)):(1-column(base+7)):(1-column(base+13)):(1-column(base+11)) w candlestick t '\bfifofixed' ls ls_bfifofixed \
    ,                                                                         "" u ($2/1e9+.75):(1-column(base+5)) w p t "" ls ls_whitepoint \
    , "<awk '$1==\"BLOCKING_FCFS\" && $3==".mtbfstr." {print}' daly-ckpt-cielo.dat" u ($2/1e9+1.5):(1-column(base+9)):(1-column(base+7)):(1-column(base+13)):(1-column(base+11)) w candlestick t '\bfifodaly' ls ls_bfifodaly \
@@ -194,5 +195,5 @@ plot"<awk '$1==\"FCFS\" && $3==".mtbfstr." {print}' daly-ckpt-cielo.dat" u ($2/1
    ,  "<awk '$1==\"Coop\" && $3==".mtbfstr." {print}' daly-ckpt-cielo.dat" u ($2/1e9+2.25):(1-column(base+9)):(1-column(base+7)):(1-column(base+13)):(1-column(base+11)) w candlestick t '\cooperative' ls ls_cooperative \
    ,                                                                    "" u ($2/1e9+2.25):(1-column(base+5)) w p t "" ls ls_whitepoint \
    ,  "<awk '$2==" . MTBF . " {print}' model.dat" u ($1/1e9):3 w lines ls ls_model t "Theoretical Model"
-							      
+
 #    EOF
