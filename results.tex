@@ -102,7 +102,11 @@ analysis. This illustrates the efficiency of the proposed heuristic
 schedule checkpoints and I/O in a way that avoids interferences,
 allowing the system to behave as if no interference was experienced,
 in most cases. The high variation shows that a minority of the runs
-experienced a significantly higher waste.
+experienced a significantly higher waste. Some runs appear to exhibit
+a lower waste than what is predicted by the theoretical
+model. Analysis of the traces show that this happens on executions
+that experienced a number of failures lower than the average number
+derived from the MTBF, from which the theoretical value is computed.
 
 \begin{figure}
   \begin{center}
