@@ -4,29 +4,31 @@
 \label{sec:algorithms}
 % Aurelien & George
 
+\dca{We need to be more pedantic with nomenclature. I think ``application'' should me
+  the computation class, and ``job'' or ``application instance'' the specific
+  invocation being scheduled.''}
+
 In this section, we present the applications I/O scheduling algorithms used to study
 the effects of concurrent I/O activities.  The first algorithm (\nocoop) represents
-the status-quo in which application I/O activities are scheduled independently and
-may incur slowdowns due to I/O resource contentions. \dca{I think we be careful of
-  the term ``non-cooperative'', which to some can suggest adversarial and
-  maliciious. Oblvious or independent is much more accurate, the I/O schedulers are
-  simply indifferent, not malicious. Or we should at least define precisely what we
-  mean when we use the term ``non-cooperative''.}
-
-The second
-algorithm (\fifoblock) coordinates applications to eliminate interference
-between their I/O activities: only one application performs I/O at any given
-time while other applications requesting I/O are blocked until their
-turn comes (First Come First Serve, FCFS). The third algorithm (\fifononblock) is similar, except
-that applications that are waiting for the I/O token
-continue computing until their turn comes; note that unlike the
-blocking algorithms, this optimization requires
-application code refactoring. Last, we propose an heuristic
-(\leastwaste) that improves on \fifononblock by giving the I/O token
-to the application that imposes the least overhead on the system. Before
-presenting the algorithms, we further discuss the interactions between
-the checkpointing policy, the I/O workloads, and the interferences that the
-algorithms have to consider.
+the status-quo in which I/O activities are scheduled independently and may incur
+slowdowns due to I/O resource contentions. \dca{I think we be careful of the term
+  ``non-cooperative'', which to some can suggest adversarial and maliciious. Oblvious
+  or independent is much more accurate, the I/O schedulers are simply indifferent,
+  not malicious. Or we should at least define precisely what we mean when we use the
+  term ``non-cooperative''.}  The second algorithm (\fifoblock) coordinates I/O
+activity to eliminate interference: I/O operations are scheduled in a
+First-Come-First-Serve (FCFS) fashion, and only one I/O operation executes at any
+given while other I/O requests are blocked until their turn comes.  The third
+algorithm (\fifononblock) is similar, except that job applications that are waiting
+for the I/O token continue their until their turn comes. Note that unlike the
+non-blocking optimization requires application code refactoring. \dca{what about the
+  case when an application must communicate before its computation can proceed?
+  E.g. it continued execution but then arrived at a point at which it needs external
+  input or coordination? Which brings up another question: does our model implicitly
+  (or explicitly) handle synchronization/barrier type communication with no data?}
+Last, we propose our heuristic (\leastwaste) that improves on \fifononblock by giving
+the I/O token to the I/O operation that will minimize system waste (or maximize
+system efficiency).
 
 %Instead of following a FCFS order to select the next I/O application,
 %for each requesting application, the heuristic computes the prospective
@@ -36,77 +38,57 @@ algorithms have to consider.
 %at the current instant.
 
 
-\subsection{Non-cooperative \nocoop I/O Scheduling}
+\subsection{\nocoop I/O Scheduling}
 
-In the non-cooperative I/O scheduling \nocoop, applications
-fill-up the system based on processor count availability, and their I/O
-workload (including checkpointing activities) are not organized by any
-comprehensive system. Instead, applications use the PFS assuming they
-are the sole user, and do not modify their access pattern to accommodate
-for possible interferences. In these conditions, it has been observed~\cite{Dorier2015}
-that concurrent access
-to I/O resources will cause a decrease in the application observed
-I/O bandwidth.
-% One can imagine multiple cost functions for the effect of that sharing;
-When the filesystem is under-provisioned, the overall throughput of the platform
-would be maintained when multiple applications concurrently access I/O, and each
-application should thereby observe a linear decrease in its own bandwidth. As an
-application blocks on the I/O completion before it can continue, the decrease in
-observed bandwidth leads to a proportionate increase in I/O time that must be
-accounted as waste.
+In \nocoop I/O scheduling, jobs are executed to fill-up the system based on processor
+availability, and their I/O workload (including CR activities) are not coordinated by
+any system of cooperation.  Instead, applications use the parallel file system
+assuming they are the sole user -- with no modification to their access pattern to
+accommodate for possible interferences. Researchers have observed that such
+concurrent I/O resource access can decrease the I/O bandwidth observed by the running
+jobs~\cite{Dorier2015}.  Under the conditions of an under-provisioned filesystem, our
+model renders to each contending I/O operation a decrease in bandwidth linearly
+proportional to the number of contending operations.  We account for the additional
+delays imposed by this decreased bandwidth as waste. Since subsequent checkpoints are
+scheduled to start after $\period{i}-\ckpt{i}$, and delays may result in checkpoint
+commit times longer than $\ckpt{i}$, the resultant checkpoint period may be longer
+than $\period{i}$. This is consistent with an oblivious I/O policy that does not
+consider for issues stemming from potential I/O contention.
 
-Checkpoints are scheduled accordingly to the normal rearming strategy
-(\ie after each checkpoint completion, the next checkpoint is scheduled
-to start after $\period{i}-\ckpt{i}$). Given that checkpoints may actually
-last longer than $\ckpt{i}$, the resultant period may be longer than
-$\period{i}$. This is however consistent with the concept of a
-checkpointing strategy that is applied blindly, without consideration
-for issues stemming from I/O resource sharing and interferences.
+% TODO: I deleted this discussion since I think it is redundant with what we already
+% said in the model section. Please double-check. - DCA
 
-In the \nocoop algorithm, we consider two variants where checkpoints are
-tentatively taken at 1) fixed frequency (\propfixed), or 2) at the
-Daly frequency (\propdaly).
+% In the \nocoop algorithm, we consider two variants where checkpoints are
+% tentatively taken at 1) fixed frequency (\propfixed), or 2) at the Daly frequency
+% (\propdaly).
 
 \subsection{Blocking \fifoblock FCFS I/O Scheduling}
 \label{sec:fcfsblock}
 
-A simple optimization to the aforementioned scheme is to favor one of
-the applications' I/O request over all others. While the overall throughput
-may remain unchanged (given an efficient PFS implementation), the favored
-application completes its I/O workload faster (\ie, at nominal speed
-$\ckpt{i}$ for an application of class $\app{i}$).
-Applications are selected to perform I/O in the order of their requests,
-\ie ,as soon as an application starts blocking on an I/O operation it will
-take a place in the back of an  I/O queue. When the currently
-active application completes its I/O, the next application waiting for I/O
-is granted access, and starts making progress. We denote this scheme as
-\fifoblock.
+A simple optimization to the \nocoop scheme is to favor one of the jobs' I/O request
+over all the others. While the overall throughput may remain unchanged (given an
+efficient filesystem implementation), the favored application completes its I/O
+workload faster (\ie, at speed $\ckpt{i}$ for an application of class $\app{i}$).  In
+the \fifoblock scheme, I/O requests are performed sequentially, in request arrival
+order. Jobs with outstanding I/O requests are blocked until their requests are
+completed.
 
-The advantage of \fifoblock over \nocoop can be seen in a simple workload with two
-applications, assuming a favorable linear interference model.
-If the two applications simultaneously start an I/O requesting the
-transfer of a similar volume $V$ of data, in the \nocoop strategy,
-both applications take $\frac{V}{\frac{\bandavail}{2}}$ time to complete
-their I/O. In the \fifoblock strategy, the first (as serialized when
-inserting in the queue) application takes only $\frac{V}{\bandavail}$
-as it enjoys exclusive access to the PFS, while the second application
-waits $\frac{V}{\bandavail}$ before its own I/O starts, but then in turn
-also complete at nominal speed $\frac{V}{\bandavail}$, and therefore still
-completes in $\frac{2V}{\bandavail}$. Thanks
-to reducing I/O interferences, the average I/O completion time
-has been reduced for the applications (although fairness has been decreased).
+Assuming a favorable linear interference model, a simple workload with two jobs can
+show the potential advantage of the \fifoblock over \nocoop strategy.  If the two
+jobs simultaneously request I/O transfers of similar data volume, $V$, in the \nocoop
+strategy, both jobs take $\frac{V}{\frac{\bandavail}{2}}$ time to complete their I/O.
+In the \fifoblock strategy, the first scheduled job takes only
+$\frac{V}{\bandavail}$, while the second application waits $\frac{V}{\bandavail}$
+before its own I/O starts, but then executes at full available bandwidth completing
+in $\frac{2V}{\bandavail}$.  Reducing I/O interference reduces the average I/O
+completion time (although fairness may be decreased).  Once again, however, observed
+checkpoint durations may increase past $\ckpt{i}$, due to I/O scheduling wait time,
+and the checkpointing period may be, on average, larger than the desired
+$\period{i}$.
 
-Similarly to the previous strategy, application observed checkpoint
-duration may increase past $\ckpt{i}$, no longer because of interference, but now because
-of  the time spent waiting for the first place in the I/O FCFS scheduling.
-As we have computed above, although the average $C-\ckpt{i}$
-difference is lower, for one application it is as large as in the
-previous strategy. In any case, again, the checkpointing period will
-be, in average, larger than the desired $\period{i}$ period.
-
-In the \fifoblock algorithm, we again consider two variants, where checkpoints are
-tentatively taken at 1) fixed frequency (\bfifofixed), or 2) at the
-Daly frequency (\bfifodaly).
+% In the \fifoblock algorithm, we again consider two variants, where checkpoints are
+% tentatively taken at 1) fixed frequency (\bfifofixed), or 2) at the Daly frequency
+% (\bfifodaly).
 
 \subsection{Non-Blocking \fifononblock FCFS I/O Scheduling}
 \label{sec:fcfsnonblock}
