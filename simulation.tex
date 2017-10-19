@@ -85,10 +85,16 @@ platform. An ordinary heuristic is to take a checkpoint every hour,
 with the reasoning that in the worst case, only one hour of work can
 be lost. We also consider a dynamic period that is defined for each
 application. We use for this period the Young/Daly
-approximation~\cite{young74,daly04} (see Section~\ref{sec:algorithms}), 
+approximation~\cite{young74,daly04} (see Section~\ref{sec:algorithms}),
 where the checkpoint time is
 taken as the time it would take to checkpoint the application if there
-were no interference.
+were no interference.%
+%
+In the reminder of this paper we will refer to these two frequency variants as
+Fixed, when the checkpoint period is fixed to 1 hours, and as Daly when the
+optimal checkpoint frequency is defined using Young/Daly. For the \leastwaste
+algorithm the checkpoint interval is at least the optimal, and a Fixed version
+is pointless.
 
 \paragraph*{Interference Models} Simulations implement each of the
 interference model and avoidance strategies defined in
