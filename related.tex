@@ -28,7 +28,7 @@ achieves the optimal trade-off between both sources to minimize the total
 waste.  However, this optimal period may put too much pressure on the I/O
 system. It is possible to use a longer, sub-optimal, period that would incur
 less pressure and still lead to a reasonable waste. S. Arunagiri et
-al.~\cite{Arunagiri2009} have studied such trade-offs and they have shown, both
+al.~\cite{Arunagiri2010} have studied such trade-offs and they have shown, both
 analytically and instantiating the model with four real-life platforms, that a
 great decrease in I/O requirement can be achieved  at the price of a small
 increase of the waste.
@@ -50,7 +50,7 @@ checkpoints have the additional benefit of allowing systems to survive
 non-transient node failures. Similarly, multi-level checkpoint protocols like
 SCR~\cite{Moody10SCR,Vaidya95TwoLevel} attempt to hide checkpoint commit times
 by writing checkpoints to RAM, flash storage, or local disk on the compute
-nodes~\cite{Kougkas2016} in addition to the parallel file system thereby
+nodes~\cite{Kougkas2017} in addition to the parallel file system thereby
 improving checkpoint or general I/O bandwidth.  Finally, checkpoint-specific
 file systems like PLFS~\cite{Bent09PLFS} leverage the I/O patterns and
 characteristics specific to checkpoint data to optimize checkpoint data
@@ -95,7 +95,7 @@ pre-define each application’s I/O behavior for their entire execution.
 Similarly, a number of works have investigated the efficiency of online
 schedulers for data intensive~\cite{Groot2013,Sim:2015:AnalyzeThis} and HPC
 workload
-I/O~\cite{Dorier2014,Gainaru:2015:Scheduling,Zhou:2015:IOAware,Herbein2016}.
+I/O~\cite{Dorier2015,Gainaru:2016:Scheduling,Zhou:2015:IOAware,Herbein2017}.
 Finally, a number of works have investigated utilizing system reliability
 information recorded on the system~\cite{Oliner:2006:Cooperative} and the
 statistical properties of these failures~\cite{Tiwari:2014:Lazy} to determine
