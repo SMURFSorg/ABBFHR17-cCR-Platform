@@ -1,3 +1,4 @@
+% !TEX root =  ipdps18.tex
 
 \section{Steady-state analysis}
 \label{sec:lowerbound}
@@ -6,16 +7,20 @@
 In this section we envision a (theoretical) scenario when the platform operates in steady-state,
 with a constant number of applications per class spanning the whole platform. We also assume that
 the I/O bandwidth $\bandavail$  that is available for CR operations remains constant throughout
-execution.  Given the above, we determine the optimal checkpointing period for each application class
+execution. This amounts to neglecting initial input and final output I/O operations,
+or more precisely, to pretending that these operations span the entire execution of the application.
+Otherwise, we would need to account for application durations, which renders the
+steady-state analysis intractable. 
+
+Given the above, we determine the optimal checkpointing period for each application class
 when the objective is to minimize the total waste incurred  by the platform, or equivalently,
-to maximize the total throughput of the platform.
-\todo[inline]{The text does not reflect my understanding (based on what Thomas described) of the problem.}
+to maximize the total throughput of the platform. To complicate matters, these optimal periods
+periods may not be achievable,  hence we derive a lower bound of the optimal waste. 
 
 In steady-state operation, there are $\nbapp{i}$ applications of class $\app{i}$,
 each using $\nbnodes{i}$ nodes, and with checkpoint time $\ckpt{i}$. Because we orchestrate
 checkpoints to avoid CR-CR interferences, we have $\ckpt{i} = \frac{\size{i}}{\bandavail}$,
 where $\size{i}$ denote the size of the checkpoint file of all applications of class $\app{i}$.
-
 The waste of an application is the ratio of time the application spends doing
 resilience operations by the time it does useful work. The time spent doing
 resilience operations include the time spend during each period to checkpoint,
@@ -99,6 +104,4 @@ we choose for $\lambda$ the minimum value such that Equation~\eqref{eq.IOconstra
 \end{theorem}
 
 The optimal periods may not be achievable, because Equation~\eqref{eq.IOconstraint} is a necessary condition, but is may not be sufficient:
-even though the total I/O bandwidth is not exceeded, meaning there is enough capacity to take all the checkpoints at the given periods, we still need to orchestrate these checkpoints into a periodic pattern that repeats over time. Furthermore, we have neglected initial input and final output I/O operations,
-because otherwise, we would need to account for application durations, which renders the
-steady-state analysis intractable. In other words, we have derived a lower bound of the optimal waste.
+even though the total I/O bandwidth is not exceeded, meaning there is enough capacity to take all the checkpoints at the given periods, we would still need to orchestrate these checkpoints into a periodic pattern that repeats over time. In other words, we only have a lower bound of the optimal platform waste.
