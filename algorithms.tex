@@ -16,15 +16,23 @@ coordinates I/O activity to eliminate interference: I/O operations are scheduled
 First-Come-First-Serve (FCFS) fashion, and only one I/O operation executes at any
 given while other I/O requests are blocked until their turn comes.  The third
 algorithm (\fifononblock) is similar, except that job applications that are waiting
-for the I/O token continue their until their turn comes. Note that unlike the
-non-blocking optimization requires application code refactoring. \dca{what about the
-  case when an application must communicate before its computation can proceed?
-  E.g. it continued execution but then arrived at a point at which it needs external
-  input or coordination? Which brings up another question: does our model implicitly
-  (or explicitly) handle synchronization/barrier type communication with no data?}
+for the I/O token continue their until their turn comes.
 Last, we propose our heuristic (\leastwaste) that improves on \fifononblock by giving
 the I/O token to the I/O operation that will minimize system waste (or maximize
-system efficiency).
+system efficiency). Note that unlike the blocking approaches (\nocoop
+and \fifoblock), non-blocking optimizations (\fifononblock and
+\cooperative) require application code refactoring.
+
+ % \dca{what about the
+ %  case when an application must communicate before its computation can proceed?
+ %  E.g. it continued execution but then arrived at a point at which it needs external
+ %  input or coordination? Which brings up another question: does our model implicitly
+ %  (or explicitly) handle synchronization/barrier type communication
+ %  with no data?}
+ % TH -> DCA: We consider a workflow batch scheduling typical of HPC
+ % platforms. Applications do not communicate or synchronize with each
+ % other, except through the filesystem, through their initial input
+ % and final ouput. Initial input and final output are always blocking.
 
 %Instead of following a FCFS order to select the next I/O application,
 %for each requesting application, the heuristic computes the prospective
@@ -93,6 +101,9 @@ exchanged for idle time when waiting for the I/O token in a blocking
 fashion. If the application developer can refactor the code
 to continue computing while awaiting for the I/O request to be granted,
 it becomes possible to overlap the idle time with useful computation.
+Note that this refactoring is already part of popular checkpointing
+libraries, like SCR~\cite{Moody10_SCR}, or FTI~\cite{Bautista-Gomez11_FTI}, through an
+existing API call to probe if a checkpoint should be taken at that time or not.
 Indeed, checkpointing I/O operations can
 be effectively time-shifted, at the risk of increasing the exposure to failures.
  In the \fifononblock algorithm, when the previous checkpoint ends at time $t_{now}$,
