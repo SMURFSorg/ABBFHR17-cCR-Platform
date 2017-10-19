@@ -4,11 +4,14 @@
 
 In this paper we presented a comprehensive model to capture interference
 between multiple applications performing fault-tolerance related I/O
-on a shared HPC system. We proved that ... We designed multiple algorithms
+on a shared HPC system. We designed multiple algorithms
 to schedule and order the checkpointing I/O workload, with the intent of
 diminishing the average slowdown sustained by applications on the
 platform induced by sharing the I/O subsystem, \ie improve the throughput
-of the platform. We formulated a steady-state analysis that ...
+of the platform. We formulated a steady-state analysis of a scenario
+where CR-CR interference is avoided, which helps us
+define a theoretical baseline for achievable performance in I/O
+constrained checkpointing workloads.
 We designed a event-based simulator that permits
 executing typical HPC workloads on current and prospective systems.
 With this simulator we have been able to demonstrate that our proposed
@@ -19,20 +22,22 @@ all cases.  We also simulated the situation on a not yet available
 platform, this time with the goal of providing guidance in the
 general I/O requirements for future HPC systems to be able to
 sustain checkpointing with the desired 80\% efficiency, a goal that
-we have found achievable with ... TB/s of I/O bandwidth.
+we have found achievable with a third of the I/O aggregate bandwidth
+requirements when the system employs a smart checkpointing policy.
 
-As burst-buffers and other node-local NVRAM storage are becoming
-more common, a natural extension of this work is to consider the effect
- of I/O contention/interference with hierarchies, in which subgroups of nodes
-may share a burst buffer at a cabinet level; and thus experience
-interference for I/O in that same cabinet, but be immune to interferences
-from I/O from other cabinets. Another interesting point in that context
-is to consider the limit on the amount of data a burst-buffer may hold,
-and how it interplays with checkpointing activities in the case where the burst
-buffers may not be committed to the sink PFS rapidly enough (possibly
-because of interference between multiple burst-buffers being
-flushed to the sink PFS simultaneously) to sustain the application
-optimal checkpointing strategy. Again, we expect that scheduling the
-commits to the PFS sink with an heuristic that considers the cost of
-lost computation in failure cases can play a role in improving the
-efficiency of the whole system in that case.
+As burst-buffers and other NVRAM storage are becoming more common
+in PFS architecting, a natural extension of this work is to consider the effect
+ of I/O contention/interference with hierarchies, in which subgroups of
+ nodes (\eg a cabinet) may share a burst buffer, and thus experience
+interference for I/O in that same group, but be immune to interferences
+from I/O from other groups. Another interesting point with burst-buffers,
+is that space availability, in addition to bandwidth, may become
+contentious. The speed at which the burst-buffers can be committed to
+the sink PFS (possibly creating interference between multiple burst-buffers being
+flushed to the sink PFS simultaneously) now interplays with the
+optimal checkpoint frequency of applications, and can cause some
+applications running out of burst-buffer space. Again, we postulate that
+scheduling the commits to the PFS sink with an heuristic that prioritizes
+applications whose loss in failure cases would be more costly
+can play a role in improving the efficiency of the whole burst-buffers
+system.
