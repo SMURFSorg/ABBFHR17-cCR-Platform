@@ -36,13 +36,15 @@ Both applications and checkpointing generate I/O requests. I/O requests
 are all scheduled using the same algorithm whether they
 are generated from an application I/O request or from a CR
 request. Note however that unlike application I/O, the checkpointing
-volume and frequency is dependent upon scheduling decisions.
+volume and frequency depends upon scheduling decisions.
 Some applications
 control their own checkpointing completely, and decide to checkpoint at
 fixed time steps or application-defined time intervals.
 Young and Daly~\cite{young74,daly04} devised a formula to compute the optimal
 checkpoint period, $T=\sqrt{2 C \mu}$, where $C$ is the duration of the
-checkpoint transfer, and $\mu$ is the reliability of the platform.
+checkpoint transfer, and $\mu$ is the application MTBF. We have $\mu = \frac{\muind}{q}$,
+where $q$ is the number of processors enrolled by the application and $\muind$ is the
+MTBF of an individual processor~\cite{springer-monograph}. 
 The parameters in this formula are dependent upon application features
 (the size of the checkpointed dataset) and platform values (the reliability
 of the system and the I/O bandwidth).
@@ -79,7 +81,7 @@ fill-up the system based on processor count availability, and their I/O
 workload (including checkpointing activities) are not organized by any
 comprehensive system. Instead, applications use the PFS assuming they
 are the sole user, and do not modify their access pattern to accommodate
-for possible interferences. In these conditions, it has been observed~\cite{Dorier2014}
+for possible interferences. In these conditions, it has been observed~\cite{Dorier2015}
 that concurrent access
 to I/O resources will cause a decrease in the application observed
 I/O bandwidth.
