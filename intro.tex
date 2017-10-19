@@ -21,10 +21,10 @@ protected by CR periodically outputs snapshots (a.k.a checkpoints) of its global
 distributed state to some remote storage device. If an application failure occurs, a
 stored checkpoint is retrieved and used to restart the application from the
 intermediate point captured by the checkpoint. Typically, concurrently executing
-applications independently (non-cooperatively) decide when to take their own
+applications independently decide when to take their own
 checkpoints.
 
-There are two widely-used, non-cooperative approaches to determine when an
+There are two widely-used approaches to determine when an
 application should \emph{commit} a checkpoint: (i) using a fixed checkpoint period
 (typically one hour) for each application; and (ii) using application-specific
 features to determine its checkpoint period. In the second approach, the well-known
@@ -36,7 +36,7 @@ MTBF of an individual processor~\cite{springer-monograph}. As a consequence, bot
 $\mu$ and $C$ in the Young/Daly formula are application-dependent, and optimal
 periods can be quite different over the application spectrum.
 
-Non-cooperative CR of concurrent application instances can incur significant resource
+Independent CR of concurrent application instances can incur significant resource
 wastage, because they lead to an inefficient usage of an already scarce resource,
 namely the I/O system.  There are two major reasons for this:
 \begin{enumerate}
@@ -52,7 +52,7 @@ namely the I/O system.  There are two major reasons for this:
   % activities.
 
 \item \emph{CR-CR I/O contention}: More importantly, there is a high probability of
-  coincident CR activity amongst concurrent, non-cooperative application instances.
+  coincident CR activity amongst concurrent application instances.
   Consider the simple case where two applications checkpoint simultaneously a file of
   the same size. Each will be assigned half the fraction $\bandavail$ to checkpoint,
   so that both checkpoints will be twice longer than expected. Such interferences
@@ -78,7 +78,7 @@ subsystem, and to estimate the costs on potential scientific throughput of diffe
 scheduling strategies, through
 a steady-state analysis as well as detailed simulations.
 The scheduling strategies included in this study cover a
-large range of I/O behaviors, going from non-cooperative algorithms, as those
+large range of I/O behaviors, going from oblivious algorithms, as those
 currently deployed on most large-scale platforms, to ones that take advantage of
 application knowledge to minimize the total system waste by scheduling the
 application with the most critical I/O needs.
