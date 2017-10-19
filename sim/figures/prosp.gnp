@@ -172,14 +172,15 @@ set fit brief errorvariables nocovariancevariables errorscaling prescale nowrap 
 GNUTERM = "aqua"
 x = 0.0
 load "style.gnp"
-set key horizontal maxrows 3 width 20 at screen .5,-.07
+set key horizontal maxrows 3 width 5 at screen .5,-.07
 plot "<awk '$1==\"Prop1h\" {print}' prosp.dat" u ($2/3600.0/24.0/365.0):($4/1e12) w l  t '\propfixed' ls ls_propfixed  \
    , "<awk '$1==\"PropDaly\" {print}' prosp.dat" u ($2/3600.0/24.0/365.0):($4/1e12) w l t '\propdaly' ls ls_propdaly \
    , "<awk '$1==\"BlockingFCFS1h\" {print}' prosp.dat" u ($2/3600.0/24.0/365.0):($4/1e12) w l t '\bfifofixed' ls ls_bfifofixed  \
    , "<awk '$1==\"BlockingFCFSDaly\" {print}' prosp.dat" u ($2/3600.0/24.0/365.0):($4/1e12) w l t '\bfifodaly' ls ls_bfifodaly \
    , "<awk '$1==\"FCFS1h\" {print}' prosp.dat" u ($2/3600.0/24.0/365.0):($4/1e12) w l t '\fifofixed' ls ls_fifofixed  \
    , "<awk '$1==\"FCFSDaly\" {print}' prosp.dat" u ($2/3600.0/24.0/365.0):($4/1e12) w l t '\fifodaly' ls ls_fifodaly  \
-   , "<awk '$1==\"Coop\" {print}' prosp.dat" u ($2/3600.0/24.0/365.0):($4/1e12) w l t '\cooperative' ls ls_cooperative
+   , "<awk '$1==\"Coop\" {print}' prosp.dat" u ($2/3600.0/24.0/365.0):($4/1e12) w l t '\cooperative' ls ls_cooperative \
+   , "prosp-model.dat" u 2:($1/1e12) w l t "Theoretical Model" ls ls_model
 
 #plot "<awk '$1==\"Prop1h\" {print}' prosp.dat" u ($2/3600.0/24.0/365.0-.3):($8/1e12):($7/1e12):($11/1e12):($10/1e12) w candlestick t "Proportional Interference (1h Checkpoint Interval)" ls ls_propfixed \
 #   , "" u ($2/3600.0/24.0/365.0):($4/1e12) w l t "" ls ls_propfixed  \
