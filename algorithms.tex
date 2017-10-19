@@ -124,13 +124,13 @@ The advantage of \fifoblock over \nocoop can be seen in a simple workload with t
 applications, assuming a favorable linear interference model.
 If the two applications simultaneously start an I/O requesting the
 transfer of a similar volume $V$ of data, in the \nocoop strategy,
-both applications take $2 \times \frac{V}{\bandavail}$ time to complete
+both applications take $\frac{V}{\frac{\bandavail}{2}}$ time to complete
 their I/O. In the \fifoblock strategy, the first (as serialized when
 inserting in the queue) application takes only $\frac{V}{\bandavail}$
 as it enjoys exclusive access to the PFS, while the second application
 waits $\frac{V}{\bandavail}$ before its own I/O starts, but then in turn
 also complete at nominal speed $\frac{V}{\bandavail}$, and therefore still
-completes in $2 \times \frac{V}{\bandavail}$. Thanks
+completes in $\frac{2V}{\bandavail}$. Thanks
 to reducing I/O interferences, the average I/O completion time
 has been reduced for the applications (although fairness has been decreased).
 
@@ -142,7 +142,7 @@ difference is lower, for one application it is as large as in the
 previous strategy. In any case, again, the checkpointing period will
 be, in average, larger than the desired $\period{i}$ period.
 
-In the \fifoblock algorithm, we consider two variants where checkpoints are
+In the \fifoblock algorithm, we again consider two variants, where checkpoints are
 tentatively taken at 1) fixed frequency (\bfifofixed), or 2) at the
 Daly frequency (\bfifodaly).
 
@@ -156,9 +156,9 @@ to continue computing while awaiting for the I/O request to be granted,
 it becomes possible to overlap the idle time with useful computation.
 Indeed, checkpointing I/O operations can
 be effectively time-shifted, at the risk of increasing the exposure to failures.
- In the \fifononblock algorithm, at the end of the previous checkpoint, a tentative
-date for the next checkpoint is set at $t_{req}=t_{now}+\period{i}-\ckpt{i}$.
-When the application reaches date $t_{req}$, a non-blocking I/O request
+ In the \fifononblock algorithm, when the previous checkpoint ends at time $t_{now}$, 
+ a tentative date for the next checkpoint is set at $t_{req}=t_{now}+\period{i}-\ckpt{i}$.
+ When the application reaches date $t_{req}$, a non-blocking I/O request
 is made and reserves a position in the
 I/O queue. The application keeps computing until the
 scheduler informs the application that the I/O system is exclusively
@@ -208,7 +208,6 @@ by giving the I/O token to the application that generates the least
 waste, rather than simply in requesting order. Note that given the time-dependent nature of that decision, the selection may
 not be the global optimum, but only an approximation given currently
 available information about the system status.
-
 In the \leastwaste algorithm, whenever an I/O operation completes at time $t$,
 we consider a pool of application candidates from two different categories:
 \begin{compactitem}
@@ -253,9 +252,8 @@ Then  $A_{i}$ will use the I/O resource for $v_{i}$ seconds.
   \item Every application $A_{j} \in \Catckptcat$ will continue executing for
   $v_{i}$ additional seconds, hence will be exposed to the risk of a failure
   that will strike within $v_{i}/2$ seconds on average. The probability of such
-  a failure is $v_{i}/\mu_{j}$, where $\mu_{j}$ is the MTBF of application
-  $A_{j}$. Since $A_{j}$ enrolls $q_{j}$ processors, we have $\mu_{j} =
-  \muind/q_{j}$, where $\muind$ is the individual MTBF per processor. With this
+  a failure is $v_{i}/\mu_{j}$, where $\mu_{j} =
+  \muind/q_{j}$. With this
   probability, the $q_{j}$ processors will have to recover and re-execute $d_{j} +
   v_{i}/2$ seconds of work, hence the waste $\wapp{i}{j}$ is $$\wapp{i}{j} =
   \frac{v_{i}}{\mu_{j} } q_{j} (\reco{j} + d_{j} + \frac{v_{i}}{2}) =
