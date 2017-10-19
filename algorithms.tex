@@ -4,12 +4,17 @@
 \label{sec:algorithms}
 % Aurelien & George
 
-In this section, we present the algorithms used to schedule applications
-I/O workloads in order to assess and alleviate the effect of concurrent access
-to I/O resources. The first algorithm (\nocoop) represents the status-quo
-in which applications are scheduled in a non-cooperative manner, which may
-incur interference on I/O resource access and wait time. The second
-algorithm (\fifoblock) coordinate applications to eliminate interference
+In this section, we present the applications I/O scheduling algorithms used to study
+the effects of concurrent I/O activities.  The first algorithm (\nocoop) represents
+the status-quo in which application I/O activities are scheduled independently and
+may incur slowdowns due to I/O resource contentions. \dca{I think we be careful of
+  the term ``non-cooperative'', which to some can suggest adversarial and
+  maliciious. Oblvious or independent is much more accurate, the I/O schedulers are
+  simply indifferent, not malicious. Or we should at least define precisely what we
+  mean when we use the term ``non-cooperative''.}
+
+The second
+algorithm (\fifoblock) coordinates applications to eliminate interference
 between their I/O activities: only one application performs I/O at any given
 time while other applications requesting I/O are blocked until their
 turn comes (First Come First Serve, FCFS). The third algorithm (\fifononblock) is similar, except
@@ -30,49 +35,6 @@ algorithms have to consider.
 %application, and selects the one that minimizes the waste increase
 %at the current instant.
 
-\subsection{Checkpoint Period and I/O Workload}
-
-Both applications and checkpointing generate I/O requests. I/O requests
-are all scheduled using the same algorithm whether they
-are generated from an application I/O request or from a CR
-request. Note however that unlike application I/O, the checkpointing
-volume and frequency depends upon scheduling decisions.
-Some applications
-control their own checkpointing completely, and decide to checkpoint at
-fixed time steps or application-defined time intervals.
-Young and Daly~\cite{young74,daly04} devised a formula to compute the optimal
-checkpoint period, $T=\sqrt{2 C \mu}$, where $C$ is the duration of the
-checkpoint transfer, and $\mu$ is the application MTBF. We have $\mu = \frac{\muind}{q}$,
-where $q$ is the number of processors enrolled by the application and $\muind$ is the
-MTBF of an individual processor~\cite{springer-monograph}. 
-The parameters in this formula are dependent upon application features
-(the size of the checkpointed dataset) and platform values (the reliability
-of the system and the I/O bandwidth).
-
-In traditional periodic checkpointing, for an application $\app{i}$,
-every time a checkpoint completes, the next checkpoint is scheduled to
-happen in at least $\period{i}-\ckpt{i}$ (and the first checkpoint is
-set at date $\period{i}$). $\period{i}$ can be 1) a \emph{fixed} period,
-either hardcoded in the application, or set as an arbitrary platform
-global setting, or 2) the \emph{Daly} optimal period for the
-application on that platform. Note that in a system where interference
-can happen (from competing application I/O or checkpoints), determining
-the appropriate checkpointing period can be challenging.
-% The observed duration of checkpoints varies depending on how much
-% interference happen, on average.
-Similarly, when employing I/O scheduling algorithms,
-checkpoints may include wait time delay or be postponed to decrease
-interference. The traditional strategy of rearming the next checkpoint at
-$\period{i}-\ckpt{i}$ yields the desired checkpointing period $\period{i}$
-only in interference-free scenarios: when interferences (or scheduling
-introduced delays) dilate the checkpoint duration to $C_{dilated}$, the effective
-period differs from the desired period by the difference $C_{dilated}-\ckpt{i}$.
-The details of how each algorithm accommodates for this discrepancy will
-be discussed later.
-
-%TODO: do we want to talk about that, if only to say we don't care?
-%  {we may want to separate Input+recovery from output+checkpoint (bidirectional channels)}
-%  {answer: we could but not sure it is 100\% independent; and it would complicate things without changing the story.}
 
 \subsection{Non-cooperative \nocoop I/O Scheduling}
 
