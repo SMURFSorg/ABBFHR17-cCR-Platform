@@ -8,8 +8,31 @@ on a shared HPC system. We proved that ... We designed multiple algorithms
 to schedule and order the checkpointing I/O workload, with the intent of
 diminishing the average slowdown sustained by applications on the
 platform induced by sharing the I/O subsystem, \ie improve the throughput
-of the platform. We designed a event-based simulator that permits
+of the platform. We formulated a steady-state analysis that ...
+We designed a event-based simulator that permits
 executing typical HPC workloads on current and prospective systems.
-With this simulator we have been able to offer guidances as to the
-preferred heuristics for scheduling checkpoint workloads, and the
-general I/O requirements for future HPC systems to sustain checkpointing.
+With this simulator we have been able to demonstrate that our proposed
+heuristic improves the platform efficiency. Unsurprisingly the gain is
+more marked on platforms with a challenging MTBF or with
+under-provisioned I/O, but our heuristic improves the efficiency in
+all cases.  We also simulated the situation on a not yet available
+platform, this time with the goal of providing guidance in the
+general I/O requirements for future HPC systems to be able to
+sustain checkpointing with the desired 80\% efficiency, a goal that
+we have found achievable with ... TB/s of I/O bandwidth.
+
+As burst-buffers and other node-local NVRAM storage are becoming
+more common, a natural extension of this work is to consider the effect
+ of I/O contention/interference with hierarchies, in which subgroups of nodes
+may share a burst buffer at a cabinet level; and thus experience
+interference for I/O in that same cabinet, but be immune to interferences
+from I/O from other cabinets. Another interesting point in that context
+is to consider the limit on the amount of data a burst-buffer may hold,
+and how it interplays with checkpointing activities in the case where the burst
+buffers may not be committed to the sink PFS rapidly enough (possibly
+because of interference between multiple burst-buffers being
+flushed to the sink PFS simultaneously) to sustain the application
+optimal checkpointing strategy. Again, we expect that scheduling the
+commits to the PFS sink with an heuristic that considers the cost of
+lost computation in failure cases can play a role in improving the
+efficiency of the whole system in that case.
