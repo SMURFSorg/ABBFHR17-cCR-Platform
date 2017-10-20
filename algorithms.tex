@@ -93,7 +93,7 @@ $\period{i}$.
 \subsection{Non-Blocking \fifononblock FCFS I/O Scheduling}
 \label{sec:fcfsnonblock}
 
-The previous strategy trades the cost of I/O interferences for for
+The previous strategy trades the cost of I/O interferences for
 idle time, as jobs perform a blocking (idle) wait for the I/O token.
 If the application developer can refactor the program code to continue
 computing while awaiting I/O request completions, it becomes possible
@@ -124,8 +124,8 @@ duration.
 Postponing checkpoint I/O increases a job's exposure to failures.  However,
 if the job successfully commits the postponed checkpoint, upon a subsequent failure,
 the job would restart from the time at which the postponed checkpoint was taken, not
-at $t_{req}$ -- a fact that may mitigate the increased risk exposure of \fifoblock
-versus \nocoop algorithms.
+at $t_{req}$ -- a fact that may mitigate the increased risk exposure when
+compared to \fifoblock and \nocoop algorithms.
 
 % Then, the job initiates its I/O (checkpointing, initial input, final
 % output or recovery). When the active job completes its I/O, the next
