@@ -98,13 +98,19 @@ We consider a set $\appset$ of $\nbapps$ applications classes
 $\app{1}, \ldots \app{\nbapps}$ that execute concurrently on a platform with
 $\nbnodesplat$ nodes. Application class $\app{i}$ specifies:
 \begin{compactitem}
-\item $\nbapp{i}$: the number of jobs $J^{i}_{1 \leq k\leq \nbapp{i}}$ in $\app{i}$,
+\item $\nbapp{i}$: the number of jobs in $\app{i}$,
 \item $\nbnodes{i}$: the number of nodes used by each job in $\app{i}$,
 \item $\period{i}$: the checkpoint period of each job in $\app{i}$, and
 \item $\ckpt{i}$ and $\reco{i}$: the checkpoint and recovery durations for each job in $\app{i}$ when there is no interference with other I/O operations.
 \end{compactitem}
-At every instant, we schedule as many jobs as possible.
-Jobs that are subject to failures are restarted at the head of
-the scheduling queue, so that (given that in most cases only one
-node has failed and can be replaced by a hot spare) it may restart
-immediately on essentially the same compute nodes it previously occupied.
+To simplify the reading, were it is not ambiguous, we extend the
+notations to jobs: for a job $J_j$ belonging to application class
+$\app{i}$, $\nbnodes{j} = \nbnodes{i}$, $\period{j} = \period{i}$,
+$\ckpt{j} = \ckpt{i}$, and $\reco{j} = \reco{i}$ denote the number of
+nodes used by job $j$, the checkpoint period of job $j$ and the
+checkpoint and recovery durations of job $j$ respectfully.  At every
+instant, we schedule as many jobs as possible.  Jobs that are subject
+to failures are restarted at the head of the scheduling queue, so that
+(given that in most cases only one node has failed and can be replaced
+by a hot spare) it may restart immediately on essentially the same
+compute nodes it previously occupied.

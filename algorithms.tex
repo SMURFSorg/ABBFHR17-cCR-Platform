@@ -159,32 +159,32 @@ status.  For each I/O scheduling decision, at time $t$ (when a previous I/O oper
 completes), we consider a pool of $r+s$ candidates from two different categories:
 
 \begin{compactitem}
-\item Category \IOcat $\Catiocat$: Applications $A_{i}$, $1\leq i \leq r$ with an
+\item Category \IOcat $\Catiocat$: Jobs $J_{i}$, $1\leq i \leq r$ with an
   (input, output or recovery) I/O request of length $v_{i}$ seconds and enrolls $q_{i}$
-  processors. $A_{i}$ initiated its I/O request $d_{i}$ seconds ago and has been idle
+  processors. $J_{i}$ initiated its I/O request $d_{i}$ seconds ago and has been idle
   for $d_{i}$ seconds.
 
-\item Category \Ckptcat $\Catckptcat$: Applications $A_{i}$, $r+1\leq i \leq r+s$,
+\item Category \Ckptcat $\Catckptcat$: Jobs $J_{i}$, $r+1\leq i \leq r+s$,
   with a checkpoint duration of $C_{i}$ seconds and enrolls $q_{i}$ processors.
-  $A_{i}$ took its last checkpoint $d_{i}$ seconds ago and keeps executing until the
-  I/O token is availalbe for a new checkpoint. Since $A_{i}$ is a candidate,
-  $d_{i} \geq \period{Daly}(A_{i})$
+  $J_{i}$ took its last checkpoint $d_{i}$ seconds ago and keeps executing until the
+  I/O token is available for a new checkpoint. Since $J_{i}$ is a candidate,
+  $d_{i} \geq \period{Daly}(J_{i})$
 \end{compactitem}
 
 
-If we select application $A_{i}$ to perform I/O, the expected waste $\wap{i}$
-incurred to the other $r+s-1$ candidate applications in  $\Catiocat \cup
-\Catckptcat$ is computed as follows. Assume first that $A_{i} \in \Catiocat$.
-Then  $A_{i}$ will use the I/O resource for $v_{i}$ seconds.
+If we select job $J_{i}$ to perform I/O, the expected waste $\wap{i}$
+incurred to the other $r+s-1$ candidate jobs in  $\Catiocat \cup
+\Catckptcat$ is computed as follows. Assume first that $J_{i} \in \Catiocat$.
+Then  $J_{i}$ will use the I/O resource for $v_{i}$ seconds.
 \begin{compactitem}
 %
-  \item Every other application $A_{j} \in \Catiocat$ will stay idle for $v_{i}$
+  \item Every other job $J_{j} \in \Catiocat$ will stay idle for $v_{i}$
   additional seconds, hence its waste $\wapp{i}{j}$ is $$\wapp{i}{j} = q_{j}
-  (d_{j} + v_{i})$$ since there are $q_{j}$ processors enrolled in $A_{j}$ that
-  idle for $d_{j} + v_{i}$ seconds. Note that for $A_{j} \in \Catiocat$, the
+  (d_{j} + v_{i})$$ since there are $q_{j}$ processors enrolled in $J_{j}$ that
+  remain idle for $d_{j} + v_{i}$ seconds. Note that for $J_{j} \in \Catiocat$, the
   waste $\wapp{i}{j}$ is deterministic.
 %
-  \item Every application $A_{j} \in \Catckptcat$ will continue executing for
+  \item Every job $J_{j} \in \Catckptcat$ will continue executing for
   $v_{i}$ additional seconds, hence will be exposed to the risk of a failure
   that will strike within $v_{i}/2$ seconds on average. The probability of such
   a failure is $v_{i}/\mu_{j}$, where $\mu_{j} =
@@ -193,13 +193,13 @@ Then  $A_{i}$ will use the I/O resource for $v_{i}$ seconds.
   v_{i}/2$ seconds of work, hence the waste $\wapp{i}{j}$ is $$\wapp{i}{j} =
   \frac{v_{i}}{\mu_{j} } q_{j} (\reco{j} + d_{j} + \frac{v_{i}}{2}) =
   \frac{v_{i}}{\muind} q^{2}_{j} (\reco{j} + d_{j} + \frac{v_{i}}{2})$$ where
-  $\reco{j}$ is the recovery time for $A_{j}$. Note that for $A_{j} \in
+  $\reco{j}$ is the recovery time for $J_{j}$. Note that for $J_{j} \in
   \Catckptcat$, the waste $\wapp{i}{j}$ is probabilistic.
 %
  \end{compactitem}
  Altogether, the expected waste $\wap{i}$ incurred
-to the other $r+s-1$ candidate applications is
-$$\wap{i} = \sum_{A_{j} \in \Catiocat, j\neq i} \wapp{i}{j} + \sum_{A_{j} \in \Catckptcat} \wapp{i}{j}$$
+to the other $r+s-1$ candidate jobs is
+$$\wap{i} = \sum_{J_{j} \in \Catiocat, j\neq i} \wapp{i}{j} + \sum_{J_{j} \in \Catckptcat} \wapp{i}{j}$$
 We obtain
 \begin{equation}
 \label{eq.selection}
@@ -209,7 +209,10 @@ We obtain
  \end{array}
 \end{equation}
 
- Assume now that the selected application $A_{i} \in \Catckptcat$. Then  $A_{i}$ will use the I/O resource for $\ckpt{i}$ seconds instead of $v_{i}$ seconds for $A_{i} \in \Catiocat$. We directly obtain the counterpart of Equation~\eqref{eq.selection} for its waste $\wap{i}$:
+Assume now that the selected job $J_{i} \in \Catckptcat$. Then $J_{i}$
+will use the I/O resource for $\ckpt{i}$ seconds instead of $v_{i}$
+seconds for $J_{i} \in \Catiocat$. We directly obtain the counterpart
+of Equation~\eqref{eq.selection} for its waste $\wap{i}$:
  \begin{equation}
 \label{eq.selection2}
  \begin{array}{ll}
@@ -218,6 +221,8 @@ We obtain
  \end{array}
 \end{equation}
 
- Finally, we select the application $A_{i} \in \Catiocat \cup \Catckptcat$ whose waste
- $\wap{i}$ is minimal.
-Contrarily to the previous scenarios, we do not consider the variant where the checkpointing frequency is arbitrarily set, because the \leastwaste algorithm is designed to optimize checkpoint frequencies across applications.
+Finally, we select the job $J_{i} \in \Catiocat \cup \Catckptcat$
+whose waste $\wap{i}$ is minimal.  Contrarily to the previous
+scenarios, we do not consider the variant where the checkpointing
+frequency is arbitrarily set, because the \leastwaste algorithm is
+designed to optimize checkpoint frequencies across jobs.
