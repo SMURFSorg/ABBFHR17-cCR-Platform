@@ -184,14 +184,14 @@ plot \
    ,                                                                   "" u ($2/1e9-2.25):(1-column(base+5)) w p t "" ls ls_whitepoint  \
    , "<awk '$1==\"Simple\" && $3==".mtbfstr." {print}' daly-ckpt-cielo.dat" u ($2/1e9-1.5):(1-column(base+9)):(1-column(base+7)):(1-column(base+13)):(1-column(base+11)) w candlestick t '\propdaly' ls ls_propdaly \
    ,                                                                    "" u ($2/1e9-1.5):(1-column(base+5)) w p t "" ls ls_whitepoint  \
-   , "<awk '$1==\"FCFS\" && $3==".mtbfstr." {print}' daly-ckpt-cielo.dat" u ($2/1e9):(1-column(base+9)):(1-column(base+7)):(1-column(base+13)):(1-column(base+11)) w candlestick t '\fifodaly' ls ls_fifodaly \
-   ,                                                                   "" u ($2/1e9):(1-column(base+5)) w p t "" ls ls_whitepoint \
-   , "<awk '$1==\"FCFS\" && $3==".mtbfstr." {print}' 1h-ckpt-cielo.dat" u ($2/1e9-.75):(1-column(base+9)):(1-column(base+7)):(1-column(base+13)):(1-column(base+11)) w candlestick t '\fifofixed' ls ls_fifofixed \
-   ,                                                                 "" u ($2/1e9-.75):(1-column(base+5)) w p t "" ls ls_whitepoint \
    , "<awk '$1==\"BLOCKING_FCFS\" && $3==".mtbfstr." {print}' 1h-ckpt-cielo.dat" u ($2/1e9+.75):(1-column(base+9)):(1-column(base+7)):(1-column(base+13)):(1-column(base+11)) w candlestick t '\bfifofixed' ls ls_bfifofixed \
    ,                                                                         "" u ($2/1e9+.75):(1-column(base+5)) w p t "" ls ls_whitepoint \
    , "<awk '$1==\"BLOCKING_FCFS\" && $3==".mtbfstr." {print}' daly-ckpt-cielo.dat" u ($2/1e9+1.5):(1-column(base+9)):(1-column(base+7)):(1-column(base+13)):(1-column(base+11)) w candlestick t '\bfifodaly' ls ls_bfifodaly \
    ,                                                                           "" u ($2/1e9+1.5):(1-column(base+5)) w p t "" ls ls_whitepoint \
+   , "<awk '$1==\"FCFS\" && $3==".mtbfstr." {print}' daly-ckpt-cielo.dat" u ($2/1e9):(1-column(base+9)):(1-column(base+7)):(1-column(base+13)):(1-column(base+11)) w candlestick t '\fifodaly' ls ls_fifodaly \
+   ,                                                                   "" u ($2/1e9):(1-column(base+5)) w p t "" ls ls_whitepoint \
+   , "<awk '$1==\"FCFS\" && $3==".mtbfstr." {print}' 1h-ckpt-cielo.dat" u ($2/1e9-.75):(1-column(base+9)):(1-column(base+7)):(1-column(base+13)):(1-column(base+11)) w candlestick t '\fifofixed' ls ls_fifofixed \
+   ,                                                                 "" u ($2/1e9-.75):(1-column(base+5)) w p t "" ls ls_whitepoint \
    ,  "<awk '$1==\"Coop\" && $3==".mtbfstr." {print}' daly-ckpt-cielo.dat" u ($2/1e9+2.25):(1-column(base+9)):(1-column(base+7)):(1-column(base+13)):(1-column(base+11)) w candlestick t '\cooperative' ls ls_cooperative \
    ,                                                                    "" u ($2/1e9+2.25):(1-column(base+5)) w p t "" ls ls_whitepoint \
    ,  "<awk '$2==" . MTBF . " {print}' model.dat" u ($1/1e9):3 w lines ls ls_model t "Theoretical Model"
