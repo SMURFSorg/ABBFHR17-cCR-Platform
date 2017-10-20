@@ -28,23 +28,23 @@ Checkpoint Size (\% of memory) & 160 & 185 & 350 & 85 \\\hline
 \caption{LANL Workflow Workload from the APEX Workflows report.\label{table:lanl}}
 \end{table}
 
-To serve as the baseline of comparison, we simulate the execution of
-each list of applications without introducing checkpoints, faults, nor
-I/O interference. From this simulation, we select a segment of the
-execution that is 60 days long, and compute the resource
-used by the applications during that time, \ie the total time
-spent on (non CR) I/O and computation in a failure-free environment.
+To serve as the baseline of comparison, we ran a set of simulations
+without introducing checkpoints, faults, nor I/O interference. For
+each of these simulations, we selected a segment of the execution that
+is 60 days long, and computed the resource used by the jobs during
+that time, \ie the total time each node spent on (non CR) I/O and
+computation in a failure-free environment.
 
-For each checkpointing and I/O scheduling technique presented in
-Section~\ref{sec:algorithms}, we then compute the resource waste as
-the total time spent not progressing applications. In the figures, we
-represent the performance of each strategy by computing the waste
-ratio, \ie the resource waste over a segment of 60 hours divided by
-the application resource usage over that same segment for the baseline
-simulation. Each simulation is conducted at least 1,000 times; the
-candlestick extremes represent the first and last decile of the
-measures, while the boxes represent the second and third quartile, and
-the point in the middle is the mean value.
+Then, for each checkpointing and I/O scheduling technique presented in
+Section~\ref{sec:algorithms}, we compute the resource waste as the
+total time computing nodes spent not progressing applications. In the
+figures, we represent the performance of each strategy by computing
+the waste ratio, \ie the resource waste over a segment of 60 hours
+divided by the application resource usage over that same segment for
+the baseline simulation. Each simulation is conducted at least 1,000
+times; the candlestick extremes represent the first and last decile of
+the measures, while the boxes represent the second and third quartile,
+and the point in the middle is the mean value.
 
 \begin{figure}
   \begin{center}
