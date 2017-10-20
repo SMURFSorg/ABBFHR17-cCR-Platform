@@ -37,11 +37,11 @@ I/O requirement can be achieved with only a small increase in waste.
 Optimizations that target reducing I/O pressure from a single application can
 generally be divided into two classes; those that attempt to hide or reduce the
 checkpoint commit times without reducing the volume of data, and those that
-reduce commit times by reducing checkpoint volumes. 
+reduce commit times by reducing checkpoint volumes.
 
 Strategies that attempt to hide checkpoint times include
 Diskless~\cite{Plank98Diskless} and remote checkpoint
-protocols~\cite{Cornwell11RemoteBLCR,Stellner96CoCheck,Zandy99ProcessHijacking}
+protocols~\cite{Cornwell11RemoteBLCR}
 which leverage the typically higher available bandwidths to the network or
 other storage media like RAM in order to mitigate the performance of slower
 storage media like spinning or solid-state disks. Additionally, remotely stored
