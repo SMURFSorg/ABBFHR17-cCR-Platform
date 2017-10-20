@@ -62,16 +62,19 @@ the point in the middle is the mean value.
 
 First, we explore the performance of each approach under heavy risks
 of failures. Figure~\ref{fig:cielo-1hmtbf} represents the waste ratio
-on Cielo, assuming the node MTBF $\muind$ was 2 years (i.e. a system MTBF of
-1h). We vary the filesystem bandwidth from 40 GB/s to 160GB/s in order
-to evaluate the impact of this parameter. We observe three classes of
-behavior: \propfixed and \bfifofixed exhibit a waste ratio that
-decreases as the bandwidth increases, but remains above 40\% even with
-a high available bandwidth; \fifodaly, \fifofixed, and \cooperative
-quickly decrease at only 20\% of waste or less, and reach the
-theoretical model performance; and \propdaly and \bfifodaly start at
-the same level of efficiency as \propfixed and \bfifofixed, and reach
-20\% of waste as the bandwidth increases.
+on Cielo, assuming the node MTBF $\muind$ was 2 years (i.e. a system
+MTBF of 1h). We vary the filesystem bandwidth from 40 GB/s to 160GB/s
+in order to evaluate the impact of this parameter. We observe three
+classes of behavior: \propfixed and \bfifofixed exhibit a waste ratio
+that decreases as the bandwidth increases, but remains above 40\% even
+with a high available bandwidth; \fifodaly, \fifofixed, and
+\cooperative quickly decrease at only 20\% of waste or less, and reach
+the theoretical model performance;\footnote{Maple code to compute the
+  performance predicted by the theoretical model is avaible on
+  \url{https://github.com/SMURFSorg/InterferingCheckpoints}} and
+\propdaly and \bfifodaly start at the same level of efficiency as
+\propfixed and \bfifofixed, and reach 20\% of waste as the bandwidth
+increases.
 
 This figure shows that with a high frequency of failures, providing
 each application with the appropriate checkpoint interval is central
