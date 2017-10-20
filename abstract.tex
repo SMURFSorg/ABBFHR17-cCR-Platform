@@ -1,11 +1,11 @@
 \begin{abstract}
 % Primary: George & Dorian
   In high-performance computing environments, input/output (I/O) from various
-sources often contend for scare available bandwidth. Adding to these I/O
-operations inherent to the failure-free execution of these applications, I/O
-from checkpoint/restart (CR) operations used to ensure progress in the presence
-of failures,  places an additional burden as it increases I/O contention which
-leads to degraded performance.
+sources often contend for scare available bandwidth. Adding to the I/O
+operations inherent to the failure-free execution of an application, I/O
+from checkpoint/restart (CR) operations (used to ensure progress in the presence
+of failures) places an additional burden as it increases I/O contention,
+leading to degraded performance.
 %  aggravates the problem. Without careful consideration, contending I/O from
 %  independently operating sources will lead to significant performance
 %  degradation.  especially for capacity I/O loads such as the I/O from
@@ -16,7 +16,7 @@ leads to degraded performance.
 %  from platform faults.
   In this work, we consider a cooperative scheduling policy that optimizes the
 overall performance of concurrently executing CR-based applications which share
-valuable I/O resources.  First, we provide a theoretical model and derive a set
+valuable I/O resources.  First, we provide a theoretical model and then derive a set
 of necessary constraints needed to minimize the global \emph{waste} on the
 platform.
 %  the scientific throughput of these platforms. Using this cooperative policy,
