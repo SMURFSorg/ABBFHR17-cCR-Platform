@@ -7,7 +7,8 @@
 In order to evaluate the performance of the proposed approaches, we ran
 a large set of discrete event simulations that we describe in this
 section. Simulations are instantiated by a set of initial conditions
-that define a set of application classes, by their distribution, and by
+that define a set of application classes, the distribution of
+resource usage between application classes, and by
 the main characteristics of the platform on which these will execute.
 
 \paragraph*{High level parameters}
@@ -49,26 +50,26 @@ location of failures constitute the initial conditions of a
 simulation.
 
 \paragraph*{Job Scheduling}
-Then, an initial job schedule is computed: jobs are set to start and
+First, an initial job schedule is computed: jobs are set to start and
 end at planned dates and on planned nodes, depending on their
 characteristics, their priority, and resource availability. The job
 schedule follows a simple first-fit strategy. We simulate an online
 scheduling, and every time a job ends before its planned date
 (because of a failure, or because it reached the end of its execution
-before the planned date), the schedule is amended by de-scheduling all
+before the planned date), the schedule is amended by re-scheduling all
 jobs that were not started yet.
 
 \paragraph*{Execution Simulation}
-Once a job is started, it first executes its initial input. It then
-executes some work for a certain period and it checkpoints. These two
+Once a job is started, it first executes its initial input. It then 1)
+executes some work for a certain period before it 2) checkpoints. These two
 steps are repeated until all planned work is executed, after which the
 final output is executed by the job, before it ends. At any time
 during the execution, a node hosting the job may be subject to a
 failure (striking at pre-computed dates and places). When that
 happens, the job is terminated, and a new job is added to the list of
 jobs to schedule. That new job represents the restart of the failed
-one: it has similar characteristics,, but an initial input
-corresponding to the restart size, and a work time corresponding to
+one: it has similar characteristics, but its initial input
+corresponds to the restart size, and its work time corresponds to
 the remaining work from the last successful checkpoint. To reflect a
 frequent job scheduling policy on shared platforms, the restarting job
 priority is set to the maximal, so that it gets a higher chance to
@@ -79,13 +80,13 @@ either be dynamic or fixed. For fixed periods, an ordinary heuristic
 is to take a checkpoint every hour, with the reasoning that in the
 worst case, only one hour of work can be lost. In the reminder of
 this paper we will refer to these two frequency variants as Fixed,
-when the checkpoint period is fixed to 1 hours, and as Daly when the
+when the checkpoint period is fixed to 1 hour, and as Daly when the
 optimal checkpoint frequency is defined using Young/Daly. For the
-\leastwaste algorithm the checkpoint interval is at least the optimal,
-and a Fixed version is pointless.
+\leastwaste algorithm the checkpoint interval is at least the optimal
+(by construction), and a Fixed version is pointless.
+
 \ifTR
 
-% This is redundant with Algorithms & Model
 \paragraph*{Interference Models} Simulations implement each of the
 interference model and avoidance strategies defined in
 Section~\ref{sec:algorithms}: for \propfixed and \propdaly,
