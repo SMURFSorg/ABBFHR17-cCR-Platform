@@ -4,14 +4,16 @@
 \label{sec:lowerbound}
 % Primary: Yves (does that go into a subsec of the algorithms or models?)
 
-In this section we envision a (theoretical) scenario when the platform operates in steady-state,
+In this section we derive a lower bound of the optimal platform waste. The motivation is to assess the absolute performance of the scheduling algorithms presented in Section~\ref{sec:algorithms}: 
+we compare their performance with  this lower bound in the simulations presented in Section~\ref{sec:results}.
+
+We envision a (theoretical) scenario when the platform operates in steady-state,
 with a constant number of applications per class spanning the whole platform. We also assume that
 the I/O bandwidth $\bandavail$  that is available for CR operations remains constant throughout
 execution. This amounts to neglecting initial input and final output I/O operations,
 or more precisely, to pretending that these operations span the entire execution of the application.
 Otherwise, we would need to account for application durations, which renders the
 steady-state analysis intractable. 
-
 Given the above, we determine the optimal checkpointing period for each application class
 when the objective is to minimize the total waste incurred  by the platform, or equivalently,
 to maximize the total throughput of the platform. To complicate matters, these optimal periods
