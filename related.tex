@@ -15,7 +15,7 @@ I/O across a platform.
 %\todo[inline]{kbf: I am unsure about this breakdown.  These two things do not
 %seem independent; reducing pressure seems to al reduce interference ...}
 
-\subsection{Checkpointing and I/O}
+\paragraph{Checkpointing and I/O}
 
 For a single application, the optimal checkpointing period is given by the
 Young/Daly formula~\cite{young74,daly04}. This period minimizes the platform
@@ -26,14 +26,13 @@ checkpoint periods), and the time needed to recover and re-execute after each
 failure (which calls for shorter checkpoint periods), The Young/Daly period
 achieves the optimal trade-off between both sources to minimize the total
 waste.  However, this optimal period may put too much pressure on the I/O
-system. It is possible to use a longer, sub-optimal, period that would incur
-less pressure and still lead to a reasonable waste. S. Arunagiri et
-al.~\cite{Arunagiri2010} have studied such trade-offs and they have shown, both
-analytically and instantiating the model with four real-life platforms, that a
-great decrease in I/O requirement can be achieved  at the price of a small
-increase of the waste.
+system due to frequent checkpoints. It is possible to use a longer,
+sub-optimal, period that would incur less pressure and still lead to acceptable
+waste. Arunagiri et al.~\cite{Arunagiri2010} studied such trade-offs and shown,
+both analytically and using four real-life platforms, that a decrease in the
+I/O requirement can be achieved with only a small increase in waste.
 
-\subsection{Reducing I/O Pressure}
+\paragraph{Reducing I/O Pressure}
 
 Optimizations that target reducing I/O pressure from a single application can
 generally be divided into two classes; those that attempt to hide or reduce the
@@ -57,7 +56,7 @@ characteristics specific to checkpoint data to optimize checkpoint data
 transfers to/from parallel file systems and therefore reduce checkpoint commit
 times.
 
-Those strategies which attempt to reduce checkpoint sizes includes \emph{memory
+Those strategies which attempt to reduce checkpoint sizes include \emph{memory
 exclusion} which leverage user-directives or other hints to exclude portions of
 process address spaces from checkpoints~\cite{Plank99MemoryExclusion}.
 Additionally, incremental checkpointing protocols reduce checkpoint volumes by
@@ -69,24 +68,20 @@ Plank94Libckpt,Paun10IncrementalWeibull,Kiswany08stdchk}.  Similarly,
 page-based hashing techniques can also be used to avoid checkpointing pages
 that have been written to but whose content has not
 changed~\cite{Ferreira11Libhashckpt}.  Finally, compression-based techniques
-use standard compression algorithms to reduce checkpoint volumes.  Li and Fuchs
-implemented a compiler-based checkpointing approach, which exploited compile
-time information to compress checkpoints~\cite{Li90CATCH}.  Plank and Li
-proposed in-memory checkpoint compression~\cite{Plank94ICKP}, similarly
-Ibtesham et al~\cite{Ibtesham12Compression} investigated the viability of
-standard text compression algorithms in compressing checkpoints, and related,
+use standard compression algorithms to reduce checkpoint
+volumes~\cite{Ibtesham12Compression} and can be used at the
+compiler-level~\cite{Li90CATCH} or in-memory~\cite{Plank94ICKP}.  Related,
 Plank et al. proposed \textit{differential compression} to reduce checkpoint
-sizes for incremental checkpoints~\cite{Plank95CompressedDiff}.  Tanzima et al.
-have shown that similarities amongst checkpoint data from different processes
+sizes for incremental checkpoints~\cite{Plank95CompressedDiff} and Tanzima et
+al.  show that similarities amongst checkpoint data from different processes
 can be exploited to compress and reduce checkpoint data
-volumes~\cite{tanzima12mcrengine}.  Sasaki et al proposed a lossy compression
-method based on wavelet transform and  vector  quantization and applied  their
-compression method  to   checkpoints of a  production climate
-application~\cite{sasaki2015}.  Finally, Ni et al~cite{Ni2014} study the trade-off
-between the loss of precision, compression ratio, and application correctness
-due to lossy compression.
+volumes~\cite{tanzima12mcrengine}.  Finally, Sasaki et al propose using a lossy
+compression method based on wavelet transform and vector quantization to the
+checkpoints of a production climate application~\cite{sasaki2015}, while Ni et
+al~\cite{Ni2014} study the trade-off between the loss of precision, compression
+ratio, and application correctness due to lossy compression.
 
- \subsection{Avoiding I/O interference}
+\paragraph{Avoiding I/O interference}
 
 Most closely related to our work, a number of studies have considered the
 global scheduling of checkpoints and other I/O across the platform to reduce
@@ -106,13 +101,14 @@ statistical properties of these failures~\cite{Tiwari:2014:Lazy} to determine
 effective checkpoint intervals for the portion of the system used by the
 workload.
 
-\subsection{Summary}
+\paragraph{Summary}
 
 This present work distinguishes itself from these previous studies in a number
 of important ways.  First, this technique is agnostic to the I/O patterns of
 the considered applications and does not require deterministic I/O behavior.
 Also, this technique attempts to optimize the efficiency of the entire
 platform, with the changing workloads and failures running on that platform,
-rather than just considering one workload. In addition, this approach can be
-used in environments where I/O is highly constrained and Daly/Young's formula
-is not appropriate.  Finally, \todo[inline]{kbf: Add more here on novelty ...}
+rather than just considering one workload. Finally and most importantly, this
+approach provides optimal checkpointing periods in environments where I/O is
+highly constrained and Daly/Young's formula is not appropriate, which is a common
+scenerio on many leadership-class systems.
