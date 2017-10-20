@@ -88,7 +88,7 @@ lower bound. In the simulations, failures have an exponential probability
 distribution centered around the desired MTBF; In some runs, the actual
 number of failures experienced during the simulation results in a larger
 MTBF than the average used in the lower bound formula, and such instances
-can experience a lower waste than the theoretical model. 
+can experience a lower waste than the theoretical model.
 
 This figure shows that with a high frequency of failures, providing
 each application with the appropriate checkpoint interval is central
@@ -188,11 +188,11 @@ required system aggregated bandwidth necessary to observe 20\% of
 waste (or 80\% of efficiency). The waste is computed, as previously,
 by dividing the amount of resource used for checkpoints and lost due
 to failures by the amount of resource used in a fault-free and
-resilience-free run of the same initial conditions.
+resilience-free run with the same initial conditions.
 
 Figure~\ref{fig:prosp} shows the impact of the MTBF and of the
-different strategies on this system. When failures are not a chronic
-event, i.e. as soon as the node MTBF is at least 15 years
+different strategies on this system. When failures are not an endemic
+event, \ie as soon as the node MTBF is at least 15 years
 (corresponding to a system MTBF of 2.6h), a hierarchy of the different
 approaches stabilizes: the two blocking strategies that rely on
 frequent checkpoints (\propfixed and \bfifofixed) are the ones
@@ -201,8 +201,8 @@ efficiency. % 6.4TB/s at 24 years
 \fifofixed, that uses a fixed checkpoint interval comes next, with a
 requirement around three quarter of the one required by \propfixed and
 \fifofixed. It benefits from the capacity to continue working when the
-filesystem is not available to checkpoint, which is sufficient when
-failures are rare to obtain a significant performance
+filesystem is not available to checkpoint, which is sufficient, when
+failures are rare, to obtain a significant performance
 gain. % 4.9TB/s at 24 years
 Then the four strategies that use the Daly optimal checkpointing
 period, alleviating significantly the I/O pressure, are the ones that
@@ -219,7 +219,7 @@ optimal checkpointing period with I/O and checkpoint scheduling
 (\cooperative and \fifodaly) perform similarly and better than all
 other approaches. These approaches exhibit a strong resilience to
 failures, with a bandwidth requirement that increases only by a factor
-3 between the very unstable simulations (at less than 1h of system
+3 between for simulations of a very unstable system (at less than 1h of system
 MTBF), and the most stable one (at 8h of system MTBF). Compared to
 this, the other strategies are much more dependent upon the frequency
 of failures, with the \propfixed strategy requiring up to 50 times the
