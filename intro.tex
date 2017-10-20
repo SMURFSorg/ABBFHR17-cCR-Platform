@@ -26,11 +26,11 @@ checkpoints.
 
 There are two widely-used approaches to determine when an
 application should \emph{commit} a checkpoint: (i) using a fixed checkpoint period
-(typically one hour) for each application; and (ii) using application-specific
-features to determine its checkpoint period. In the second approach, the well-known
+(typically one hour) for each application; and (ii) using platform and
+application-specific features to determine its checkpoint period. In the second approach, the well-known
 Young/Daly formula~\cite{young74,daly04} yields an application optimal checkpoint
 period, $\sqrt{2 \mu C}$ seconds, where $C$ is the time to commit a checkpoint and
-$\mu$ the application Mean Time Between Failures (MTBF). We have $\mu = \frac{\muind}{q}$,
+$\mu$ the application Mean Time Between Failures (MTBF) on this platform. We have $\mu = \frac{\muind}{q}$,
 where $q$ is the number of processors enrolled by the application and $\muind$ is the
 MTBF of an individual processor~\cite{springer-monograph}. As a consequence, both
 $\mu$ and $C$ in the Young/Daly formula are application-dependent, and optimal
@@ -52,8 +52,8 @@ namely the I/O system.  There are two major reasons for this:
   % activities.
 
 \item \emph{CR-CR I/O contention}: More importantly, there is a high probability of
-  coincident CR activity amongst concurrent application instances.
-  Consider the simple case where two applications checkpoint simultaneously a file of
+  overlapping CR activity amongst concurrent application instances.
+  Consider the simple case where two applications of same size checkpoint simultaneously a file of
   the same size. Each will be assigned half the fraction $\bandavail$ to checkpoint,
   so that both checkpoints will be twice longer than expected. Such interferences
   severely decrease application efficiency (e.g., when the expected checkpoint commit
@@ -73,7 +73,7 @@ throughput. This cooperative checkpoint process is calculated such that there is
 I/O interference and minimal re-work to be done when failures occur.
 
 The main contributions of the paper are to provide a model allowing to quantify
-the I/O interferences for applications sharing a common underlying I/O
+the I/O interferences for checkpointing applications sharing a common underlying I/O
 subsystem, and to estimate the costs on potential scientific throughput of different I/O-aware
 scheduling strategies, through
 a steady-state analysis as well as detailed simulations.
