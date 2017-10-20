@@ -14,18 +14,18 @@ the main characteristics of the platform on which these will execute.
 Application classes are characterized by the following parameters:
 size of initial input and output, size of checkpoints, quantity of
 work to execute, number of nodes to use, quantity of diffuse I/O to
-execute during the entire life of the application, and execution time.
+execute during the entire life of the job, and execution time.
 Platforms are characterized by the number of nodes, a system Mean Time
 Between Failures, and an aggregated I/O subsystem bandwidth that is
-shared between the different nodes. We assume that the bandwidth when reading from and
-writing to the filesystem is symmetric, hence $\ckpt{i}=\reco{i}$
-for each application $\app{i}$.
+shared between the different nodes. We assume that the bandwidth when
+reading from and writing to the filesystem is symmetric, hence
+$\ckpt{i}=\reco{i}$ for each application class $\app{i}$.
 
-A simulation first selects randomly a list (ordered) of applications
-that are instances of the different application classes. This list is
-constrained by two parameters: the minimum simulated time to consider,
-and the relative proportion of platform resources allocated to each
-application class.
+A simulation first selects randomly a list of jobs that are instances
+of the different application classes. This list is ordered by job
+priority, and constrained by two parameters: the minimum simulated
+time to consider, and the relative proportion of platform resources
+allocated to each application class.
 
 As an example, we consider the subset of application classes given by
 the APEX workflows report for the subset of application classes of
@@ -40,61 +40,50 @@ amount of resource used by the selected class is within 1\% of the
 target goal of the representative workload percentage defined in the
 APEX workflows report (see Table~\ref{table:lanl}).
 
-Once this list of applications is defined, a set of node failures
-dates is computed. Dates of failures are placed following an
-exponential distribution with the MTBF required for the simulation. At
-the chosen dates, which node is hit by the failure is chosen uniformly
-between all nodes of the simulated platform. The (ordered) list of
-applications and the date and location of failures constitute the
-initial conditions of a simulation.
+Once this list of jobs is defined, a set of node failures dates is
+computed. Dates of failures are placed following an exponential
+distribution with the MTBF required for the simulation. At the chosen
+dates, which node is hit by the failure is chosen uniformly between
+all nodes of the simulated platform. The list of jobs and the date and
+location of failures constitute the initial conditions of a
+simulation.
 
 \paragraph*{Job Scheduling}
-Then, an initial job schedule is computed: applications are set to
-start and end at planned dates and on planned nodes, depending on
-their characteristics, the order they appear in
-the ordered list, and resource availability. The job schedule follows a
-simple first-fit
-strategy. We simulate an online scheduling, and every time an
-application ends before its planned date (because of a failure, or
-because it reached the end of its execution before the planned date),
-the schedule is amended by de-scheduling all applications that were
-not started yet, and re-scheduling them following the current order of
-applications.
+Then, an initial job schedule is computed: jobs are set to start and
+end at planned dates and on planned nodes, depending on their
+characteristics, their priority, and resource availability. The job
+schedule follows a simple first-fit strategy. We simulate an online
+scheduling, and every time a job ends before its planned date
+(because of a failure, or because it reached the end of its execution
+before the planned date), the schedule is amended by de-scheduling all
+jobs that were not started yet.
 
 \paragraph*{Execution Simulation}
-Once an application is started, it first executes its initial
-input. It then executes some work for a certain period and it
-checkpoints. These two steps are repeated until all planned work is
-executed, after which the final output is executed by the application,
-before it ends. At any time during the execution, a node hosting the
-application may be subject to a failure (striking at pre-computed
-dates and places). When that happens, this application is terminated,
-and a new application is added to the list of applications to
-schedule. That new application represents the restart of the failed
-application: it has similar characteristics as the failed application,
-but an initial input corresponding to the restart size, and a work
-time corresponding to the remaining work from the last
-successful checkpoint. To reflect a frequent policy on shared
-platforms, this restarting application is pushed in front of the
-ordered list of applications to execute, so that it gets a higher
-priority to obtain resources and complete its execution.
+Once a job is started, it first executes its initial input. It then
+executes some work for a certain period and it checkpoints. These two
+steps are repeated until all planned work is executed, after which the
+final output is executed by the job, before it ends. At any time
+during the execution, a node hosting the job may be subject to a
+failure (striking at pre-computed dates and places). When that
+happens, the job is terminated, and a new job is added to the list of
+jobs to schedule. That new job represents the restart of the failed
+one: it has similar characteristics,, but an initial input
+corresponding to the restart size, and a work time corresponding to
+the remaining work from the last successful checkpoint. To reflect a
+frequent job scheduling policy on shared platforms, the restarting job
+priority is set to the maximal, so that it gets a higher chance to
+obtain an allocation fast and complete the execution.
 
-Checkpointing periods can either be dynamic or fixed. Many users
-define a fixed period based on their own experience on the
-platform. An ordinary heuristic is to take a checkpoint every hour,
-with the reasoning that in the worst case, only one hour of work can
-be lost. We also consider a dynamic period that is defined for each
-application. We use for this period the Young/Daly
-approximation~\cite{young74,daly04} (see Section~\ref{sec:algorithms}),
-where the checkpoint time is
-taken as the time it would take to checkpoint the application if there
-were no interference.%
-%
-In the reminder of this paper we will refer to these two frequency variants as
-Fixed, when the checkpoint period is fixed to 1 hours, and as Daly when the
-optimal checkpoint frequency is defined using Young/Daly. For the \leastwaste
-algorithm the checkpoint interval is at least the optimal, and a Fixed version
-is pointless.
+As described in Section~\ref{sec:model}, checkpointing periods can
+either be dynamic or fixed. For fixed periods, an ordinary heuristic
+is to take a checkpoint every hour, with the reasoning that in the
+worst case, only one hour of work can be lost. In the reminder of
+this paper we will refer to these two frequency variants as Fixed,
+when the checkpoint period is fixed to 1 hours, and as Daly when the
+optimal checkpoint frequency is defined using Young/Daly. For the
+\leastwaste algorithm the checkpoint interval is at least the optimal,
+and a Fixed version is pointless.
+\ifTR
 
 \paragraph*{Interference Models} Simulations implement each of the
 interference model and avoidance strategies defined in
@@ -102,35 +91,38 @@ Section~\ref{sec:algorithms}: for \propfixed and \propdaly,
 interfering I/O and checkpoints get a portion of the available
 aggregated bandwidth proportional to the number of nodes they use, and
 inversely proportional to the number of nodes involved for all
-applications doing I/O; for \bfifofixed and \bfifodaly, I/O requests
+jobs doing I/O; for \bfifofixed and \bfifodaly, I/O requests
 and checkpoints are ordered in a first-come first-serve strategy, and
 when they are selected, obtain the full bandwidth; for \fifofixed and
 \fifodaly, I/O requests and checkpoints are served in order, but the
 simulation adds all the time waiting for a checkpoint to start as
-progress in the computation for the application; and for \cooperative,
+progress in the computation for the job; and for \cooperative,
 the same is implemented, but I/O are ordered to minimize the waste in
 Equations~\eqref{eq.selection} and~\eqref{eq.selection2}.
 
 Note that in the scheduled I/O methods (\fifononblock and \cooperative),
-initial inputs and final outputs are blocking (the application
+initial inputs and final outputs are blocking (the job
 cannot progress during the I/O until it is served), but checkpoints
-are non blocking, which entails that if a failure hits the application,
+are non blocking, which entails that if a failure hits the job,
 it may have to re-execute from a checkpoint far in its past, if it was not
 granted access to the filesystem for a long time.
+\else
+Simulations implement each of the interference models and avoidance
+strategies defined in Section~\ref{sec:algorithms}.
+\fi
 
 \paragraph*{Method of statistics collection from simulations}
 As we compare all the scheduling strategies, each simulation is run
-once per strategy with the same initial conditions (ordered list of
-applications and date and location of failures). Performance
+once per strategy with the same initial conditions (list of jobs with
+initial priorities and date and location of failures). Performance
 statistics are collected over each simulation. In order to consolidate
 these measures over many simulations, statistics are taken over a
 segment of fixed length of each simulation.  To capture steady-state,
-this segment excludes both
-the first day of the simulation (in which applications might be
-synchronized artificially because a subset starts at the same date),
-and the last day of the simulation (in which a large amount of
-resource may not be used as new applications are not added to the
-workload). We simulate a large number of such runs (at least a
-thousand simulations per shown measurement), and compute the first,
-second, third quartile of the performance for each statistic, as well
-as the mean value.
+this segment excludes both the first day of the simulation (in which
+jobs might be synchronized artificially because a subset
+starts at the same date), and the last day of the simulation (in which
+a large amount of resource may not be used as new jobs are not
+added to the workload). We simulate a large number of such runs (at
+least a thousand simulations per shown measurement), and compute the
+first, and ninth decile and the first and third quartile of the
+performance for each statistic, as well as the mean value.
