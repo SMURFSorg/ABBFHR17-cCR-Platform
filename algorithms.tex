@@ -53,9 +53,6 @@ commit times longer than $\ckpt{i}$, the resultant checkpoint period may be long
 than $\period{i}$. This is consistent with an oblivious I/O policy that does not
 consider for issues stemming from potential I/O contention.
 
-% TODO: I deleted this discussion since I think it is redundant with what we already
-% said in the model section. Please double-check. - DCA
-
 % GB: The variants are described in the Simulation
 % In the \nocoop algorithm, we consider two variants where checkpoints are
 % tentatively taken at 1) fixed frequency (\propfixed), or 2) at the Daly frequency
@@ -140,8 +137,7 @@ compared to \fifoblock and \nocoop algorithms.
 % data to a later date when the I/O token is available to the job.
 % When the job finaly gets the token, the previously scratch-space
 % stored checkpoint is transfered to the PFS without interference.
-
-%NOTODO: something about replacing with last ckpt if token doesn't come in fast enough;
+%NOTTODO: something about replacing with last ckpt if token doesn't come in fast enough;
 % there's something that doesn't work with the T-C after C depiction: we would rollback unbounded amounts now.
 % that's because we do not consider whats commented down here with local scratchpads
 % the checkpoint is taken at a date t_c posterior to t_req, and we will restart at t_c, not t_req.
