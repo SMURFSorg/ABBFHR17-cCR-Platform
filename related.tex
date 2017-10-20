@@ -4,7 +4,7 @@
 \section{Related Work}\label{sec:related}
 % Primary: Kurt
 
-We survey related work in this section. We first discuss papers related to I/O
+We first discuss papers related to I/O
 pressure due to checkpointing, followed by those related to avoiding I/O
 interference.  We note that these techniques are not necessarily independent;
 reducing I/O pressure will generally reduce the likelihood of interference.
@@ -15,7 +15,7 @@ I/O across a platform.
 %\todo[inline]{kbf: I am unsure about this breakdown.  These two things do not
 %seem independent; reducing pressure seems to al reduce interference ...}
 
-\paragraph{Checkpointing and I/O}
+\paragraph*{Checkpointing and I/O}
 
 For a single application, the optimal checkpointing period is given by the
 Young/Daly formula~\cite{young74,daly04}. This period minimizes the platform
@@ -30,7 +30,7 @@ sub-optimal period with the intent of reducing I/O pressure, and shown,
 both analytically and using four real-life platforms, that a decrease in the
 I/O requirement can be achieved with only a small increase in waste.
 
-\paragraph{Reducing I/O Pressure}
+\paragraph*{Reducing I/O Pressure}
 
 Optimizations that target reducing I/O pressure from a single application can
 generally be divided into two classes; those that attempt to hide or reduce the
@@ -40,7 +40,7 @@ reduce commit times by reducing checkpoint volumes.
 Strategies that attempt to hide checkpoint times include
 Diskless~\cite{Plank98Diskless} and remote checkpoint
 protocols~\cite{Cornwell11RemoteBLCR}
-which leverage the typically higher available bandwidths to the network or
+which leverage the typically higher available bandwidths of the network or
 other storage media like RAM in order to mitigate the performance of slower
 storage media like spinning or solid-state disks. Additionally, remotely stored
 checkpoints have the additional benefit of allowing systems to survive
@@ -54,7 +54,7 @@ characteristics specific to checkpoint data to optimize checkpoint data
 transfers to/from parallel file systems and therefore reduce checkpoint commit
 times.
 
-Those strategies which attempt to reduce checkpoint sizes include \emph{memory
+The strategies which attempt to reduce checkpoint sizes include \emph{memory
 exclusion} which leverage user-directives or other hints to exclude portions of
 process address spaces from checkpoints~\cite{Plank99MemoryExclusion}.
 Additionally, incremental checkpointing protocols reduce checkpoint volumes by
@@ -79,7 +79,7 @@ checkpoints of a production climate application~\cite{sasaki2015}, while Ni et
 al~\cite{Ni2014} study the trade-offs between the loss of precision, compression
 ratio, and application correctness due to lossy compression.
 
-\paragraph{Avoiding I/O interference}
+\paragraph*{Avoiding I/O interference}
 
 Most closely related to our work, a number of studies have considered the
 global scheduling of checkpoints and other I/O across the platform to reduce
@@ -99,9 +99,9 @@ statistical properties of these failures~\cite{Tiwari:2014:Lazy} to determine
 effective checkpoint intervals for the portion of the system used by the
 workload.
 
-\paragraph{Summary}
+\paragraph*{Summary}
 
-This present work distinguishes itself from these previous studies in a number
+The present work distinguishes itself from these previous studies in a number
 of important ways.  First, this technique considers existing platform I/O, a
 number of previous studies do not.  Unlike some previous work, this method is
 agnostic to the I/O patterns of the considered applications and does not
