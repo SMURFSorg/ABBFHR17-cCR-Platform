@@ -14,7 +14,7 @@ subsystem is time-shared (contended) amongst the application instances, \ie mult
 applications performing I/O simultaneously can result in a per-application reduction
 in commit speed. Without loss of generality, we consider a straightforward linear
 interference model in which the global throughput remains constant and is evenly
-shared among contending applications, proportionnaly to their size. 
+shared among contending applications, proportionally to their size.
 (A more adversarial interference models could be substituted.)
 
 \paragraph*{Application Workload Model}
@@ -65,8 +65,9 @@ reliability and I/O bandwidth).
 
 Traditionally, when a job $J_{i}$ of class $\app{i}$ completes a checkpoint, its next
 checkpoint is scheduled to happen in at least $\period{i}-\ckpt{i}$ (and the first
-checkpoint is set at date $\period{i}$).  With potential CR I/O interference,
-determining the appropriate checkpointing period can be challenging.
+checkpoint is set at date $\period{i}$). With potential CR I/O interference,
+the checkpoint commit may last longer than $\ckpt{i}$, and setting
+the appropriate checkpointing period can be challenging.
 Additionally, I/O scheduling algorithms that try to mitigate I/O interference can
 impose further CR I/O delays.  In other words, the traditional strategy of scheduling
 subsequent checkpoints at $\period{i}-\ckpt{i}$ yields the desired checkpointing
@@ -74,12 +75,12 @@ period $\period{i}$ only in interference-free scenarios. CR I/O delays (induced 
 interferences or scheduling delays) dilate the checkpoint duration to $C_{dilated}$,
 and the effective period differs from the desired period by the difference
 $C_{dilated}-\ckpt{i}$.  (In Section~\ref{sec:algorithms}, we discuss how each I/O
-scheduling algorithm accommodates this discrepancy).
+scheduling algorithm handles this discrepancy).
 
 \paragraph*{Job Scheduling Model}
 To evaluate the scheduling policies, we consider a finite segment, typically lasting
 a few days, of a representative schedule where the computing resource
-usage by each job (application instances) in each class remains approximately constant at every instant. Of
+usage by each application instance (job) in each class remains approximately constant at every instant. Of
 course, with different job execution times, we cannot enforce a fixed proportion of
 each application class at every instant. However, we ensure the proper proportion is
 enforced in average throughout the schedule execution. Similarly, we enforce that at
@@ -89,7 +90,7 @@ theoretical performance of a co-scheduling policy that optimizes the steady-stat
 behavior of the job portfolio, assuming that all processors are used. We shuffle and
 simultaneously present all jobs to the scheduler, which uses a simple, greedy
 first-fit algorithm.  We resubmit failed jobs with a new wall-time equal to the
-fraction that remained when the last checkpoint was committed. Input I/O becomes
+fraction that remained when the last checkpoint commit started. Input I/O becomes
 recovery I/O; output I/O is unmodified.
 
 \paragraph*{The Formal Model}
@@ -107,4 +108,3 @@ Jobs that are subject to failures are restarted at the head of
 the scheduling queue, so that (given that in most cases only one
 node has failed and can be replaced by a hot spare) it may restart
 immediately on essentially the same compute nodes it previously occupied.
-
