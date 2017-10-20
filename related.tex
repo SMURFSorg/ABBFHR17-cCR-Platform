@@ -25,10 +25,8 @@ sources of waste, the time spent taking checkpoints (which calls for longer
 checkpoint periods), and the time needed to recover and re-execute after each
 failure (which calls for shorter checkpoint periods), The Young/Daly period
 achieves the optimal trade-off between both sources to minimize the total
-waste.  However, this optimal period may put too much pressure on the I/O
-system due to frequent checkpoints. It is possible to use a longer,
-sub-optimal, period that would incur less pressure and still lead to acceptable
-waste. Arunagiri et al.~\cite{Arunagiri2010} studied such trade-offs and shown,
+waste. Arunagiri et al.~\cite{Arunagiri2010} studied the use of a longer,
+sub-optimal period with the intent of reducing I/O pressure, and shown,
 both analytically and using four real-life platforms, that a decrease in the
 I/O requirement can be achieved with only a small increase in waste.
 
