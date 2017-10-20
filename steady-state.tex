@@ -4,7 +4,9 @@
 \label{sec:lowerbound}
 % Primary: Yves (does that go into a subsec of the algorithms or models?)
 
-In this section we derive a lower bound of the optimal platform waste. The motivation is to assess the absolute performance of the scheduling algorithms presented in Section~\ref{sec:algorithms}: 
+In this section we derive a lower bound of the optimal platform waste.
+The motivation is to assess the absolute performance of the scheduling
+algorithms presented in Section~\ref{sec:algorithms}:
 we compare their performance with  this lower bound in the simulations presented in Section~\ref{sec:results}.
 
 We envision a (theoretical) scenario when the platform operates in steady-state,
@@ -13,11 +15,11 @@ the I/O bandwidth $\bandavail$  that is available for CR operations remains cons
 execution. This amounts to neglecting initial input and final output I/O operations,
 or more precisely, to pretending that these operations span the entire execution of the application.
 Otherwise, we would need to account for application durations, which renders the
-steady-state analysis intractable. 
+steady-state analysis intractable.
 Given the above, we determine the optimal checkpointing period for each application class
 when the objective is to minimize the total waste incurred  by the platform, or equivalently,
 to maximize the total throughput of the platform. To complicate matters, these optimal periods
-periods may not be achievable,  hence we derive a lower bound of the optimal waste. 
+may not be achievable,  hence we derive a lower bound of the optimal waste.
 
 In steady-state operation, there are $\nbapp{i}$ applications of class $\app{i}$,
 each using $\nbnodes{i}$ nodes, and with checkpoint time $\ckpt{i}$. Because we orchestrate
@@ -63,7 +65,8 @@ we readily derive that
 where $\mu_{i}$ is the MTBF of  class $\app{i}$ applications, which is the Young/Daly formula~\cite{young74,daly04}.
 
 However, I/O constraints may impose the use of sub-optimal periods. If each application
-of  class $\app{i}$ checkpoints in time $\ckpt{i}$ during its period $\period{i}$ (hence without any contention), it uses the I/O device during a fraction $\frac{\ckpt{i}}{\period{i}}$ of the time.
+of  class $\app{i}$ checkpoints in time $\ckpt{i}$ during its period $\period{i}$ (hence
+without any contention), it uses the I/O device during a fraction $\frac{\ckpt{i}}{\period{i}}$ of the time.
 The total usage fraction of the  I/O device is $\ioconstraint = \sum_{i} \frac{\nbapp{i} \ckpt{i}}{\period{i}}$
 and cannot exceed $1$. Therefore, we have to solve the following optimization problem: find
 the set of values $\period{i}$ that minimize $\wasteplat$ in Equation~\eqref{eq.waste} subject to the I/O constraint:
@@ -92,9 +95,12 @@ for all $i$. This leads to:
 \period{i} = \sqrt{\frac{2 \mtbfplat  \nbnodesplat}{\nbnodes{i}^{2}} \left(\frac{\nbnodes{i}}{\nbnodesplat} +\lambda \right) \ckpt{i}}
   \label{eq.KKT}
 \end{equation}
-for all $i$. Note that when $\lambda=0$, Equation~\eqref{eq.KKT} reduces to Equation~\eqref{eq.daly}. Because of the I/O constraint in Equation~\eqref{eq.IOconstraint},
+for all $i$. Note that when $\lambda=0$, Equation~\eqref{eq.KKT} reduces to Equation~\eqref{eq.daly}.
+Because of the I/O constraint in Equation~\eqref{eq.IOconstraint},
 we choose for $\lambda$ the minimum value such that Equation~\eqref{eq.IOconstraint}
-  is satisfied. If $\lambda \neq 0$, this will lead to periods $P_{i}$ larger than the optimal value of Equation~\eqref{eq.daly}. Note that there is no closed-form expression for the minimum value of $\lambda$,
+  is satisfied. If $\lambda \neq 0$, this will lead to periods $P_{i}$ larger
+  than the optimal value of Equation~\eqref{eq.daly}. Note that there is no
+  closed-form expression for the minimum value of $\lambda$,
   it has to be found numerically.
    Altogether, we state our main result:
 
@@ -105,5 +111,9 @@ we choose for $\lambda$ the minimum value such that Equation~\eqref{eq.IOconstra
   Equation~\eqref{eq.totalwaste}.
 \end{theorem}
 
-The optimal periods may not be achievable, because Equation~\eqref{eq.IOconstraint} is a necessary condition, but is may not be sufficient:
-even though the total I/O bandwidth is not exceeded, meaning there is enough capacity to take all the checkpoints at the given periods, we would still need to orchestrate these checkpoints into a periodic pattern that repeats over time. In other words, we only have a lower bound of the optimal platform waste.
+The optimal periods may not be achievable, because Equation~\eqref{eq.IOconstraint} is a
+necessary condition, but it may not be sufficient:
+even though the total I/O bandwidth is not exceeded, meaning there is enough
+capacity to take all the checkpoints at the given periods, we would still need to 
+orchestrate these checkpoints into a periodic pattern that repeats over time.
+In other words, we only have a lower bound of the optimal platform waste.
