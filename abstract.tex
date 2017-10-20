@@ -1,39 +1,40 @@
 \begin{abstract}
 % Primary: George & Dorian
-  In high-performance computing environments, input/output (I/O) from
-  various sources often contend for I/O or network resources. Adding
-  to these I/O operations necessary to the completion of the
-  applications, checkpoint/restart (CR) I/O loads is used to protect the
-  parallel applications from platform
-  faults increase the contention, and lead to an additional
-  degradation of platforms performance.
+  In high-performance computing environments, input/output (I/O) from various
+sources often contend for scare available bandwidth. Adding to these I/O
+operations inherent to the failure-free execution of these applications, I/O
+from checkpoint/restart (CR) operations used to ensure progress in the presence
+of failures,  places an additional burden as it increases I/O contention which
+leads to degraded performance.
 %  aggravates the problem. Without careful consideration, contending I/O from
 %  independently operating sources will lead to significant performance
-%  degradation.
-% especially for capacity I/O loads such as
-%  the I/O from checkpoint/restart (CR) services used to protect these
-%  computations from platform faults.
-%   For example, I/O from concurrently running applications can contend with each
-%   other as well as with other I/O loads, such as the I/O from
-%   checkpoint/restart (CR) services used to protect these computations from
-%   platform faults.
-  In this work, we consider how a cooperative scheduling policy that optimizes
-  the way concurrently executing CR-based applications share I/O resources,
-  would impact congestion, and therefore performance. We provide a theoretical
-  model, and derive a set of necessary constraints to minimize the global waste.
-%  the scientific throughput of these platforms. Using
-%  this cooperative policy, application checkpoints are cooperatively
-%  orchestrated to prevent congestion and to minimize the global waste.
-  Our results show that the optimal checkpoint interval as defined by
-  Young/Daly provide a sensible metric for a single application, but
-  is not sufficient to address a larger problem, the resource
-  contention at the platform scale.  We demonstrate how combining
-  optimal checkpointing periods with I/O scheduling strategies can
-  provide a significant improvement on the overall application
-  performance, maximizing the platform throughput.
+%  degradation.  especially for capacity I/O loads such as the I/O from
+%  checkpoint/restart (CR) services used to protect these computations from
+%  platform faults.  For example, I/O from concurrently running applications
+%  can contend with each other as well as with other I/O loads, such as the I/O
+%  from checkpoint/restart (CR) services used to protect these computations
+%  from platform faults.
+  In this work, we consider a cooperative scheduling policy that optimizes the
+overall performance of concurrently executing CR-based applications which share
+valuable I/O resources.  First, we provide a theoretical model and derive a set
+of necessary constraints needed to minimize the global \emph{waste} on the
+platform.
+%  the scientific throughput of these platforms. Using this cooperative policy,
+%  application checkpoints are cooperatively orchestrated to prevent congestion
+%  and to minimize the global waste.
+  Our results demonstrate that the optimal checkpoint interval as defined by
+Young/Daly, while providing a sensible metric for a single application, is not
+sufficient to optimally address resource contention at the platform scale.  We
+therefore show that combining optimal checkpointing periods with I/O scheduling
+strategies can provide a significant improvement on the overall application
+performance, thereby maximizing platform throughput.
 %   sequentially, with a dynamic, priority-dependent frequency dictated by the
 %   scheduler. When enough I/O bandwidth is available, each application
 %   checkpoints with its optimal period. However, when I/O bandwidth is scarce,
 %   our scheduling algorithm provides an optimal checkpoint process that
 %   maximizes platform throughput. Our results show ...
+Overall, these results provide critical analysis and direct guidance on checkpointing
+large-scale workloads in the presence of competing I/O while minimizing the impact
+on application performance.
+
 \end{abstract}
