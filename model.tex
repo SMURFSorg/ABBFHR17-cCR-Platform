@@ -36,11 +36,15 @@ simplifying assumptions (that we validate in the experimental section):
 \item Job makespans are precisely known a priori. This allows us to ignore all other
   sources of job disturbance except C/R overheads.
 \end{compactitem}
-We used specific numbers and characteristics of application classes based on real
-benchmark data, such as those provided in the APEX workflows report on the Cielo platform~\cite{apex2016}.  To
-avoid the side effects induced by hundreds of completely identical application
-instances, we use normal distributions for job durations with mean equal to original
-APEX value and small (20\%) standard deviation.
+We used specific numbers and characteristics of application classes
+based on real benchmark data, such as those provided in the APEX
+workflows report on the Cielo platform~\cite{apex2016}.  To avoid the
+side effects induced by hundreds of completely identical jobs, 
+we use normal distributions for job durations with mean
+equal to original APEX value and small (20\%) standard deviation. In
+the rest of the paper, we will use the term \emph{job} to denote a
+specific application instance, and \emph{application class} to denote
+a set of applications with similare characteristics.
 
 \paragraph*{Checkpoint Period and I/O Interference}
 
@@ -59,7 +63,7 @@ processor~\cite{springer-monograph}.  The parameters in this formula are depende
 upon application features (checkpoint dataset size) and platform features (system
 reliability and I/O bandwidth).
 
-Traditionally, when an application, $\app{i}$, completes a checkpoint, its next
+Traditionally, when a job $J_{i}$ of class $\app{i}$ completes a checkpoint, its next
 checkpoint is scheduled to happen in at least $\period{i}-\ckpt{i}$ (and the first
 checkpoint is set at date $\period{i}$).  With potential CR I/O interference,
 determining the appropriate checkpointing period can be challenging.
@@ -74,8 +78,8 @@ scheduling algorithm accommodates this discrepancy).
 
 \paragraph*{Job Scheduling Model}
 To evaluate the scheduling policies, we consider a finite segment, typically lasting
-a few days, of a representative schedule where the computing esource usage by each application
-instances (jobs) in each class remains approximately constant at every instant. Of
+a few days, of a representative schedule where the computing resource
+usage by each job (application instances) in each class remains approximately constant at every instant. Of
 course, with different job execution times, we cannot enforce a fixed proportion of
 each application class at every instant. However, we ensure the proper proportion is
 enforced in average throughout the schedule execution. Similarly, we enforce that at
@@ -93,13 +97,13 @@ We consider a set $\appset$ of $\nbapps$ applications classes
 $\app{1}, \ldots \app{\nbapps}$ that execute concurrently on a platform with
 $\nbnodesplat$ nodes. Application class $\app{i}$ specifies:
 \begin{compactitem}
-\item $\nbapp{i}$: the number of applications in $\app{i}$,
-\item $\nbnodes{i}$: the number of nodes used by each application in $\app{i}$,
-\item $\period{i}$: the checkpoint period of each application in $\app{i}$, and
-\item $\ckpt{i}$ and $\reco{i}$: the checkpoint and recovery durations for each application in $\app{i}$ when there is no interference with other I/O operations.
+\item $\nbapp{i}$: the number of jobs $J^{i}_{1 \leq k\leq \nbapp{i}}$ in $\app{i}$,
+\item $\nbnodes{i}$: the number of nodes used by each job in $\app{i}$,
+\item $\period{i}$: the checkpoint period of each job in $\app{i}$, and
+\item $\ckpt{i}$ and $\reco{i}$: the checkpoint and recovery durations for each job in $\app{i}$ when there is no interference with other I/O operations.
 \end{compactitem}
-At every instant, we schedule as many applications as possible.
-Application that are subject to failures are restarted at the head of
+At every instant, we schedule as many jobs as possible.
+Jobs that are subject to failures are restarted at the head of
 the scheduling queue, so that (given that in most cases only one
 node has failed and can be replaced by a hot spare) it may restart
 immediately on essentially the same compute nodes it previously occupied.
