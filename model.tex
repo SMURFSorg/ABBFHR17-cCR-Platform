@@ -26,11 +26,11 @@ storing an output file at completion. Because applications are long-running
 are protected using coordinated CR that incurs periodic \emph{CR I/O}.
 
 To model these behavioral variations with minimal parameters, we make the following
-simplifying assumptions (that we validate in the experimental section):
+simplifying assumptions:
 \begin{compactitem}
 \item There is a large number of applications, but only a small number of application
   classes, \ie, sets of applications with similar sizes, durations, footprints and
-  I/O requirements;
+  I/O needs;
 \item Other than initialization and finalization I/O, an application's regular
   (non-CR) I/O operations are evenly distributed over its makespan.
 \item Job makespans are precisely known a priori. This allows us to ignore all other
@@ -39,7 +39,7 @@ simplifying assumptions (that we validate in the experimental section):
 We used specific numbers and characteristics of application classes
 based on real benchmark data, such as those provided in the APEX
 workflows report on the Cielo platform~\cite{apex2016}.  To avoid the
-side effects induced by hundreds of completely identical jobs, 
+side effects induced by hundreds of completely identical jobs,
 we use normal distributions for job durations with mean
 equal to original APEX value and small (20\%) standard deviation. In
 the rest of the paper, we will use the term \emph{job} to denote a

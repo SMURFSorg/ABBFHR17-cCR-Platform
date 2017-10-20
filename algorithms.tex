@@ -10,12 +10,11 @@ the status-quo in which I/O activities are scheduled independently and may incur
 slowdowns due to I/O resource contentions. The second algorithm (\fifoblock)
 coordinates I/O activity to eliminate interference: I/O operations are scheduled in a
 First-Come-First-Serve (FCFS) fashion, and only one I/O operation executes at any
-given while other I/O requests are blocked until their turn comes.  The third
+given time while other I/O requests are blocked until their turn comes.  The third
 algorithm (\fifononblock) is similar, except that jobs that are waiting
 for the I/O token to checkpoint continue working until their turn comes.
 Last, we propose our heuristic (\leastwaste) that improves on \fifononblock by giving
-the I/O token to the I/O operation that will minimize system waste (or maximize
-system efficiency). Note that unlike the blocking approaches (\nocoop
+the I/O token to the I/O operation that will minimize system waste. Note that unlike the blocking approaches (\nocoop
 and \fifoblock), non-blocking optimizations (\fifononblock and
 \cooperative) require application code refactoring.
 
@@ -127,7 +126,7 @@ if the job successfully commits the postponed checkpoint, upon a subsequent fail
 the job would restart from the time at which the postponed checkpoint was taken, not
 at $t_{req}$ -- a fact that may mitigate the increased risk exposure of \fifoblock
 versus \nocoop algorithms.
- 
+
 % Then, the job initiates its I/O (checkpointing, initial input, final
 % output or recovery). When the active job completes its I/O, the next
 % requesting job (in FCFS order) become the active I/O job.
