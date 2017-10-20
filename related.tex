@@ -104,11 +104,12 @@ workload.
 \paragraph{Summary}
 
 This present work distinguishes itself from these previous studies in a number
-of important ways.  First, this technique is agnostic to the I/O patterns of
-the considered applications and does not require deterministic I/O behavior.
-Also, this technique attempts to optimize the efficiency of the entire
-platform, with the changing workloads and failures running on that platform,
-rather than just considering one workload. Finally and most importantly, this
-approach provides optimal checkpointing periods in environments where I/O is
-highly constrained and Daly/Young's formula is not appropriate, which is a common
-scenario on many leadership-class systems.
+of important ways.  First, this technique considers existing platform I/O, a
+number of previous studies do not.  Unlike some previous work, this method is
+agnostic to the I/O patterns of the considered applications and does not
+require deterministic I/O behavior.  Also, this technique attempts to optimize
+the efficiency of the entire platform, with the changing workloads and failures
+running on that platform, rather than just considering one workload. Finally
+and most importantly, this approach provides optimal checkpointing periods in
+environments where I/O is highly constrained and Daly/Young's formula is not
+appropriate, a common scenario on many leadership-class systems.
