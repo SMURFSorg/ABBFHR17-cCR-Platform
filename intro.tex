@@ -11,10 +11,10 @@ pattern in today's HPC centers.  In fact, space-sharing in this fashion is more
 common than \emph{capability} workloads that span the entire
 platform~\cite{Weidner2016}. Furthermore, while computational nodes are
 dedicated to a particular application instance, the interconnect links and
-storage partition are typically shared amongst application instances. Therefore,
-without careful consideration, network and storage contention can reduce
-individual application and overall system performance \todo{kbf: CITE "There goes the
-neighborhood"?}.
+storage partition are typically shared amongst application instances.
+Therefore, without careful consideration, network and storage contention can
+reduce individual application and overall system
+performance~\cite{Bhatele:2013:Neighborhood}.
 
 On these platforms, checkpoint/restart (CR) is the most common strategy
 employed to protect applications from underlying faults and failures.
@@ -39,22 +39,21 @@ optimal periods can be quite different over the application spectrum.
 
 Independent CR of concurrent application instances can incur significant
 resource wastage, because they lead to an inefficient usage of an already
-scarce resource, namely available I/O bandwidth\todo{kbf: CITE R. Ross SOP
-paper?}.  There are two major reasons for this:
+scarce resource, namely available I/O bandwidth~\cite{Luu:2015:Multiplatform}.
+There are two major reasons for this:
 
 \begin{enumerate}
         
 \item \emph{Application-CR I/O contention}: On many systems, the I/O subsystem
-does not have enough available usable bandwidth to meet the requirements of
-the concurrent application workloads\todo{kbf: CITE R. Ross SOP paper?}. This
-congestion is expected to worsen going forward with the emergence of many data
-intensive workloads in HPC\todo{kbf: CITE}.  Let $\bandtotal$ be the total
-filesystem I/O bandwidth.  Concurrently executing applications typically
-perform regular (non-CR) I/O operations throughout their execution, so that
-only a fraction $\bandavail$ of the total bandwidth remains available for
-checkpoints.  This fraction may be insufficient, particularly when some
-applications perform intensive non-checkpoint I/O and others may write very
-large checkpoints.
+does not have enough available usable bandwidth to meet the requirements of the
+concurrent application workloads~\cite{Luu:2015:Multiplatform}. This congestion
+is expected to worsen going forward with the increased prevelance of data
+intensive workflows in HPC.  Let $\bandtotal$ be the total filesystem I/O
+bandwidth.  Concurrently executing applications typically perform regular
+(non-CR) I/O operations throughout their execution, so that only a fraction
+$\bandavail$ of the total bandwidth remains available for checkpoints.  This
+fraction may be insufficient, particularly when some applications perform
+intensive non-checkpoint I/O and others may write very large checkpoints.
   % $\bandtotal$ of a well-provisioned platform should allow for efficient CR
   % I/O activities.
 
@@ -64,9 +63,9 @@ instances.  Consider the simple case where two applications of same size
 checkpoint simultaneously a file of the same size. Each will be assigned half
 the fraction $\bandavail$ to checkpoint, therefore the commits will take twice
 as long. Such interferences can severely decrease application efficiency and
-overall platform throughput (e.g., when the expected checkpoint commit time
+overall platform throughput\footnote{When the expected checkpoint commit time
 used to compute the optimal checkpoint interval differs from the actual
-checkpoint commit time)\todo{footnote?}.
+checkpoint commit time, effeciecy will decrease}.
 
 \end{enumerate}
 
