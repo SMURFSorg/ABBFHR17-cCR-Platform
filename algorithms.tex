@@ -107,7 +107,7 @@ synchronization\footnote{In user-level checkpointing the job typically
   finishes its current computing block before generating its
   checkpoint data.}).  In most applications, the granularity of the
 work is small enough for a simple approach to be efficient:
-applications can use existing APIs in SCR~\cite{Moody10_SCR} or
+applications can use existing APIs in SCR~\cite{Moody10SCR} or
 FTI~\cite{Bautista-Gomez11_FTI} to regularly poll if a checkpoint
 should be taken at this time. In this work, we assume that this
 resynchronization cost is negligible relative to the checkpoint commit
