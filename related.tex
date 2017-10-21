@@ -4,58 +4,51 @@
 \section{Related Work}\label{sec:related}
 % Primary: Kurt
 
-We first discuss papers related to I/O
-pressure due to checkpointing, followed by those related to avoiding I/O
-interference.  We note that these techniques are not necessarily independent;
-reducing I/O pressure will generally reduce the likelihood of interference.
-Therefore, we attempt to limit our I/O interference discussion to those
-techniques which consider the global scheduling of checkpoints and/or general
-I/O across a platform.
+We first discuss research regarding checkpoint-induced I/O pressure, followed by
+works that regard avoiding I/O interference.  These techniques are not necessarily
+independent: generally, reducing I/O pressure will reduce the likelihood of
+interference.  Therefore, we focus our I/O interference discussion to those
+techniques which consider the global scheduling of checkpoints and/or application I/O
+across a platform.
 
 %\todo[inline]{kbf: I am unsure about this breakdown.  These two things do not
 %seem independent; reducing pressure seems to al reduce interference ...}
 
 \paragraph*{Checkpointing and I/O}
 
-For a single application, the optimal checkpointing period is given by the
-Young/Daly formula~\cite{young74,daly04}. This period minimizes the platform
-waste, defined as the fraction of the execution time that does not contribute
-to the progress of the application (the time \emph{wasted}).  There are two
-sources of waste, the time spent taking checkpoints (which calls for longer
-checkpoint periods), and the time needed to recover and re-execute after each
-failure (which calls for shorter checkpoint periods), The Young/Daly period
-achieves the optimal trade-off between both sources to minimize the total
-waste. Arunagiri et al.~\cite{Arunagiri2010} studied the use of a longer,
-sub-optimal period with the intent of reducing I/O pressure, and shown,
-both analytically and using four real-life platforms, that a decrease in the
-I/O requirement can be achieved with only a small increase in waste.
+For a single application, the Young/Daly formula~\cite{young74,daly04} gives the
+optimal checkpointing period. This period minimizes platform waste, defined as the
+fraction of job execution time that does not contribute to its progress.  The two
+sources of waste are the time spent taking checkpoints (which motivates longer
+checkpoint periods) and the time needed to recover and re-execute after each failure
+(which motivates shorter checkpoint periods). The Young/Daly period achieves the
+optimal trade-off between these sources to minimize the total waste. Arunagiri et
+al.~\cite{Arunagiri2010} studied longer, sub-optimal periods with the intent of
+reducing I/O pressure and showed, both analytically and empircally using four real
+platforms, that a decrease in the I/O requirement can be achieved with only a small
+increase in waste.
 
 \paragraph*{Reducing I/O Pressure}
 
-Optimizations that target reducing I/O pressure from a single application can
-generally be divided into two classes; those that attempt to hide or reduce the
-checkpoint commit times without reducing the volume of data, and those that
-reduce commit times by reducing checkpoint volumes.
-
-Strategies that attempt to hide checkpoint times include
-Diskless~\cite{Plank98Diskless} and remote checkpoint
-protocols~\cite{Cornwell11RemoteBLCR}
-which leverage the typically higher available bandwidths of the network or
-other storage media like RAM in order to mitigate the performance of slower
-storage media like spinning or solid-state disks. Additionally, remotely stored
-checkpoints have the additional benefit of allowing systems to survive
-non-transient node failures. Similarly, multi-level checkpoint protocols like
-SCR~\cite{Moody10SCR,Vaidya95TwoLevel} attempt to hide checkpoint commit times
-by writing checkpoints to RAM, flash storage, or local disk on the compute
-nodes~\cite{Kougkas2017} in addition to the parallel file system thereby
-improving checkpoint or general I/O bandwidth.  Finally, checkpoint-specific
+There are two general strategies for reducing I/O pressure from a single application:
+hiding or reducing checkpoint commit times without reducing checkpoint data volumes
+and reducing commit times by reducing checkpoint data volumes.  Strategies that
+attempt to hide checkpoint times include Diskless~\cite{Plank98Diskless} and remote
+checkpoint protocols~\cite{Cornwell11RemoteBLCR} which leverage the typically higher
+available bandwidths of the network or other storage media like RAM in order to
+mitigate the performance of slower storage media like spinning or solid-state
+disks. Additionally, remotely stored checkpoints have the additional benefit of
+allowing systems to survive non-transient node failures. Similarly, multi-level
+checkpoint protocols like SCR~\cite{Moody10SCR,Vaidya95TwoLevel} attempt to hide
+checkpoint commit times by writing checkpoints to RAM, flash storage, or local disk
+on the compute nodes~\cite{Kougkas2017} in addition to the parallel file system
+thereby improving checkpoint or general I/O bandwidth.  Finally, checkpoint-specific
 file systems like PLFS~\cite{Bent09PLFS} leverage the I/O patterns and
-characteristics specific to checkpoint data to optimize checkpoint data
-transfers to/from parallel file systems and therefore reduce checkpoint commit
-times.
+characteristics specific to checkpoint data to optimize checkpoint data transfers
+to/from parallel file systems and therefore reduce checkpoint commit times.
 
-The strategies which attempt to reduce checkpoint sizes include \emph{memory
-exclusion} which leverage user-directives or other hints to exclude portions of
+Strategies that attempt to reduce checkpoint sizes include \emph{memory
+exclusion}, which leverage user-directives or other hints to exclude portions of
 process address spaces from checkpoints~\cite{Plank99MemoryExclusion}.
 Additionally, incremental checkpointing protocols reduce checkpoint volumes by
 utilizing the OS's memory page protection facilities to detect and save only
@@ -73,41 +66,39 @@ Plank et al. proposed \textit{differential compression} to reduce checkpoint
 sizes for incremental checkpoints~\cite{Plank95CompressedDiff} and Tanzima et
 al.  show that similarities amongst checkpoint data from different processes
 can be exploited to compress and reduce checkpoint data
-volumes~\cite{tanzima12mcrengine}.  Finally, Sasaki et al propose using a lossy
+volumes~\cite{tanzima12mcrengine}.  Finally, Sasaki et al propose a lossy
 compression method based on wavelet transform and vector quantization to the
 checkpoints of a production climate application~\cite{sasaki2015}, while Ni et
 al~\cite{Ni2014} study the trade-offs between the loss of precision, compression
-ratio, and application correctness due to lossy compression.
+ratio, and application correctness due to lossy compression.\dca{Can we say the
+  outcomes from these latter studies?}
 
 \paragraph*{Avoiding I/O interference}
 
-Most closely related to our work, a number of studies have considered the
-global scheduling of checkpoints and other I/O across the platform to reduce
-the overall congestion therefore increase performance.  Aupy et
-al.~\cite{Aupy:2017:Periodic} presented a decentralized I/O scheduling
-technique for minimizing the congestion due to checkpoint interference by
-taking advantage of the observed periodic and deterministic nature of HPC
-application checkpoints and I/O.  This technique allows the job scheduler to
-pre-define each application’s I/O behavior for their entire execution.
-Similarly, a number of works have investigated the efficiency of online
-schedulers for data intensive~\cite{Groot2013,Sim:2015:AnalyzeThis} and HPC
-workload
+Most closely related to our work, a number of studies have considered the global
+scheduling of checkpoints and other I/O across a platform to reduce overall
+congestion, thereby increasing performance.  Aupy et al.~\cite{Aupy:2017:Periodic}
+presented a decentralized I/O scheduling technique for minimizing the congestion due
+to checkpoint interference by taking advantage of the observed periodic and
+deterministic nature of HPC application checkpoints and I/O.  This technique allows
+the job scheduler to pre-define each application’s I/O behavior for their entire
+execution.  Similarly, a number of works have investigated the efficiency of online
+schedulers for data intensive~\cite{Groot2013,Sim:2015:AnalyzeThis} and HPC workload
 I/O~\cite{Dorier2015,Gainaru:2016:Scheduling,Zhou:2015:IOAware,Herbein2017}.
-Finally, a number of works have investigated utilizing system reliability
-information recorded on the system~\cite{Oliner:2006:Cooperative} and the
-statistical properties of these failures~\cite{Tiwari:2014:Lazy} to determine
-effective checkpoint intervals for the portion of the system used by the
-workload.
+Finally, a number of works have investigated utilizing recorded system reliability
+information~\cite{Oliner:2006:Cooperative} and the statistical properties of these
+failures~\cite{Tiwari:2014:Lazy} to determine effective checkpoint intervals for the
+portion of the system used by the workload.
 
 \paragraph*{Summary}
 
-The present work distinguishes itself from these previous studies in a number
-of important ways.  First, this technique considers existing platform I/O, a
-number of previous studies do not.  Unlike some previous work, this method is
-agnostic to the I/O patterns of the considered applications as long as they are
-known.  Also, this technique attempts to optimize the efficiency of the entire
-platform, with the changing workloads and failures running on that platform,
-rather than just considering one workload. Finally and most importantly, this
-approach provides optimal checkpointing periods in environments where I/O is
-highly constrained and Daly/Young's formula is not appropriate, a common
+We distinguishes our work from these previous studies in a number of important ways.
+First, unlike a number of the previous studies, our technique considers existing
+platform I/O. \dca{by existing, do we mean application I/O, do we mean ``real''
+  system behavior???}  Additionally, our approach is agnostic to the I/O patterns of
+the considered applications as long as they are known.  Also, we attempt to optimize
+the efficiency of the entire platform, with the changing workloads and failures
+running on that platform, rather than just considering one workload. Finally and most
+importantly, this approach provides optimal checkpointing periods in environments
+where I/O is highly constrained and Daly/Young's formula is not appropriate, a common
 scenario on many leadership-class systems.
