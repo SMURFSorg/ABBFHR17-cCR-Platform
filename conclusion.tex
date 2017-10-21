@@ -47,13 +47,14 @@ all without a large investment in the I/O partition.
 As burst-buffers and other NVRAM storage are becoming more common, a natural
 extension would be to consider the impact on I/O contention/interference with
 nodes sharing a common burst-buffer. Increasing the available I/O bandwidth
-leads to reduced the waste (due to the decrease in checkpoint duration but also
+leads to reduced  waste (due to the decrease in checkpoint duration but also
 an increase in the optimal checkpoint frequency and therefore a decrease in the
 restart time), while providing relief to the shared I/O subsystem to better
 absorb additional checkpoint information. We speculate that scheduling the
 commits to the PFS with a heuristic that prioritizes applications whose loss
 would be more costly can play a role in improving the efficiency of the entire
-burst-buffer system.
+burst-buffer system. Such a heuristic would build upon the strategies discussed in this work and
+extend them to the new framework. 
 
 % As burst-buffers and other NVRAM storage are becoming more common
 % in PFS architecting, a natural extension of this work is to consider the effect
