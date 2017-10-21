@@ -13,10 +13,21 @@ characteristics of the platform on which application instances will execute.
 
 \paragraph*{High level parameters}
 Application classes are characterized by: initial input and output sizes, checkpoint
-size, quantity of work to execute, number of nodes to use, volume of diffuse I/O to
-execute during job makespan, and execution time. \dca{what does diffuse I/O mean?}
-\dca{what is the difference between execution time and ``quantity of work to
-  execute?''}  Platforms are characterized by the number of nodes, a system Mean Time
+size, quantity of work to execute, number of nodes to use, volume of I/O to
+execute during job makespan, and execution time.
+% \dca{what does diffuse I/O mean?}
+% TH Removed confusing adjective 
+%\dca{what is the difference between execution time and ``quantity of
+%work to execute?''} 
+% TH: for me, execution time implies from start to finish, and that
+% includes time to do I/O and checkpoints. Quantity of work to execute
+% implies how long to compute, and that is constant whatever the
+% duration of I/O or checkpoints.
+% Obviously, execution time > time to do the quantity of work, and
+% more importantly, execution time depends on the strategy used to
+% checkpoint and schedule the I/Os, so we need something constant to
+% define the workload.
+Platforms are characterized by the number of nodes, a system Mean Time
 Between Failures, and an aggregated I/O subsystem bandwidth that is shared among the
 nodes. We assume symmetric read and write filesystem bandwidths, hence
 $\ckpt{i}=\reco{i}$ for each application class, $\app{i}$.
@@ -25,10 +36,17 @@ A simulation first selects randomly a list of jobs that are instances of the
 different application classes. This list is ordered by job priority, and constrained
 by two parameters: the minimum simulated time to consider, and the relative
 proportion of platform resources used by each application class (based on the APEX
-report). \dca{I don't recall any prior discussion of job priority.}  As an example,
+report). 
+%\dca{I don't recall any prior discussion of job priority.}  
+% TH: There is an implicit order in first fit scheduling. That
+% priority makes it explicit. It's important because we re-schedule,
+% it's in particular important when failures happen to understand in
+% which order the apps are considered.
+As an example,
 we consider the subset of application classes given by the APEX workflows report for
 the subset of application classes of LANL (EAP, LAP, Silverton and VPIC), simulated
-as running over the Cielo supercomputer, for a minimal execution time of 60h. A
+as running over the Cielo supercomputer, for a minimal execution time
+of 60 day. A
 simulation will randomly instantiate one of the four classes, assigning a work
 duration uniformly distributed between $0.8w$ and $1.2w$, where $w$ is the typical
 walltime specified for the chosen application class, and count the resource allocated
@@ -48,7 +66,24 @@ simple first-fit strategy and considering job characteristics, job priority and
 resource availability.  We simulate online scheduling: whenever a job prematuraly
 ends (because of a failure or because it reached the end of its execution before the
 planned time), the schedule is amended by re-scheduling all jobs that were not
-started yet. \dca{How does a job end before its planned end time?}
+started yet.
+% \dca{How does a job end before its planned end time?}
+% TH: well, it can, but this can be confusing... Here is the full
+% story:
+%   - we set a planned end date based on estimates of duration of
+%   checkpoints, number of checkpoints and I/O
+%   - but these estimates cannot be right all the times: checkpoints
+%   and I/Os will be delayed
+%   - So when a job spans over its end date, we extend its duration
+%   by re-estimating what remains to do (work, I/O, checkpoints)
+%   - When we extend a job duration we re-schedule jobs that did not
+%   start yet
+%   - After a while, the job finally completes, and it can happen it
+%   completes before the estimate (because of rounding errors and/or
+%   over-estimation of checkpoint / I/O duration
+%   If you want to explain this story here, feel free to do so. I
+%   thought this was going to be a lot of details and make the reader
+%   focus on elements that are not central to the result.
 
 \paragraph*{Execution Simulation}
 Once a job is started, it first executes its initial input. It then 1) executes some
@@ -64,10 +99,12 @@ reflect a common job scheduling policy on shared platforms, restarted jobs are s
 the highest priority, maximizing their higher chances of obtaining an immediate
 allocation and continuing what was the original (failed) jobs execution.
 
-\dca{Moved the discussion of fixed v. Daly to model section. Don't know what we want
-to do with the remaining snippet since it didn't quite fit there: ``For the
-\leastwaste algorithm, the checkpoint interval is at least the Daly period
-(by construction), and a Fixed version is pointless.''}
+%\dca{Moved the discussion of fixed v. Daly to model section. Don't know what we want
+%to do with the remaining snippet since it didn't quite fit there: ``For the
+%\leastwaste algorithm, the checkpoint interval is at least the Daly period
+%(by construction), and a Fixed version is pointless.''}
+% TH: Yves put a footnote in III.E about that, so we can ditch the
+% paragraph entirely
 
 \ifTR
 
@@ -99,17 +136,35 @@ strategies defined in Section~\ref{sec:algorithms}.
 \fi
 
 \paragraph*{Method of statistics collection from simulations}
-We run each simulation once per strategy with the same initial conditions (list of
-jobs with initial priorities and date and location of failures). \dca{Why only once
-  since we can generate different random scenarios that map to the same
-  characteristics? I can't rationalize this statement with the one below that says we
-  simulate thousands ...}  We collect performance statistics for each simulation.  In
-order to consolidate these measures over many simulations, statistics are taken over
-a segment of fixed length of each simulation. \dca{I don't understand the
-  ``consolidation'' concept.}  To capture steady-state, this segment excludes both
-the first day of the simulation (in which jobs might be synchronized artificially
-because a subset starts at the same date), and the last day of the simulation (in
-which a large amount of resource may not be used as new jobs are not added to the
-workload). We simulate a large number of such runs (at least a thousand simulations
-per shown measurement), and compute the first, and ninth decile and the first and
-third quartile of the performance for each statistic, as well as the mean value.
+Each simulation runs the same initial conditions (list of jobs with
+initial priorities and date and location of failures) on each
+strategy.
+% \dca{Why only once since we can generate different random scenarios
+% that map to the same characteristics? I can't rationalize this
+% statement with the one below that says we simulate thousands ...}
+% TH: I obviously said that in a confusing way. I have updated it,
+% feel free to improve the wording :) What I meant is that each
+% strategy is run on the same initial conditions, we extract the
+% measure from each simulation, and compute ratios. If the initial
+% conditions were changing between runs, it would take even more runs
+% to reduce variability.
+We collect performance statistics over a segment of fixed length of
+each simulation.
+%\dca{I don't understand the ``consolidation'' concept.}  
+%TH me neither.  I have removed it.
+% I feel we lost a discussion here why we need to do so.
+% We were explaining before that we cannot simply average the time
+% spent doing useful work or wasting resource between two set of
+% simulations (two set with different initial conditions), because
+% different initial conditions imply different work load, different
+% number of applications, etc. So, the idea was to use a segment of
+% fixed length and extract work ratio / waste ratio from these. Since
+% they have the same denominator, simple average still makes sense.
+To capture steady-state, this segment excludes both the first day of
+the simulation (in which jobs might be synchronized artificially
+because a subset starts at the same date), and the last day of the
+simulation (in which a large amount of resource may not be used as new
+jobs are not added to the workload). We simulate a large number of
+such runs (at least a thousand simulations per shown measurement), and
+compute the first, and ninth decile and the first and third quartile
+of the performance for each statistic, as well as the mean value.
