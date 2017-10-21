@@ -64,7 +64,7 @@ consider for issues stemming from potential I/O contention.
 A simple optimization to the \nocoop scheme is to favor one of the jobs' I/O request
 over all the others. While the overall throughput may remain unchanged (given an
 efficient filesystem implementation), the favored job completes its I/O
-workload faster (\ie, at speed $\ckpt{i}$ for a job of class $\app{i}$).  In
+workload faster (\ie, in time $\ckpt{i}$ for a job of class $\app{i}$).  In
 the \fifoblock scheme, I/O requests are performed sequentially, in request arrival
 order. Jobs with outstanding I/O requests are blocked until their requests are
 completed.
@@ -103,7 +103,7 @@ token is still scheduled FCFS according to request arrival time.  The
 job continues its computation until the scheduler informs it that the
 I/O token is available. At this point, the job must generate its
 checkpoint data as soon as possible (or after a short
-synchronization\footnote{In user-level checkpointing the job typically
+synchronization\footnote{In user-level checkpointing, the job typically
   finishes its current computing block before generating its
   checkpoint data.}).  In most applications, the granularity of the
 work is small enough for a simple approach to be efficient:

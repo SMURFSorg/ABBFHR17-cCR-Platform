@@ -62,7 +62,7 @@ the parameters in this formula are dependent upon application features
 bandwidth).
 
 Traditionally, when a job $J_{i}$ of class $\app{i}$ completes a checkpoint, its next
-checkpoint is scheduled to happen in at least $\period{i}-\ckpt{i}$ (and the first
+checkpoint is scheduled to happen $\period{i}-\ckpt{i}$ instants later (and the first
 checkpoint is set at date $\period{i}$). With potential CR I/O interference,
 the checkpoint commit may last longer than $\ckpt{i}$, and setting
 the appropriate checkpointing period can be challenging.
