@@ -10,22 +10,22 @@ algorithms presented in Section~\ref{sec:algorithms}:
 we compare their performance with  this lower bound in the simulations presented in Section~\ref{sec:results}.
 
 We envision a (theoretical) scenario when the platform operates in steady-state,
-with a constant number of applications per class spanning the whole platform. We also assume that
+with a constant number of jobs per application class spanning the whole platform. We also assume that
 the I/O bandwidth $\bandavail$  that is available for CR operations remains constant throughout
 execution. This amounts to neglecting initial input and final output I/O operations,
-or more precisely, to pretending that these operations span the entire execution of the application.
-Otherwise, we would need to account for application durations, which renders the
+or more precisely, to pretending that these operations span the entire execution of the jobs.
+Otherwise, we would need to account for job durations, which renders the
 steady-state analysis intractable.
 Given the above, we determine the optimal checkpointing period for each application class
 when the objective is to minimize the total waste incurred  by the platform, or equivalently,
 to maximize the total throughput of the platform. To complicate matters, these optimal periods
 may not be achievable,  hence we derive a lower bound of the optimal waste.
 
-In steady-state operation, there are $\nbapp{i}$ applications of class $\app{i}$,
+In steady-state operation, there are $\nbapp{i}$ jobs of class $\app{i}$,
 each using $\nbnodes{i}$ nodes, and with checkpoint time $\ckpt{i}$. Because we orchestrate
 checkpoints to avoid CR-CR interferences, we have $\ckpt{i} = \frac{\size{i}}{\bandavail}$,
-where $\size{i}$ denote the size of the checkpoint file of all applications of class $\app{i}$.
-The waste of an application is the ratio of time the application spends doing
+where $\size{i}$ denote the size of the checkpoint file of all jobs of class $\app{i}$.
+The waste of a job is the ratio of time the job spends doing
 resilience operations by the time it does useful work. The time spent doing
 resilience operations include the time spent during each period to checkpoint,
 and in case of failure, the time to rollback to the previous checkpoint, and the
@@ -33,7 +33,7 @@ time to recompute lost work.
 %We assume
 %that the recovery time $\reco{i}$ is equivalent to the checkpoint time  $\ckpt{i}$.
 We
-can express the waste $\wasteapp{i}$ of an application of class
+can express the waste $\wasteapp{i}$ of a job $J_{i}$ of class
 $\app{i}$ that checkpoints with period $\period{i}$
 as follows~\cite{springer-monograph}:
 \begin{equation}
@@ -53,7 +53,7 @@ it uses:
 \end{equation}
 
 In the absence of I/O constraints, the checkpointing period can be minimized
-for each application independently. Indeed, the optimal period for an application
+for each job independently. Indeed, the optimal period for a job
 of class $\app{i}$ is obtained by minimizing $\wasteapp{i}$ in Equation~\eqref{eq.wasteAi}.
 Differentiating and solving
 $$\frac{\delta \wasteapp{i}}{\delta \period{i}} = - \frac{\ckpt{i}}{\period{i}^{2}} + \frac{\nbnodes{i}}{2 \mtbfplat} = 0$$
@@ -62,9 +62,10 @@ we readily derive that
 \period{i} = \sqrt{2 \frac{\mtbfplat}{\nbnodes{i}} \ckpt{i}} = \sqrt{2 \mu_{i} \ckpt{i}}
 \label{eq.daly}
 \end{equation}
-where $\mu_{i}$ is the MTBF of  class $\app{i}$ applications, which is the Young/Daly formula~\cite{young74,daly04}.
+where $\mu_{i}$ is the MTBF of  class $\app{i}$ applications, and we retrieve the Daly period
+$\period{i} = \period{Daly}(J_{i})}$.
 
-However, I/O constraints may impose the use of sub-optimal periods. If each application
+However, I/O constraints may impose the use of sub-optimal periods. If each job
 of  class $\app{i}$ checkpoints in time $\ckpt{i}$ during its period $\period{i}$ (hence
 without any contention), it uses the I/O device during a fraction $\frac{\ckpt{i}}{\period{i}}$ of the time.
 The total usage fraction of the  I/O device is $\ioconstraint = \sum_{i} \frac{\nbapp{i} \ckpt{i}}{\period{i}}$
