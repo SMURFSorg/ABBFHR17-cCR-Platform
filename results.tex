@@ -114,25 +114,23 @@ all algorithms.
 
 Second, we explore the performance of each approach under low bandwidth (and
 thus high risk of interference). A scenarios with such low bandwidth is not
-unrealistic, as mentioned in Ross et al~\cite{XX} practical bandwidth can be
-sensibly lower than the theoretical.
-Figure~\ref{fig:cielo-40gbs} represents the waste ratio on Cielo,
-assuming the aggregated filesystem bandwidth of the system was
-40GB/s. We vary the node MTBF $\muind$ from 2 years (1h of system
-MTBF) to 50 years (24h of system MTBF) in order to evaluate the impact
-of this parameter. Similarly to Figure~\ref{fig:cielo-1hmtbf}, we
-observe three classes of behavior: \propfixed and \bfifofixed exhibit
-a waste ratio that remains constant around 80\% for all values of the
-MTBF. These approaches are critically dependent on the filesystem
-bandwidth, and a lower frequency of failures does not significantly
-improve their performance. The I/O subsystem is saturated, and the
-applications spends most of their time waiting for it.
+unrealistic, as mentioned in Luu et al~\cite{Luu:2015:Multiplatform} practical
+bandwidth can be consideraly lower than the theoretical.
+Figure~\ref{fig:cielo-40gbs} represents the waste ratio on Cielo, assuming the
+aggregated filesystem bandwidth of the system was 40GB/s. We vary the node MTBF
+$\muind$ from 2 years (1h of system MTBF) to 50 years (24h of system MTBF) in
+order to evaluate the impact of this parameter. Similarly to
+Figure~\ref{fig:cielo-1hmtbf}, we observe three classes of behavior: \propfixed
+and \bfifofixed exhibit a waste ratio that remains constant around 80\% for all
+values of the MTBF. These approaches are critically dependent on the filesystem
+bandwidth, and a lower frequency of failures does not significantly improve
+their performance. The I/O subsystem is saturated, and the applications spends
+most of their time waiting for it.
 %
-\propdaly and \bfifodaly, see poor efficiency for small MTBF values,
-but steadily improve to come close to the theoretical bound for higher
-MTBF values. Last, \fifodaly,
-\fifofixed, and \cooperative quickly reach the theoretical model
-performance, even with a challenging MTBF (4 years of node MTBF; or 2h of
+\propdaly and \bfifodaly, see poor efficiency for small MTBF values, but
+steadily improve to come close to the theoretical bound for higher MTBF values.
+Last, \fifodaly, \fifofixed, and \cooperative quickly reach the theoretical
+model performance, even with a challenging MTBF (4 years of node MTBF; or 2h of
 system MTBF).
 
 For all the strategies that integrate the Daly checkpointing period
@@ -178,7 +176,7 @@ In order to understand the impact of the I/O contention on future platforms, we
 use our simulator to explore a prospective system and assess the impact of I/O
 and checkpoint scheduling when the problem size and the machine size will
 increase. We consider a future system with 7PB of main memory and 50,000 compute
-nodes (Aurora~\footnote{\url{https://aurora.alcf.anl.gov/}}). Based on the APEX
+nodes (Aurora\footnote{\url{https://aurora.alcf.anl.gov/}}). Based on the APEX
 workflow report, we extrapolate the increase in problem size expected for the
 application classes considered above, and project these applications on the
 prospective system.  We simulate the workload of Table~\ref{table:lanl}, scaling
