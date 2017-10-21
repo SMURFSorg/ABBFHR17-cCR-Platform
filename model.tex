@@ -105,10 +105,8 @@ $\nbnodesplat$ nodes. Application class $\app{i}$ specifies:
 \item $\ckpt{i}$ and $\reco{i}$: the checkpoint and recovery durations for each job in $\app{i}$ when there is no interference with other I/O operations.
 \end{compactitem}
 
-Jobs inherit these properties from their classes: all jobs
-$J_{1 \leq j \leq \nbapp{i}}$ of class $A_{i}$ use $\nbnodes{i}$
-nodes.  To simplify notations, we extend the notations to jobs: if $j$
-denotes Job $J_j$, we write $\nbnodes{j}, \period{j}, \ckpt{j}$ and
+Jobs inherit their characteristics from their classes. To simplify notations, 
+for a job $J_j$, we use $\nbnodes{j}, \period{j}, \ckpt{j}$ and
 $\reco{j}$ to denote respectfully the number of nodes, checkpoint
 period, and checkpoint and recovery durations of the application class
 to which $J_j$ belongs.  We let
