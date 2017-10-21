@@ -1,25 +1,25 @@
 \section{Conclusion and Future Work} \label{sec:conclusion}
 % Primary: Aurélien
 
-As we build larger and possibly more error prone platforms, being able to
-protect applications against platform faults in a timely and efficient manner,
-will be critical to maintaining performance. Current production
+As we acquire larger, likely more error-prone, platforms, effectively protectign
+applications from platform faults becomes critical. Current production
 fault-protection techniques rely on checkpoint/restart to ensure such progress.
 However, these techniques, by their very nature, regularly save the application state
-to stable storage, and therefore increase the burden of the already overtaxed
-I/O subsystem.
+to stable storage, and therefore increase the burden of the already overtaxed I/O
+subsystem.
 
-In this work we presented a comprehensive model of interference between
-applications performing I/O on a shared platform. We designed and assessed
-multiple I/O scheduling algorithms, with the goal if improving the overall
-throughput of the platform. We formulated a steady-state analysis, which is
-similar to platform usage over long periods of time, and proved a theoretical
-baseline for achievable performance for I/O constrained checkpointing
-workloads.  Unsurprisingly, the gain is most prominent on platforms with a
-challenging MTBF or under-provisioned I/O; our heuristic invariably improves
-the platform efficiency. Through simulation, we show a path to supporting
-application-level checkpointing while maintaining a 80\% platform efficiency,
-all without a large investment in the I/O partition.
+Considering a comprehensive I/O interference model for platforms susceptible to I/O
+contention, we designed multiple I/O scheduling algorithms that target improving
+overall platform job throughput via waste minimization. We also theorized a
+lower-bound for platform waste for I/O constrained checkpointing workloads. We use
+this this theoretical lower-bound to demonstrate the effectiveness of our \emph{least
+  waste} I/O scheduling algorithm and to compare its performance with other I/O
+scheduling strategies.  Our scheduling strategy invariably outperforms the others
+with respect to the platform efficiency; Unsurprisingly, the biggest gains are
+rendered on the platforms with a lowest MTBF or greater degrees of under-provisioned
+I/O; Through simulation, we also show a path to supporting application-level
+checkpointing while maintaining a 80\% platform efficiency, all without a large
+investment in the I/O partition.
 
 % In this paper we presented a comprehensive model to capture interference
 % between multiple applications performing fault-tolerance related I/O
@@ -44,17 +44,16 @@ all without a large investment in the I/O partition.
 % we have found achievable with a third of the I/O aggregate bandwidth
 % requirements when the system employs a smart checkpointing policy.
 
-As burst-buffers and other NVRAM storage are becoming more common, a natural
-extension would be to consider the impact on I/O contention/interference with
-nodes sharing a common burst-buffer. Increasing the available I/O bandwidth
-leads to reduced  waste (due to the decrease in checkpoint duration but also
+As burst-buffers and other NVRAM storage mechanisms become more common, a natural
+extension of this work would consider the impact on I/O contention/interference for
+platforms that leverage burst-buffer technologies. Increasing the available I/O
+bandwidth leads to reduced waste (due to the decrease in checkpoint duration but also
 an increase in the optimal checkpoint frequency and therefore a decrease in the
-restart time), while providing relief to the shared I/O subsystem to better
-absorb additional checkpoint information. We speculate that scheduling the
-commits to the PFS with a heuristic that prioritizes applications whose loss
-would be more costly can play a role in improving the efficiency of the entire
-burst-buffer system. Such a heuristic would build upon the strategies discussed in this work and
-extend them to the new framework. 
+restart time), while providing relief to the shared I/O subsystem to better absorb
+additional checkpoint information. We speculate that scheduling parallel filesystem
+I/O with a heuristic that prioritizes jobs to minimize failure impact can help to
+improve overall burst-buffer efficiencies. Such a heuristic would build upon the
+strategies discussed in this work and extend them to the new framework.
 
 % As burst-buffers and other NVRAM storage are becoming more common
 % in PFS architecting, a natural extension of this work is to consider the effect
