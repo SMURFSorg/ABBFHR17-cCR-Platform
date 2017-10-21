@@ -109,8 +109,10 @@ To simplify notation, where unambiguous we extend the notations to jobs: for a
 job $J_j$ belonging to application class $\app{i}$, $\nbnodes{j} =
 \nbnodes{i}$, $\period{j} = \period{i}$, $\ckpt{j} = \ckpt{i}$, and $\reco{j} =
 \reco{i}$ denote the number of nodes used by job $j$, the checkpoint period of
-job $j$ and the checkpoint and recovery durations of job $j$ respectfully.  At
-each instance, we schedule as many jobs as possible.  Jobs that are subject to
+job $j$ and the checkpoint and recovery durations of job $j$ respectfully.  
+We let $\period{Daly}(J_{j}) = \sqrt{2 \ckpt{i} \mu_{i}}$ be the \emph{Daly period}~\cite{young74,daly04} of a job $J_j$ belonging to application class $\app{i}$, where $\mu = \frac{\muind}{\nbnodes{i}}$
+and $\muind$ is the MTBF of an individual processor~\cite{springer-monograph}.
+At each instance, we schedule as many jobs as possible.  Jobs that are subject to
 failures are restarted at the head of the scheduling queue, as to restart
-immediately on the same compute nodes previously used (In most cases, only one
+immediately on the same compute nodes previously used (in most cases, only one
 node has failed and is replaced by a hot spare).

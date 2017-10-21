@@ -142,6 +142,13 @@ compared to \fifoblock and \nocoop algorithms.
 % that's because we do not consider whats commented down here with local scratchpads
 % the checkpoint is taken at a date t_c posterior to t_req, and we will restart at t_c, not t_req.
 
+\subsection{Variants}
+\label{sec:variants}
+
+The periods $\period{i}$ of the checkpointing requests are  input parameters to the three strategies
+ \nocoop, \fifoblock and \fifononblock. In \Cref{sec:simulator}, we instantiate each strategy with two variants. The first variant uses a fixed checkpointing period 
+ for each job, while the second variant uses the Daly period of each job.
+ 
 \subsection{\leastwaste Algorithm}
 \label{sec:least-waste}
 
@@ -150,7 +157,11 @@ issuing the I/O token to the job whose I/O request minimizes the total expected 
 (explained hereafter), rather than simply based on request arrival order.  Given the
 time-dependent nature of this decision, the selection may not be a global optimum,
 but only an approximation given currently available information about the system
-status.  For each I/O scheduling decision, at time $t$ (when a previous I/O operation
+status. The \leastwaste algorithm assumes that jobs issue checkpointing requests according
+ to their Daly period\footnote{Fixed checkpointing makes no sense in the \leastwaste strategy,
+ which is
+designed to optimize checkpoint frequencies across jobs.}.
+ For each I/O scheduling decision, at time $t$ (when a previous I/O operation
 completes), we consider a pool of $r+s$ candidates from two different categories:
 
 \begin{compactitem}
@@ -217,7 +228,4 @@ of Equation~\eqref{eq.selection} for its waste $\wap{i}$:
 \end{equation}
 
 Finally, we select the job $J_{i} \in \Catiocat \cup \Catckptcat$
-whose waste $\wap{i}$ is minimal.  Contrarily to the previous
-scenarios, we do not consider the variant where the checkpointing
-frequency is arbitrarily set, because the \leastwaste algorithm is
-designed to optimize checkpoint frequencies across jobs.
+whose waste $\wap{i}$ is minimal. 
