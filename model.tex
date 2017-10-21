@@ -50,16 +50,21 @@ of applications with similar characteristics.
 
 \paragraph*{Checkpoint Period and I/O Interference}
 
-Both application computation and CR generate I/O requests.  In both cases,
-activity is scheduled using an I/O scheduling algorithm (see
-\Cref{sec:algorithms}). As described above, steady-state application I/O is
-regular. However, CR I/O periodicity, $P$, depends upon the CR policy being
-used.  In our model, applications either checkpoint using an
-application-defined periodicity or using Young and Daly's~\cite{young74,daly04}
-optimal checkpoint period detailed in \Cref{sec:intro}. As stated previously,
-the parameters in this formula are dependent upon application features
-(checkpoint dataset size) and platform features (system reliability and I/O
-bandwidth).
+Both application computation and CR generate I/O requests.  In both cases, activity
+is scheduled using an I/O scheduling algorithm (see \Cref{sec:algorithms}). As
+described above, steady-state application I/O is regular. However, CR I/O
+periodicity, $P$, depends upon the CR policy being used.  In our model, applications
+either checkpoint using an application-defined periodicity or using Young and
+Daly's~\cite{young74,daly04} optimal checkpoint period detailed in
+\Cref{sec:intro}. As stated previously, the parameters in this formula are dependent
+upon application features (checkpoint dataset size) and platform features (system
+reliability and I/O bandwidth).  For fixed, application-defined periods, a common
+heuristic is to take a checkpoint every hour -- capping the worst case amount of lost
+work at one hour.  In the reminder of this paper we will refer to the two variants as
+\emph{Fixed} (with a 1 hour period unless otherwise specified) and \emph{Daly}.
+
+
+
 
 Traditionally, when a job $J_{i}$ of class $\app{i}$ completes a checkpoint, its next
 checkpoint is scheduled to happen $\period{i}-\ckpt{i}$ instants later (and the first
