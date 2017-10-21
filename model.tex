@@ -5,23 +5,25 @@
 % Primary: Yves
 
 \paragraph*{Computational Platform Model}
-In this work, we consider a shared platform that comprises a set of computational
+
+In this work, we consider a shared platform comprised of computational
 nodes, storage resources in the form of a parallel file system (PFS), and a network
-that interconnects the nodes as well as the storage resources. Applications are
+that interconnects the nodes and storage resources. Applications are
 scheduled on the platform by a job scheduler such that computational nodes are
 space-shared (dedicated) amongst concurrent application instances. However, the I/O
-subsystem is time-shared (contended) amongst the application instances, \ie multiple
-applications performing I/O simultaneously can result in a per-application reduction
-in commit speed. Without loss of generality, we consider a straightforward linear
+subsystem is time-shared (contended) amongst application instances  (\ie multiple
+applications performing I/O simultaneously result in a per-application reduction
+in commit speed). Without loss of generality, we consider a straightforward linear
 interference model in which the global throughput remains constant and is evenly
-shared among contending applications, proportionally to their size.
-(A more adversarial interference models could be substituted.)
+shared among contending applications, proportional to their size\footnote{A more
+adversarial interference model can be substituted, if needed.}.
 
 \paragraph*{Application Workload Model}
-Applications can vary in size (number of computational nodes), duration, memory
+
+Applications can vary in size (computational node count), duration, memory
 footprint and I/O requirements.  \emph{Application I/O} entails loading an input file
 at startup, performing regular I/O operations during their main execution phase and
-storing an output file at completion. Because applications are long-running
+storing an output file at completion. Because applications are long-running,
 (typically, several hours or days) and the platform is failure-prone, applications
 are protected using coordinated CR that incurs periodic \emph{CR I/O}.
 
@@ -31,37 +33,33 @@ simplifying assumptions:
 \item There is a large number of applications, but only a small number of application
   classes, \ie, sets of applications with similar sizes, durations, footprints and
   I/O needs;
-\item Other than initialization and finalization I/O, an application's regular
-  (non-CR) I/O operations are evenly distributed over its makespan.
-\item Job makespans are precisely known a priori. This allows us to ignore all other
+\item Excluding initialization and finalization I/O, an application's regular
+  (non-CR) I/O operations are evenly distributed over its makespan;
+\item Job makespans are known a priori. This allows us to ignore all other
   sources of job disturbance except C/R overheads.
 \end{compactitem}
-We used specific numbers and characteristics of application classes
-based on real benchmark data, such as those provided in the APEX
-workflows report on the Cielo platform~\cite{apex2016}.  To avoid the
-side effects induced by hundreds of completely identical jobs,
-we use normal distributions for job durations with mean
-equal to original APEX value and small (20\%) standard deviation. In
-the rest of the paper, we will use the term \emph{job} to denote a
-specific application instance, and \emph{application class} to denote
-a set of applications with similare characteristics.
+
+We use specific numbers and characteristics of application classes based on
+documented production workloads, such as those provided in the APEX workflows report
+on the Cielo platform~\cite{apex2016}.  To avoid the side effects induced by
+hundreds of completely identical jobs, we use a normal distributions for job
+durations with a mean equal to original APEX value and small (20\%) standard
+deviation.  In the rest of the paper, we use the term \emph{job} to denote
+a specific application instance, and \emph{application class} to denote a set
+of applications with similar characteristics.
 
 \paragraph*{Checkpoint Period and I/O Interference}
 
-Both application computation and CR generate I/O requests, and both classes of I/O
-activity are scheduled using an I/O scheduling algorithm (Section~\ref{sec:algorithms}). As
-described above, steady-state application I/O is regular. However, CR I/O
-periodicity, $P$, depends
-upon the CR policy being used.  In our model, applications either checkpoint using an
-application-defined periodicity or using Young and
-Daly's~\cite{young74,daly04} optimal checkpoint period. The latter interval is
-computed by, $T=\sqrt{2 C \mu}$, where $C$ is the duration of the checkpoint
-transfer, and $\mu$ is the application mean time between failures (MTBF).
-$\mu = \frac{\muind}{q}$, where $q$ is the number of processors enrolled by the
-application and $\muind$ is the MTBF of an individual
-processor~\cite{springer-monograph}.  The parameters in this formula are dependent
-upon application features (checkpoint dataset size) and platform features (system
-reliability and I/O bandwidth).
+Both application computation and CR generate I/O requests.  In both cases,
+activity is scheduled using an I/O scheduling algorithm (see
+\Cref{sec:algorithms}). As described above, steady-state application I/O is
+regular. However, CR I/O periodicity, $P$, depends upon the CR policy being
+used.  In our model, applications either checkpoint using an
+application-defined periodicity or using Young and Daly's~\cite{young74,daly04}
+optimal checkpoint period detailed in \Cref{sec:intro}. As stated previously,
+the parameters in this formula are dependent upon application features
+(checkpoint dataset size) and platform features (system reliability and I/O
+bandwidth).
 
 Traditionally, when a job $J_{i}$ of class $\app{i}$ completes a checkpoint, its next
 checkpoint is scheduled to happen in at least $\period{i}-\ckpt{i}$ (and the first
@@ -74,26 +72,29 @@ subsequent checkpoints at $\period{i}-\ckpt{i}$ yields the desired checkpointing
 period $\period{i}$ only in interference-free scenarios. CR I/O delays (induced by
 interferences or scheduling delays) dilate the checkpoint duration to $C_{dilated}$,
 and the effective period differs from the desired period by the difference
-$C_{dilated}-\ckpt{i}$.  (In Section~\ref{sec:algorithms}, we discuss how each I/O
-scheduling algorithm handles this discrepancy).
+$C_{dilated}-\ckpt{i}$.  \Cref{sec:algorithms} discusses how each I/O
+scheduling algorithm handles this discrepancy.
 
 \paragraph*{Job Scheduling Model}
-To evaluate the scheduling policies, we consider a finite segment, typically lasting
-a few days, of a representative schedule where the computing resource
-usage by each application instance (job) in each class remains approximately constant at every instant. Of
-course, with different job execution times, we cannot enforce a fixed proportion of
-each application class at every instant. However, we ensure the proper proportion is
-enforced in average throughout the schedule execution. Similarly, we enforce that at
-every instant during the finite segment, at least 98\% of the nodes are enrolled for
-the execution. This allows us to compare actual (simulated) performance with the
-theoretical performance of a co-scheduling policy that optimizes the steady-state I/O
-behavior of the job portfolio, assuming that all processors are used. We shuffle and
-simultaneously present all jobs to the scheduler, which uses a simple, greedy
-first-fit algorithm.  We resubmit failed jobs with a new wall-time equal to the
-fraction that remained when the last checkpoint commit started. Input I/O becomes
-recovery I/O; output I/O is unmodified.
+
+To evaluate the scheduling policies, we consider a finite segment, typically
+lasting a few days, of a representative schedule where the computing resource
+usage by each application instance (job) in each class remains nearly constant.
+Of course, with varying job execution times, we cannot enforce a fixed
+proportion of each application class at every instant. However, we ensure the
+proper proportion is enforced on average throughout the schedule execution.
+Similarly, we enforce that at every instant during the finite segment, at least
+98\% of the nodes are enrolled for the execution. This allows us to compare
+actual (simulated) performance with the theoretical performance of a
+co-scheduling policy that optimizes the steady-state I/O behavior of the job
+portfolio, assuming that all processors are used. We shuffle and simultaneously
+present all jobs to the scheduler, which uses a simple, greedy first-fit
+algorithm.  We resubmit failed jobs with a new wall-time equal to the fraction
+that remained when the last checkpoint commit started.  In this case, input I/O
+becomes recovery I/O; output I/O is unmodified.
 
 \paragraph*{The Formal Model}
+
 We consider a set $\appset$ of $\nbapps$ applications classes
 $\app{1}, \ldots \app{\nbapps}$ that execute concurrently on a platform with
 $\nbnodesplat$ nodes. Application class $\app{i}$ specifies:
@@ -103,14 +104,13 @@ $\nbnodesplat$ nodes. Application class $\app{i}$ specifies:
 \item $\period{i}$: the checkpoint period of each job in $\app{i}$, and
 \item $\ckpt{i}$ and $\reco{i}$: the checkpoint and recovery durations for each job in $\app{i}$ when there is no interference with other I/O operations.
 \end{compactitem}
-To simplify the reading, where it is not ambiguous, we extend the
-notations to jobs: for a job $J_j$ belonging to application class
-$\app{i}$, $\nbnodes{j} = \nbnodes{i}$, $\period{j} = \period{i}$,
-$\ckpt{j} = \ckpt{i}$, and $\reco{j} = \reco{i}$ denote the number of
-nodes used by job $j$, the checkpoint period of job $j$ and the
-checkpoint and recovery durations of job $j$ respectfully.  At every
-instant, we schedule as many jobs as possible.  Jobs that are subject
-to failures are restarted at the head of the scheduling queue, so that
-(given that in most cases only one node has failed and can be replaced
-by a hot spare) it may restart immediately on essentially the same
-compute nodes it previously occupied.
+
+To simplify notation, where unambiguous we extend the notations to jobs: for a
+job $J_j$ belonging to application class $\app{i}$, $\nbnodes{j} =
+\nbnodes{i}$, $\period{j} = \period{i}$, $\ckpt{j} = \ckpt{i}$, and $\reco{j} =
+\reco{i}$ denote the number of nodes used by job $j$, the checkpoint period of
+job $j$ and the checkpoint and recovery durations of job $j$ respectfully.  At
+each instance, we schedule as many jobs as possible.  Jobs that are subject to
+failures are restarted at the head of the scheduling queue, as to restart
+immediately on the same compute nodes previously used (In most cases, only one
+node has failed and is replaced by a hot spare).
