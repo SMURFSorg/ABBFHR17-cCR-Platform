@@ -6,13 +6,16 @@
 \subsection{LANL APEX Simulation Workflows on Cielo}
 
 We consider the workload from LANL found in the APEX Workflows
-report~\cite{apex2016} that consists of four applications
-classes: EAP, LAP, Silverton and VPIC. The main characteristics of
-these classes are reported in Table~\ref{table:lanl}. We simulate the
-behavior of these applications over the Cielo Platform. Cielo is a
-1.37 Petaflops capability system installed in 2010-2011 at the Los
-Alamos National Laboratory, with 143,104 cores, 286 TB of main memory,
-and a parallel filesystem with a theoretical maximum capacity of 160GB/s.
+report~\cite{apex2016} that consists of four applications classes: EAP, LAP,
+Silverton and VPIC. The main characteristics of these classes are reported in
+Table~\ref{table:lanl}. We simulate the behavior of these applications on the
+Cielo Platform. Cielo was a 1.37 Petaflops capability system operated from 2010
+to 2016 at the Los Alamos National Laboratory.  It consisted of 143,104 cores,
+286 TB of main memory, and a parallel filesystem with a theoretical maximum
+capacity of 160GB/s.  Cielo was chosen for this initial analysis due to the
+availability of the aforementioned workflows report, something not available for
+other platforms. In later sections, we consider similar workloads on a more
+modern platform.
 
 \begin{table}
 \begin{tabular}{|l|c|c|c|c|}
@@ -28,21 +31,20 @@ Checkpoint Size (\% of memory) & 160 & 185 & 350 & 85 \\\hline
 \caption{LANL Workflow Workload from the APEX Workflows report.\label{table:lanl}}
 \end{table}
 
-Our comparison baseline comprises a set of simulations with no faults, checkpoints,
-nor I/O interference. For these simulations, we selected a 60-day execution segment,
-and computed the resources used by the jobs during this period, \ie the total time
-each node spent on (non-CR) I/O and computation in a failure-free environment.
+The baseline in this comparison comprises a set of simulations with no faults,
+checkpoints, nor I/O interference. For these simulations, we selected a 60-day
+execution segment, and computed the resources used by the jobs during this
+period, \ie the total time each node spent on (non-CR) I/O and computation in a
+failure-free environment.
 
-Then, for the I/O scheduling techniques presented in
-Section~\ref{sec:algorithms}, we computed the resource waste as the
-total time computing nodes spent not progressing jobs. In the
-results figures, we represent the performance of each strategy by computing
-the waste ratio, \ie the resource waste over a segment of 60 days
-divided by the application resource usage over that same segment for
-the baseline simulation. Each simulation is conducted at least 1,000
-times; the candlestick extremes represent the first and last decile of
-the measures, while the boxes represent the first and last quartile,
-and the point in the middle is the mean value.
+For the I/O scheduling techniques presented in Section~\ref{sec:algorithms}, we
+compute the resource waste as the total time nodes spend not progressing jobs.
+In the figures presented, we represent the performance of each strategy by
+computing the waste ratio, \ie the resource waste over a segment of 60 days
+divided by the application resource usage over that same segment for the
+baseline simulation. Each simulation is conducted over 1,000 times; the
+candlestick extremes represent the first and last decile of the measures, while
+the boxes represent the first and last quartile, and the center the mean value.
 
 \begin{figure}
   \begin{center}
@@ -54,9 +56,9 @@ and the point in the middle is the mean value.
 \end{figure}
 
 \paragraph{The Impact of Available System Bandwidth}
-First, we explore the performance of each approach under high risks
-of failures. Figure~\ref{fig:cielo-1hmtbf} represents the waste ratio
-on Cielo, assuming the node MTBF $\muind$ was 2 years (i.e. a system
+First, we explore the performance of each approach in a failure-prone
+environment. Figure~\ref{fig:cielo-1hmtbf} represents the waste ratio
+on Cielo, assuming the node MTBF $\muind$ of 2 years (\ie a system
 MTBF of 1h). We vary the filesystem bandwidth from 40 GB/s to 160GB/s
 in order to evaluate the impact of this parameter. We observe three
 classes of behavior: \propfixed and \bfifofixed exhibit a waste ratio
@@ -66,41 +68,40 @@ at the maximum theoretical I/O bandwidth; \fifodaly, \fifofixed, and
 the theoretical model performance;
 %
 \footnote{Maple code to compute the
-  performance predicted by the theoretical model is available on
+  performance predicted by the theoretical model is available at
   \url{https://github.com/SMURFSorg/InterferingCheckpoints}}
 %
 and \propdaly and \bfifodaly start at the same level of efficiency as
 \propfixed and \bfifofixed, and slowly reach 20\% of waste as the bandwidth
 increases.
 %
-Note that in some cases, the error bars below the theoretical
+Note, in some cases the error bars dip below the theoretical
 lower bound. In the simulations, failures have an exponential probability
-distribution centered around the desired MTBF. In some runs, a lower
+distribution centered around the desired MTBF. For some runs, a lower
 number of failures experienced during the simulation results in a larger
-MTBF than the average used in the lower-bound formula, and such instances
+MTBF than the average used in the lower-bound formula; such instances
 can experience a waste lower than the theoretical model.
 
 This figure shows that with a high frequency of failures, providing each job
-with the appropriate checkpoint interval is paramount to preventing unnecessary (or
-even detrimental) checkpoints: the two strategies that render high waste
-despite a high bandwidth rely on a fixed 1h interval. But it also shows that
-this is not the sole criteria that should be taken into account, nor a necessary
-condition to extract performance. Even for favorable bandwidth, \propdaly and
-\bfifodaly experience close to twice the waste of the other strategies relying
-on the same value for the checkpointing period. All strategies that decouple the
+with the appropriate checkpoint interval is paramount to preventing unnecessary
+(or even detrimental) checkpoints: the two strategies that render high waste
+despite high bandwidth rely on a fixed 1h interval. However, it also shows that
+this is not the sole criteria that should be taken into account, nor a
+necessary condition to extract performance. Even with favorable bandwidth,
+\propdaly and \bfifodaly experience nearly twice the waste of the other
+strategies with same checkpointing period. All strategies that decouple the
 execution of the application from the filesystem availability (\fifodaly,
-\fifofixed, \cooperative) exhibit much better performance despite low bandwidth.
+\fifofixed, \cooperative) exhibit considerably better performance despite low
+bandwidth.
 
-Notably, \cooperative remains the most efficient technique under all
-conditions, and reaches the theoretical performance given by
-Equation~\eqref{eq.totalwaste} for steady-state analysis. This
-illustrates the efficiency of the proposed heuristic
-(Equations~\eqref{eq.selection} and~\eqref{eq.selection2}) to schedule
-checkpoints and I/O in a way that avoids interferences, allowing the
-system to behave as if no interference was experienced, in most
-cases. The high variation shows that a minority of the runs
-experienced a significantly higher waste, but such is the case for
-all algorithms.
+Notably, \cooperative remains the most efficient technique in this study, and
+reaches the theoretical performance given by Equation~\eqref{eq.totalwaste} for
+steady-state analysis. This illustrates the efficiency of the proposed
+heuristic (Equations~\eqref{eq.selection} and~\eqref{eq.selection2}) to
+schedule checkpoints and I/O in a way that avoids interferences, allowing the
+system to behave as if no interference is experienced, in most cases. The high
+variation shows that a minority of the runs experienced a significantly higher
+waste, but such is the case for all algorithms.
 
 \begin{figure}
   \begin{center}
@@ -112,14 +113,14 @@ all algorithms.
 \end{figure}
 
 \paragraph{The Impact of System Reliability}
-Second, we explore the performance of each approach under low bandwidth (and
-thus high risk of interference). A scenarios with such low bandwidth is not
-unrealistic, as mentioned in Luu et al~\cite{Luu:2015:Multiplatform} practical
-bandwidth can be consideraly lower than the theoretical.
+Next, we explore the performance of each approach under low bandwidth (and
+thus high probability of interference). A scenario with such low bandwidth is not
+unrealistic.  As shown in Luu et al~\cite{Luu:2015:Multiplatform}, practical
+bandwidth can be considerably lower than theoretical.
 Figure~\ref{fig:cielo-40gbs} represents the waste ratio on Cielo, assuming the
-aggregated filesystem bandwidth of the system was 40GB/s. We vary the node MTBF
+aggregated filesystem bandwidth of the system is 40GB/s. We vary the node MTBF
 $\muind$ from 2 years (1h of system MTBF) to 50 years (24h of system MTBF) in
-order to evaluate the impact of this parameter. Similarly to
+order to evaluate the impact of this parameter. Similar to
 Figure~\ref{fig:cielo-1hmtbf}, we observe three classes of behavior: \propfixed
 and \bfifofixed exhibit a waste ratio that remains constant around 80\% for all
 values of the MTBF. These approaches are critically dependent on the filesystem
@@ -129,26 +130,25 @@ most of their time waiting for it.
 %
 \propdaly and \bfifodaly, see poor efficiency for small MTBF values, but
 steadily improve to come close to the theoretical bound for higher MTBF values.
-Last, \fifodaly, \fifofixed, and \cooperative quickly reach the theoretical
-model performance, even with a challenging MTBF (4 years of node MTBF; or 2h of
+Lastly, \fifodaly, \fifofixed, and \cooperative quickly reach the theoretical
+model performance, even with a low  MTBF (4 year node MTBF or 2h of
 system MTBF).
 
-For all the strategies that integrate the Daly checkpointing period
-optimization, increasing the MTBF reduces the amount of I/O required
-and thus relieves the pressure of a constrained bandwidth. All
-strategies that schedule the bandwidth are successful at increasing the
-efficiency close to the theoretical model.
+For all the strategies that use the Daly checkpointing period, increasing the
+MTBF reduces the amount of I/O required and thus relieves the pressure of a
+constrained bandwidth. All strategies that schedule the bandwidth are
+successful at increasing the efficiency close to the theoretical model.
 %
-Similarly to the previous result, \fifofixed, despite its fixed checkpoint
-interval is capable of reaching a performance comparable to the Daly-based
-strategies that reduce the number of checkpoints. The quick improvement of the
-\fifofixed approach can be explained by a combination of 2 factors. Foremost,
-the non-blocking aspect of the checkpoint, provide the I/O subsystem with enough
-flexibility to order the checkpoint without imposing additional wait. Delayed
-checkpoints only translate in additional waste if that application itself is
-subject to failure. Additionally, for small MTBFs, the more frequent restarts of
-other jobs despite the fact that they delay the checkpointing operation do not
-introduce additional waste.
+Similarly, \fifofixed, despite its fixed checkpoint interval is capable of
+reaching a performance comparable to the Daly-based strategies (which reduce the
+number of total checkpoints). The rapid improvement of the \fifofixed approach can be
+explained by a combination of 2 factors. Foremost, the non-blocking aspect of
+the checkpoint provide the I/O subsystem with enough flexibility to order the
+checkpoint without imposing an additional wait. Delayed checkpoints only translate
+in additional waste if that application itself is subject to failure.
+Additionally, for lower MTBFs, the more frequent restarts of interfering jobs,
+despite the fact that they delay the checkpointing operation, do not introduce
+additional waste.
 
 %% HT + GB: we wanted to say the same thing but in a more clear setting
 % Surprisingly so in the case of \fifofixed, with its fixed checkpoint
@@ -175,58 +175,58 @@ introduce additional waste.
 In order to understand the impact of the I/O contention on future platforms, we
 use our simulator to explore a prospective system and assess the impact of I/O
 and checkpoint scheduling when the problem size and the machine size will
-increase. We consider a future system with 7PB of main memory and 50,000 compute
-nodes (Aurora\footnote{\url{https://aurora.alcf.anl.gov/}}). Based on the APEX
-workflow report, we extrapolate the increase in problem size expected for the
-application classes considered above, and project these applications on the
-prospective system.  We simulate the workload of Table~\ref{table:lanl}, scaling
-the problem size proportionally to the change in machine memory size. The waste
-is computed, as previously, by dividing the amount of resource used for
-checkpoints and lost due to failures by the amount of resource used in a
-fault-free and resilience-free run with the same initial conditions.
+increase. We consider a future system with 7PB of main memory and 50,000
+compute nodes (\eg Aurora\footnote{\url{https://aurora.alcf.anl.gov/}}). Based
+on the APEX workflow report, we extrapolate the increase in problem size
+expected for the application classes considered previously, and project these
+applications on the prospective system.  We simulate the workload of
+Table~\ref{table:lanl}, scaling the problem size proportionally to the change
+in machine memory size. The waste is computed, as previously, by dividing the
+amount of resource used for checkpoints and lost due to failures by the amount
+of resource used in a fault-free and resilience-free run with the same initial
+conditions.
 %
-We consider different values for the system MTBF; and for each strategy, we
-find the required aggregated practical bandwidth necessary to provide a
-sustained 80\% efficiency of the system.
+We vary system MTBF; and for each strategy, we find the required aggregated
+practical bandwidth necessary to provide a sustained 80\% efficiency of the
+system.  This 80\% target efficiency is viewed by many program (\eg ECP) as a
+reasonable cost for resilience activities.
 %
-Figure~\ref{fig:prosp} shows the impact of the MTBF and of the
-different strategies on this system.
+Figure~\ref{fig:prosp} shows the impact of MTBF and strategies on this
+prospective system.
 
-When the failures are frequent (under 10 years of node MTBF), the most critical
+When failures are frequent (less than 10 year node MTBF), the most critical
 element is to reduce the I/O pressure: all strategies that use a fixed and
-frequent checkpoint interval require a much higher system bandwidth to reach the
+frequent checkpoint interval require greater available bandwidth to reach the
 target efficiency.  In this case, strategies that combine an optimal
 checkpointing period with I/O and checkpoint scheduling (\cooperative and
 \fifodaly) perform similarly, consistently better than all other approaches.
-These 2 approaches exhibit a strong resilience to failures, with a bandwidth
-requirement that only increases by a factor 3 between a very unstable system (at
-less than 1h of system MTBF), and a stable one (at 8h of system MTBF). On the
-contrary, the other strategies are much more dependent upon the frequency of
-failures, with the \propfixed strategy requiring up to 50 times the bandwidth of
-\cooperative to reach the same efficiency under these MTBF conditions.
+These two approaches exhibit a strong resilience to failures, with a bandwidth
+requirement that only increases by a factor of three between a very unstable system
+(less than one hour system MTBF), and a stable one (an 8 hour system MTBF). In
+contrast, the other strategies are much more dependent upon the frequency of
+failures; the \propfixed strategy requires up to 50 times the bandwidth of
+\cooperative to reach the same efficiency.
 
-When failures are not endemic
-events, \ie as soon as the node MTBF is at least 15 years
-(corresponding to a system MTBF of 2.6h), the hierarchy of different
+When failures are not endemic (\ie a node MTBF is at least 15 years
+and a system MTBF of 2.6 hours), the hierarchy of different
 approaches stabilizes. The two blocking strategies relying on
 frequent checkpoints (\propfixed and \bfifofixed) remain expensive,
 requiring the highest bandwidth to reach the target
 efficiency. % 6.4TB/s at 24 years
-The next contender, \fifofixed, requires a quarter less bandwidth
+The next contender, \fifofixed, requires a quarter of the  bandwidth
 to reach the same efficiency.
 % \fifofixed, that uses a fixed checkpoint interval comes next, with a
 % requirement around three quarter of the one required by \propfixed and
 % \bfifofixed.
 Despite using the same fixed checkpoint interval as the previous methods, it
-benefits from not blocking when the filesystem is not available to checkpoint,
-which is sufficient, when failures are rare, to obtain a significant
+benefits from not blocking when the filesystem is not available.
+This is sufficient, when failures are rare, to obtain a significant
 performance gain. % 4.9TB/s at 24 years
-All Daly-based strategies benefit from their lesser I/O pressure, and reach the
-target efficiency with around half the bandwidth needed by \propfixed. The
-highlight these results call attention upon is that C/R strategies can scale to
-satisfy the need of future platforms, either by integrating I/O-aware scheduling
-strategies in the software infrastructure of prospective systems or by heavily
-investing in over-provisioning their practical I/O bandwidth.
+All Daly-based strategies benefit from reduced I/O pressure, and reach the
+target efficiency with around half the bandwidth needed by \propfixed. These
+results highlight that checkpoint-based strategies can scale to
+satisfy the need of future platforms, whether by integrating I/O-aware scheduling
+strategies or by significantly over-provisioning the I/O partition.
 % Then the four strategies that use the Daly optimal checkpointing
 % period, alleviating significantly the I/O pressure, are the ones that
 % require the lowest bandwidth to reach 80\% of efficiency, at about
