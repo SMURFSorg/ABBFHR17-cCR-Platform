@@ -14,20 +14,7 @@ characteristics of the platform on which application instances will execute.
 \paragraph*{High level parameters}
 Application classes are characterized by: initial input and output sizes, checkpoint
 size, quantity of work to execute, number of nodes to use, volume of I/O to
-execute during job makespan, and execution time.
-
-% TH: for me, execution time implies from start to finish, and that
-% includes time to do I/O and checkpoints. Quantity of work to execute
-% implies how long to compute, and that is constant whatever the
-% duration of I/O or checkpoints.
-% Obviously, execution time > time to do the quantity of work, and
-% more importantly, execution time depends on the strategy used to
-% checkpoint and schedule the I/Os, so we need something constant to
-% define the workload.
-%
-%DA: How about "job work volume" vs "job makespan": the former is the
-%constant workload and the latter is the time to execute that load
-%given all the system's non-determinism.
+execute during job makespan, and job compute time.
 
 Platforms are characterized by the number of nodes, a system Mean Time
 Between Failures, and an aggregated I/O subsystem bandwidth that is shared among the
@@ -43,7 +30,7 @@ class (based on the APEX report~\cite{apex2016}).  As an example, we
 consider the subset of application classes given by the APEX workflows
 report for the subset of application classes of LANL (EAP, LAP,
 Silverton and VPIC), simulated as is executed on the Cielo
-supercomputer, for a minimal execution time of 60 day. A simulation
+supercomputer, for a minimal execution time of 60 days. A simulation
 will randomly instantiate one of the four classes, assigning a work
 duration uniformly distributed between $0.8w$ and $1.2w$, where $w$ is
 the typical walltime specified for the chosen application class, and
@@ -63,28 +50,10 @@ the initial conditions of a simulation.
 We compute a job schedule (start and end times for all jobs in the list) using
 a simple first-fit strategy considering: job characteristics, job priority and
 resource availability.  We simulate online scheduling; whenever a job
-prematurely ends, whether due to failure or because the job reached the end of its
-execution before the planned time, the schedule is amended by re-scheduling all
+ends at a date different than the initially planned end date (because of
+failures, or because the I/O interference made the job extend after
+its planned end date), the schedule is amended by re-scheduling all
 jobs that were not started yet.
-% \dca{How does a job end before its planned end time?} TH: well, it can, but
-% this can be confusing... Here is the full story: - we set a planned end date
-% based on estimates of duration of checkpoints, number of checkpoints and I/O
-% - but these estimates cannot be right all the times: checkpoints and I/Os
-%   will be delayed - So when a job spans over its end date, we extend its
-%   duration by re-estimating what remains to do (work, I/O, checkpoints) -
-%   When we extend a job duration we re-schedule jobs that did not start yet
-%   - After a while, the job finally completes, and it can happen it completes
-%   before the estimate (because of rounding errors and/or over-estimation of
-%   checkpoint / I/O duration If you want to explain this story here, feel free
-%   to do so. I thought this was going to be a lot of details and make the
-%   reader focus on elements that are not central to the result.
-%
-%   DCA: My (perhaps incorrect) understanding of how we compute a
-%   job's end time is by considering that job's start time, volume of
-%   work, and I/O (normal and CR). Since this computation doesn't
-%   factor in failures or interference, this seems to render a
-%   makespan lower bound. Those other factors would only increase (not
-%   decrease) makespan. I think I may be still missing something.
 
 \paragraph*{Execution Simulation}
 
@@ -134,43 +103,19 @@ strategies defined in Section~\ref{sec:algorithms}.
 \fi
 
 \paragraph*{Method of statistics collection from simulations}
-For a given scheduling strategy, all simulated runs begin with the
-same initial conditions (jobs list, job priorities and failure
-instances).  We collect performance statistics over a fixed length
-segment of each simulation.  To capture steady-state behaviors, this
-segment excludes the first and last days of the simulation. (During
-the first day, jobs may be synchronized artificially because a subset
+We compute the distribution of performance of each strategy using the
+Monte Carlo method: a large set of initial conditions (at least a
+thousand) is randomly chosen, and we simulate the execution of the
+system over each element of this set for each strategy. Since
+simulations for the various scheduling strategies have different
+initial conditions (including job mix), it would be misleading to
+compare simple averages of the time spent doing useful work (or time
+wasted) across simulation instances. Instead, we collect performance
+statistics over a fixed length segment of each simulation and extract
+and compare waste/work ratios that can be compared appropriately. The
+segment excludes the first and last days of the simulation: during the
+first day, jobs may be synchronized artificially because a subset
 starts at the same date, and during the last day, large amounts of
-resources may not be used as new jobs are not added to the workload).
-Each measurement given in Section~\ref{sec:results} aggregates the
-observations of at least a thousand simulations: for each aggregate
-measurement, we compute and show mean, first and ninth decile, and
-first and third quartile statistics.  Since simulations for the
-various scheduling strategies have different initial conditions
-(including job mix), it would be misleading to compare simple averages
-of the time spent doing useful work (or time wasted) across simulation
-instances. Instead, we use the fixed-length, steady-state segments
-across simulation instances to extract and compare waste/work ratios
-that can be compared appropriately.
-
-% we cannot simply average the time
-% spent doing useful work or wasting resource between two set of
-% simulations (two set with different initial conditions), because
-% different initial conditions imply different work load, different
-% number of applications, etc. So, the idea was to use a segment of
-% fixed length and extract work ratio / waste ratio from these. Since
-% they have the same denominator, simple average still makes sense.
-
-% If the initial conditions were changing between runs, it would take
-% even more runs to reduce variability.
-%
-% I feel we lost a discussion here why we need to do so.
-% We were explaining before that we cannot simply average the time
-% spent doing useful work or wasting resource between two set of
-% simulations (two set with different initial conditions), because
-% different initial conditions imply different work load, different
-% number of applications, etc. So, the idea was to use a segment of
-% fixed length and extract work ratio / waste ratio from these. Since
-% they have the same denominator, simple average still makes sense.
-
-
+resources may not be used as new jobs are not added to the workload.
+For each aggregate measurement, we compute and show mean, first and
+ninth decile, and first and third quartile statistics. 
