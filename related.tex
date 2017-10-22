@@ -31,7 +31,7 @@ increase in waste.
 \paragraph*{Reducing I/O Pressure}
 
 There are two general strategies for reducing I/O pressure from a single application:
-hiding or reducing checkpoint commit times without reducing checkpoint data volumes
+hiding or reducing checkpoint commit times without reducing checkpoint data volumes,
 and reducing commit times by reducing checkpoint data volumes.  Strategies that
 attempt to hide checkpoint times include Diskless~\cite{Plank98Diskless} and remote
 checkpoint protocols~\cite{Cornwell11RemoteBLCR} which leverage the typically higher
@@ -70,9 +70,10 @@ volumes~\cite{tanzima12mcrengine}.  Finally, Sasaki et al propose a lossy
 compression method based on wavelet transform and vector quantization to the
 checkpoints of a production climate application~\cite{sasaki2015}, while Ni et
 al~\cite{Ni2014} study the trade-offs between the loss of precision, compression
-ratio, and application correctness due to lossy compression.\dca{Can we say the
-  outcomes from these latter studies?}
-\kbf{Yes, but why???  This is not a lossy compression paper}
+ratio, and application correctness due to lossy compression.
+%\dca{Can we say the
+%  outcomes from these latter studies?}
+%\kbf{Yes, but why???  This is not a lossy compression paper}
 
 \paragraph*{Avoiding I/O interference}
 
@@ -93,7 +94,7 @@ portion of the system used by the workload.
 
 \paragraph*{Summary}
 
-We distinguishes our work from these previous studies in a number of important ways.
+We distinguish our work from these previous studies in a number of important ways.
 First, unlike a number of the previous studies, our technique considers existing
 non-CR application I/O. Additionally, our approach is agnostic to the I/O patterns of
 the considered applications as long as they are known.  Also, we attempt to optimize

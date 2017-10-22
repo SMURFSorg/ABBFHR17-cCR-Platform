@@ -65,11 +65,9 @@ classes of behavior: \propfixed and \bfifofixed exhibit a waste ratio
 that decreases as the bandwidth increases, but remains above 40\% even
 at the maximum theoretical I/O bandwidth; \fifodaly, \fifofixed, and
 \cooperative quickly decrease to below 20\% of waste, and reach
-the theoretical model performance;
-%
-\footnote{Maple code to compute the
+the theoretical model performance\footnote{Maple code to compute the
   performance predicted by the theoretical model is available at
-  \url{https://github.com/SMURFSorg/InterferingCheckpoints}}
+  \url{https://github.com/SMURFSorg/InterferingCheckpoints}.};
 %
 and \propdaly and \bfifodaly start at the same level of efficiency as
 \propfixed and \bfifofixed, and slowly reach 20\% of waste as the bandwidth
@@ -224,7 +222,9 @@ benefits from not blocking when the filesystem is not available.
 This is sufficient, when failures are rare, to obtain a significant
 performance gain. % 4.9TB/s at 24 years
 All Daly-based strategies benefit from reduced I/O pressure, and reach the
-target efficiency with around half the bandwidth needed by \propfixed. These
+target efficiency with around half the bandwidth needed by \propfixed. 
+We also observe that \fifodaly and \leastwaste remain the most efficient strategies
+for the whole MTBF spectrum. These
 results highlight that checkpoint-based strategies can scale to
 satisfy the need of future platforms, whether by integrating I/O-aware scheduling
 strategies or by significantly over-provisioning the I/O partition.
