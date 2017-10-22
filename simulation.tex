@@ -4,11 +4,11 @@
 \label{sec:simulator}
 % Primary: Thomas
 
-We used discrete event simulations to evaluate the performance of the proposed
-approaches.  Our simulations\footnote{The simulator is publicly
-  available on~\url{https://github.com/SMURFSorg/InterferingCheckpoints}.} are
-instantiated by a set of initial conditions that define a set of application classes,
-the distribution of resource usage between application classes, and the main
+We use discrete event simulations to evaluate the performance of the proposed
+approaches.  Our simulations\footnote{The simulator is publicly available
+from~\url{https://github.com/SMURFSorg/InterferingCheckpoints}.} are instantiated
+by a set of initial conditions that define a set of application classes, the
+distribution of resource usage between application classes, and the main
 characteristics of the platform on which application instances will execute.
 
 \paragraph*{High level parameters}
@@ -29,14 +29,14 @@ execute during job makespan, and execution time.
 % define the workload.
 Platforms are characterized by the number of nodes, a system Mean Time
 Between Failures, and an aggregated I/O subsystem bandwidth that is shared among the
-nodes. We assume symmetric read and write filesystem bandwidths, hence
+nodes. For simplicity, we assume symmetric read and write filesystem bandwidths, hence
 $\ckpt{i}=\reco{i}$ for each application class, $\app{i}$.
 
-A simulation first selects randomly a list of jobs that are instances of the
+A simulation first randomly selects a list of jobs that are instances of the
 different application classes. This list is ordered by job priority, and constrained
 by two parameters: the minimum simulated time to consider, and the relative
 proportion of platform resources used by each application class (based on the APEX
-report). 
+report~\cite{apex2016}). 
 %\dca{I don't recall any prior discussion of job priority.}  
 % TH: There is an implicit order in first fit scheduling. That
 % priority makes it explicit. It's important because we re-schedule,
@@ -45,59 +45,57 @@ report).
 As an example,
 we consider the subset of application classes given by the APEX workflows report for
 the subset of application classes of LANL (EAP, LAP, Silverton and VPIC), simulated
-as running over the Cielo supercomputer, for a minimal execution time
+as is executed on the Cielo supercomputer, for a minimal execution time
 of 60 day. A
 simulation will randomly instantiate one of the four classes, assigning a work
 duration uniformly distributed between $0.8w$ and $1.2w$, where $w$ is the typical
 walltime specified for the chosen application class, and count the resource allocated
-for this application class, until A) the simulated execution would necessarily run
-for at least 2 months, and B) the amount of resource used by the selected class is
+for this application class, until 1.)~the simulated execution would necessarily run
+for at least 2 months, and 2.)~resources used by the selected class is
 within 1\% of the target goal of the representative workload percentage defined in
 the APEX workflows report (see Table~\ref{table:lanl}).
 
 In addition to the jobs list, we generate a set of node failure times according to an
 exponential distribution with the specified MTBF. At the chosen times, we randomly
-choose which of the system nodes fails.  The jobs list and failure times constitute
+choose which of the nodes fail.  These jobs list and failure times constitute
 the initial conditions of a simulation.
 
 \paragraph*{Job Scheduling}
-We compute a job schedule (start and end times for all jobs in the list) using a
-simple first-fit strategy and considering job characteristics, job priority and
-resource availability.  We simulate online scheduling: whenever a job prematuraly
-ends (because of a failure or because it reached the end of its execution before the
-planned time), the schedule is amended by re-scheduling all jobs that were not
-started yet.
-% \dca{How does a job end before its planned end time?}
-% TH: well, it can, but this can be confusing... Here is the full
-% story:
-%   - we set a planned end date based on estimates of duration of
-%   checkpoints, number of checkpoints and I/O
-%   - but these estimates cannot be right all the times: checkpoints
-%   and I/Os will be delayed
-%   - So when a job spans over its end date, we extend its duration
-%   by re-estimating what remains to do (work, I/O, checkpoints)
-%   - When we extend a job duration we re-schedule jobs that did not
-%   start yet
-%   - After a while, the job finally completes, and it can happen it
-%   completes before the estimate (because of rounding errors and/or
-%   over-estimation of checkpoint / I/O duration
-%   If you want to explain this story here, feel free to do so. I
-%   thought this was going to be a lot of details and make the reader
-%   focus on elements that are not central to the result.
+
+We compute a job schedule (start and end times for all jobs in the list) using
+a simple first-fit strategy considering: job characteristics, job priority and
+resource availability.  We simulate online scheduling; whenever a job
+prematurely ends, whether due to failure or because it reached the end of its
+execution before the planned time, the schedule is amended by re-scheduling all
+jobs that were not started yet.
+% \dca{How does a job end before its planned end time?} TH: well, it can, but
+% this can be confusing... Here is the full story: - we set a planned end date
+% based on estimates of duration of checkpoints, number of checkpoints and I/O
+% - but these estimates cannot be right all the times: checkpoints and I/Os
+%   will be delayed - So when a job spans over its end date, we extend its
+%   duration by re-estimating what remains to do (work, I/O, checkpoints) -
+%   When we extend a job duration we re-schedule jobs that did not start yet
+%   - After a while, the job finally completes, and it can happen it completes
+%   before the estimate (because of rounding errors and/or over-estimation of
+%   checkpoint / I/O duration If you want to explain this story here, feel free
+%   to do so. I thought this was going to be a lot of details and make the
+%   reader focus on elements that are not central to the result.
 
 \paragraph*{Execution Simulation}
-Once a job is started, it first executes its initial input. It then 1) executes some
-work for a certain period before it 2) checkpoints. These two steps are repeated
-until all planned work is executed, after which the final output is executed by the
-job, before it ends. At any time during the execution, a node hosting the job may be
-subject to a failure (according to the pre-computed failure times and places). When
-that happens, the job is terminated, and a new job is added to the list of jobs to
-schedule. That new job represents the restart of the failed one: it has similar
-characteristics except its initial input corresponds to the restart size, and its
-work time corresponds to the remaining work from the last successful checkpoint. To
-reflect a common job scheduling policy on shared platforms, restarted jobs are set to
-the highest priority, maximizing their higher chances of obtaining an immediate
-allocation and continuing what was the original (failed) jobs execution.
+
+Once a job is started, it executes its initial input. It then, 1.)~executes
+some work for a certain period before it, and 2.)~checkpoints. These two steps
+are repeated until all planned work is executed, after which the final output
+is executed by the job, before it ends.  At any time during the execution, a
+node hosting the job may be subject to a failure (according to the pre-computed
+failure times and location). When that happens, the job is terminated and a new
+job is added to the list of jobs to schedule. That new job represents the
+restart of the failed one; it has similar characteristics except its initial
+input corresponds to the restart size, and its work time corresponds to the
+remaining work from the last successful checkpoint. To reflect a common job
+scheduling policy on shared platforms, restarted jobs are set to the highest
+priority, maximizing their chances of obtaining an immediate allocation and
+continuing what was the original (failed) jobs execution.
 
 %\dca{Moved the discussion of fixed v. Daly to model section. Don't know what we want
 %to do with the remaining snippet since it didn't quite fit there: ``For the
@@ -108,29 +106,30 @@ allocation and continuing what was the original (failed) jobs execution.
 
 \ifTR
 
-\paragraph*{Interference Models} Simulations implement each of the
-interference model and avoidance strategies defined in
+\paragraph*{Interference Models} Our simulations implement each of the
+interference models and avoidance strategies defined in
 Section~\ref{sec:algorithms}: for \propfixed and \propdaly,
 interfering I/O and checkpoints get a portion of the available
 aggregated bandwidth proportional to the number of nodes they use, and
 inversely proportional to the number of nodes involved for all
 jobs doing I/O; for \bfifofixed and \bfifodaly, I/O requests
-and checkpoints are ordered in a first-come first-serve strategy, and
+and checkpoints are ordered in a first-come first-served basis, and
 when they are selected, obtain the full bandwidth; for \fifofixed and
 \fifodaly, I/O requests and checkpoints are served in order, but the
 simulation adds all the time waiting for a checkpoint to start as
 progress in the computation for the job; and for \cooperative,
-the same is implemented, but I/O are ordered to minimize the waste in
+the same is implemented, but I/O is ordered to minimize the waste in
 Equations~\eqref{eq.selection} and~\eqref{eq.selection2}.
 
-
 Note that in the scheduled I/O methods (\fifononblock and \cooperative),
-initial inputs and final outputs are blocking (the job
-cannot progress during the I/O until it is served), but checkpoints
-are non blocking, which entails that if a failure hits the job,
-it may have to re-execute from a checkpoint far in its past, if it was not
-granted access to the filesystem for a long time.
+initial inputs and final outputs are blocking (the job cannot progress during
+the I/O until it is served), but checkpoints are non-blocking, which means that
+if a failure hits the job, it may have to re-execute from a checkpoint far in
+its past if it has  not been granted access to the filesystem for an extended
+period of time.
+
 \else
+
 Simulations implement each of the interference models and avoidance
 strategies defined in Section~\ref{sec:algorithms}.
 \fi
