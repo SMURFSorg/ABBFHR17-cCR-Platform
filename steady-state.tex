@@ -5,38 +5,37 @@
 % Primary: Yves (does that go into a subsec of the algorithms or models?)
 
 We now derive a lower bound for optimal platform waste.  When we assess the
-performance of the scheduling algorithms presented in Section~\ref{sec:algorithms},
-we also compare their relative performance to this lower bound (in
-Section~\ref{sec:results}).
+performance of the scheduling algorithms presented in \Cref{sec:algorithms}, we
+also compare their relative performance to this lower bound (in
+\Cref{sec:results}).
 
-We envision a (theoretical) scenario when the platform operates in steady-state,
-with a constant number of jobs per application class spanning the whole platform. We also assume that
-the I/O bandwidth $\bandavail$  that is available for CR operations remains constant throughout
-execution. This amounts to neglecting initial input and final output I/O operations,
-or more precisely, to pretending that these operations span the entire execution of
-the jobs. \dca{How is this, the ``pretending'', the case if full bandwidth is available?}
-Otherwise, we would need to account for job durations, which renders the
-steady-state analysis intractable.
-Given the above, we determine the optimal checkpointing period for each application class
-when the objective is to minimize the total waste incurred  by the platform, or equivalently,
-to maximize the total throughput of the platform. To complicate matters, these optimal periods
-may not be achievable,  hence we derive a lower bound of the optimal waste.
+We envision a (theoretical) scenario in which the platform operates in
+steady-state, a constant number of jobs per application class spanning the
+entire platform.  We also assume that the I/O bandwidth $\bandavail$ available
+for CR operations remains constant throughout execution. This amounts to
+ignoring initial input and final output I/O operations, or more precisely, to
+assuming these operations span the entire execution of the jobs.  Without this
+assumption, we would need to account for job durations; this renders the
+steady-state analysis intractable.  Given above, we determine the optimal
+checkpointing period for each application class with the objective to minimize
+the total waste of the platform; or equivalently, to maximize the total
+throughput of the platform. To complicate this analysis, these optimal periods
+may not be achievable, hence we derive a lower bound of the optimal waste.
 
-In steady-state operation, there are $\nbapp{i}$ jobs of class $\app{i}$,
-each using $\nbnodes{i}$ nodes, and with checkpoint time $\ckpt{i}$. Because we orchestrate
-checkpoints to avoid CR-CR interferences, we have $\ckpt{i} = \frac{\size{i}}{\bandavail}$,
-where $\size{i}$ denote the size of the checkpoint file of all jobs of class $\app{i}$.
-The waste of a job is the ratio of time the job spends doing
-resilience operations by the time it does useful work. The time spent doing
-resilience operations include the time spent during each period to checkpoint,
-and in case of failure, the time to rollback to the previous checkpoint, and the
-time to recompute lost work.
-%We assume
-%that the recovery time $\reco{i}$ is equivalent to the checkpoint time  $\ckpt{i}$.
-We
-can express the waste $\wasteapp{i}$ of a job $J_{i}$ of class
-$\app{i}$ that checkpoints with period $\period{i}$
-as follows~\cite{springer-monograph}:
+In steady-state operation, there are $\nbapp{i}$ jobs of class $\app{i}$, each
+using $\nbnodes{i}$ nodes, and with checkpoint time $\ckpt{i}$. Because we
+orchestrate checkpoints to avoid CR-CR interferences, we have $\ckpt{i} =
+\frac{\size{i}}{\bandavail}$, where $\size{i}$ denote the size of the
+checkpoint file of all jobs of class $\app{i}$.  The waste of a job is the
+ratio of time the job spends doing resilience operations by the time it does
+useful work. The time spent performing resilience operations include the time spent
+during each period to checkpoint; and in case of failure, the time to rollback
+to the previous checkpoint and the time to recompute lost work.
+%We assume that the recovery time $\reco{i}$ is equivalent to the checkpoint
+%time  $\ckpt{i}$.
+We can express the waste $\wasteapp{i}$ of a job $J_{i}$ of class $\app{i}$
+that checkpoints with period $\period{i}$ as follows~\cite{springer-monograph}:
+
 \begin{equation}
 \wasteapp{i} = \wastefct{i}{\ckpt{i}} = \frac{\ckpt{i}}{\period{i}} +
 \frac{\nbnodes{i}}{\mtbfplat}(\frac{\period{i}}{2} + \reco{i})
@@ -55,7 +54,9 @@ it uses:
 
 In the absence of I/O constraints, the checkpointing period can be minimized
 for each job independently. Indeed, the optimal period for a job
-of class $\app{i}$ is obtained by minimizing $\wasteapp{i}$ in Equation~\eqref{eq.wasteAi}.
+of class $\app{i}$ is obtained by minimizing $\wasteapp{i}$ in 
+Equation~\eqref{eq.wasteAi}.
+
 Differentiating and solving
 $$\frac{\delta \wasteapp{i}}{\delta \period{i}} = - \frac{\ckpt{i}}{\period{i}^{2}} + \frac{\nbnodes{i}}{2 \mtbfplat} = 0$$
 we readily derive that
@@ -67,7 +68,7 @@ where $\mu_{i}$ is the MTBF of  class $\app{i}$ applications, and we retrieve th
 $\period{i} = \period{Daly}(J_{i})$.
 
 However, I/O constraints may impose the use of sub-optimal periods. If each job
-of  class $\app{i}$ checkpoints in time $\ckpt{i}$ during its period $\period{i}$ (hence
+of class $\app{i}$ checkpoints in time $\ckpt{i}$ during its period $\period{i}$ (hence
 without any contention), it uses the I/O device during a fraction $\frac{\ckpt{i}}{\period{i}}$ of the time.
 The total usage fraction of the  I/O device is $\ioconstraint = \sum_{i} \frac{\nbapp{i} \ckpt{i}}{\period{i}}$
 and cannot exceed $1$. Therefore, we have to solve the following optimization problem: find
@@ -78,7 +79,7 @@ the set of values $\period{i}$ that minimize $\wasteplat$ in Equation~\eqref{eq.
 \label{eq.IOconstraint}
 \end{equation}
 
-Hence the optimization problem writes: minimize
+Hence the optimization problem is to minimize:
 \begin{equation}
 \wasteplat = \sum_i \frac{\nbapp{i} \nbnodes{i}}{\nbnodesplat}  \left( \frac{\ckpt{i}}{\period{i}} +
 \frac{\nbnodes{i}}{\mtbfplat}(\frac{\period{i}}{2} + \reco{i}) \right)
@@ -98,24 +99,27 @@ for all $i$. This leads to:
   \label{eq.KKT}
 \end{equation}
 for all $i$. Note that when $\lambda=0$, Equation~\eqref{eq.KKT} reduces to Equation~\eqref{eq.daly}.
-Because of the I/O constraint in Equation~\eqref{eq.IOconstraint},
-we choose for $\lambda$ the minimum value such that Equation~\eqref{eq.IOconstraint}
-  is satisfied. If $\lambda \neq 0$, this will lead to periods $P_{i}$ larger
-  than the optimal value of Equation~\eqref{eq.daly}. Note that there is no
-  closed-form expression for the minimum value of $\lambda$,
-  it has to be found numerically.
-   Altogether, we state our main result:
 
-   \begin{theorem}
+Because of the I/O constraint in Equation~\eqref{eq.IOconstraint}, we choose
+for $\lambda$ the minimum value such that Equation~\eqref{eq.IOconstraint} is
+satisfied. If $\lambda \neq 0$, this will lead to periods $P_{i}$ larger than
+the optimal value of Equation~\eqref{eq.daly}. Note that there is no
+closed-form expression for the minimum value of $\lambda$, it has to be found
+numerically.
+
+Altogether, we state our main result:
+
+\begin{theorem}
      In the presence of I/O constraints, the optimal checkpoint periods are given by
      Equation~\eqref{eq.KKT}, where $\lambda$ is the smallest non-negative value such
      that Equation~\eqref{eq.IOconstraint} holds. The total platform waste is then
      given by Equation~\eqref{eq.totalwaste}.
 \end{theorem}
 
-The optimal periods may not be achievable, because Equation~\eqref{eq.IOconstraint}
-is a necessary, but not sufficient condition: even though the total I/O bandwidth is
-not exceeded, meaning there is enough capacity to take all the checkpoints at the
-given periods, we would still need to orchestrate these checkpoints into an
-appropriate, periodic, repeating pattern.  In other words, we only have a lower bound
-of the optimal platform waste.
+The optimal periods may not be achievable, because
+Equation~\eqref{eq.IOconstraint} is a necessary, but not sufficient condition.
+Even though the total I/O bandwidth is not exceeded, meaning there is enough
+capacity to take all the checkpoints at the given periods, we would still need
+to orchestrate these checkpoints into an appropriate, periodic, repeating
+pattern.  In other words, we only have a lower bound of the optimal platform
+waste.
