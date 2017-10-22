@@ -42,7 +42,7 @@ divided by the application resource usage over that same segment for
 the baseline simulation. Each simulation is conducted at least 1,000
 times; the candlestick extremes represent the first and last decile of
 the measures, while the boxes represent the first and last quartile,
-and the point in the middle is the mean value. 
+and the point in the middle is the mean value.
 
 \begin{figure}
   \begin{center}
@@ -205,21 +205,30 @@ contrary, the other strategies are much more dependent upon the frequency of
 failures, with the \propfixed strategy requiring up to 50 times the bandwidth of
 \cooperative to reach the same efficiency under these MTBF conditions.
 
-When failures are not an endemic
-event, \ie as soon as the node MTBF is at least 15 years
+When failures are not endemic
+events, \ie as soon as the node MTBF is at least 15 years
 (corresponding to a system MTBF of 2.6h), the hierarchy of different
-approaches stabilizes: the two blocking strategies that rely on
-frequent checkpoints (\propfixed and \bfifofixed) are the ones
-requiring the highest bandwidth to maintain 80\%
+approaches stabilizes. The two blocking strategies relying on
+frequent checkpoints (\propfixed and \bfifofixed) remain expensive,
+requiring the highest bandwidth to reach the target
 efficiency. % 6.4TB/s at 24 years
-\fifofixed, that uses a fixed checkpoint interval comes next, with a
-requirement around three quarter of the one required by \propfixed and
-\fifofixed. It benefits from the capacity to continue working when the
-filesystem is not available to checkpoint, which is sufficient, when
-failures are rare, to obtain a significant performance
-gain. % 4.9TB/s at 24 years
-Then the four strategies that use the Daly optimal checkpointing
-period, alleviating significantly the I/O pressure, are the ones that
-require the lowest bandwidth to reach 80\% of efficiency, at about
-half the required bandwidth of the current
-situation. %coop: 2.9 TB/s at 24 years
+The next contender, \fifofixed, requires a quarter less bandwidth
+to reach the same efficiency.
+% \fifofixed, that uses a fixed checkpoint interval comes next, with a
+% requirement around three quarter of the one required by \propfixed and
+% \bfifofixed.
+Despite using the same fixed checkpoint interval as the previous methods, it
+benefits from not blocking when the filesystem is not available to checkpoint,
+which is sufficient, when failures are rare, to obtain a significant
+performance gain. % 4.9TB/s at 24 years
+All Daly-based strategies benefit from their lesser I/O pressure, and reach the
+target efficiency with around half the bandwidth needed by \propfixed. The
+highlight these results call attention upon is that C/R strategies can scale to
+satisfy the need of future platforms, either by integrating I/O-aware scheduling
+strategies in the software infrastructure of prospective systems or by heavily
+investing in over-provisioning their practical I/O bandwidth.
+% Then the four strategies that use the Daly optimal checkpointing
+% period, alleviating significantly the I/O pressure, are the ones that
+% require the lowest bandwidth to reach 80\% of efficiency, at about
+% half the required bandwidth of the current
+% situation. %coop: 2.9 TB/s at 24 years
