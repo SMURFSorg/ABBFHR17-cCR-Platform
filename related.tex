@@ -72,6 +72,7 @@ checkpoints of a production climate application~\cite{sasaki2015}, while Ni et
 al~\cite{Ni2014} study the trade-offs between the loss of precision, compression
 ratio, and application correctness due to lossy compression.\dca{Can we say the
   outcomes from these latter studies?}
+\kbf{Yes, but why???  This is not a lossy compression paper}
 
 \paragraph*{Avoiding I/O interference}
 
@@ -94,8 +95,7 @@ portion of the system used by the workload.
 
 We distinguishes our work from these previous studies in a number of important ways.
 First, unlike a number of the previous studies, our technique considers existing
-platform I/O. \dca{by existing, do we mean application I/O, do we mean ``real''
-  system behavior???}  Additionally, our approach is agnostic to the I/O patterns of
+non-CR application I/O. Additionally, our approach is agnostic to the I/O patterns of
 the considered applications as long as they are known.  Also, we attempt to optimize
 the efficiency of the entire platform, with the changing workloads and failures
 running on that platform, rather than just considering one workload. Finally and most
