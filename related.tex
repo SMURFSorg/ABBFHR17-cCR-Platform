@@ -93,12 +93,12 @@ portion of the system used by the workload.
 \paragraph*{Summary}
 
 We distinguishes our work from these previous studies in a number of important ways.
-First, unlike a number of the previous studies, our technique considers existing
-platform I/O. \dca{by existing, do we mean application I/O, do we mean ``real''
-  system behavior???}  Additionally, our approach is agnostic to the I/O patterns of
-the considered applications as long as they are known.  Also, we attempt to optimize
+First, unlike a number of the previous studies, our technique, based on
+APEX workflows report on the Cielo platform, considers existing
+platform I/O. Additionally, our approach is agnostic to the I/O patterns of
+the considered applications as long as they are known.  We attempt to optimize
 the efficiency of the entire platform, with the changing workloads and failures
 running on that platform, rather than just considering one workload. Finally and most
 importantly, this approach provides optimal checkpointing periods in environments
-where I/O is highly constrained and Daly/Young's formula is not appropriate, a common
+where I/O is highly constrained and Daly/Young's formula is less appropriate, a common
 scenario on many leadership-class systems.
