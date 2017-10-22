@@ -4,19 +4,20 @@
 \label{sec:algorithms}
 % Aurelien & George
 
-In this section, we present the applications I/O scheduling algorithms used to study
-the effects of concurrent I/O activities.  The first algorithm (\nocoop) represents
-the status-quo in which I/O activities are scheduled independently and may incur
-slowdowns due to I/O resource contentions. The second algorithm (\fifoblock)
-coordinates I/O activity to eliminate interference: I/O operations are scheduled in a
-First-Come-First-Serve (FCFS) fashion, and only one I/O operation executes at any
-given time while other I/O requests are blocked until their turn comes.  The third
-algorithm (\fifononblock) is similar, except that jobs that are waiting
-for the I/O token to checkpoint continue working until their turn comes.
-Last, we propose our heuristic (\leastwaste) that improves on \fifononblock by giving
-the I/O token to the I/O operation that will minimize system waste. Note that unlike the blocking approaches (\nocoop
-and \fifoblock), non-blocking optimizations (\fifononblock and
-\cooperative) require application code refactoring.
+In this section, we present the application I/O scheduling algorithms used in
+this study.  The first algorithm, \nocoop, represents the status-quo in which
+I/O activities are scheduled independently and may incur slowdowns due to I/O
+contention. The second algorithm, \fifoblock, coordinates I/O activity to
+eliminate interference: I/O operations are scheduled in a
+First-Come-First-Serve (FCFS) fashion and only one I/O operation executes at
+any given time, while other I/O requests are blocked until their turn comes.
+The third algorithm, \fifononblock, is similar except that jobs that are
+waiting for the I/O token to checkpoint continue working until their turn
+comes.  Lastly, we propose our heuristic, \leastwaste,  which improves on
+\fifononblock by giving the I/O token to the I/O operation that will minimize
+system waste. Note that unlike the blocking approaches (\nocoop and
+\fifoblock), non-blocking optimizations (\fifononblock and \cooperative) may
+require application code refactoring.
 
  % \dca{what about the
  %  case when an application must communicate before its computation can proceed?
@@ -38,20 +39,21 @@ and \fifoblock), non-blocking optimizations (\fifononblock and
 
 \subsection{\nocoop I/O Scheduling}
 
-In \nocoop I/O scheduling, jobs are executed to fill-up the system based on processor
-availability, and their I/O workload (including CR activities) are not coordinated by
-any system of cooperation.  Instead, jobs use the parallel file system
-assuming they are the sole user -- with no modification to their access pattern to
-accommodate for possible interferences. Researchers have observed that such
-concurrent I/O resource access can decrease the I/O bandwidth observed by the running
-jobs~\cite{Dorier2015}.  Under the conditions of an under-provisioned filesystem, our
-model renders to each contending I/O operation a decrease in bandwidth linearly
-proportional to the number of contending operations.  We account for the additional
-delays imposed by this decreased bandwidth as waste. Since subsequent checkpoints are
-scheduled to start after $\period{i}-\ckpt{i}$, and delays may result in checkpoint
-commit times longer than $\ckpt{i}$, the resultant checkpoint period may be longer
-than $\period{i}$. This is consistent with an oblivious I/O policy that does not
-consider for issues stemming from potential I/O contention.
+In \nocoop I/O scheduling, jobs are executed to fill-up the system based on
+processor availability, and their I/O workload (including CR activities) are
+not coordinated by the system.  Instead, jobs use the parallel file system
+assuming they are the sole user -- with no modifications made to their access
+patterns to accommodate for possible interference. Researchers have observed
+that concurrent I/O resource access can decrease the I/O bandwidth
+observed~\cite{Dorier2015}.  Under the conditions of an under-provisioned I/O
+substrate, our model gives each I/O stream a decrease in bandwidth linearly
+proportional to the number of competing operations.  We account for the
+additional delays imposed by this decreased available bandwidth as
+\emph{waste}.  Since subsequent checkpoints are scheduled to start after
+$\period{i}-\ckpt{i}$, and delays may result in checkpoint commit times longer
+than $\ckpt{i}$, the resultant checkpoint period may be longer than
+$\period{i}$. This is consistent with a trivial I/O policy that does not
+consider potential contention.
 
 % GB: The variants are described in the Simulation
 % In the \nocoop algorithm, we consider two variants where checkpoints are
@@ -61,26 +63,25 @@ consider for issues stemming from potential I/O contention.
 \subsection{Blocking \fifoblock FCFS I/O Scheduling}
 \label{sec:fcfsblock}
 
-A simple optimization to the \nocoop scheme is to favor one of the jobs' I/O request
-over all the others. While the overall throughput may remain unchanged (given an
-efficient filesystem implementation), the favored job completes its I/O
-workload faster (\ie, in time $\ckpt{i}$ for a job of class $\app{i}$).  In
-the \fifoblock scheme, I/O requests are performed sequentially, in request arrival
-order. Jobs with outstanding I/O requests are blocked until their requests are
-completed.
+A simple optimization to the \nocoop scheme is to favor one jobs' I/O over all
+others. While the overall throughput may remain unchanged (given an efficient
+filesystem implementation), the favored job completes its I/O workload faster
+(\ie, in time $\ckpt{i}$ for a job of class $\app{i}$).  In the \fifoblock
+scheme, I/O requests are performed sequentially, in request arrival order. Jobs
+with outstanding I/O requests are blocked until their requests are completed.
 
-Assuming a favorable linear interference model, a simple workload with two jobs can
-show the potential advantage of the \fifoblock over \nocoop strategy.  If the two
-jobs simultaneously request I/O transfers of similar data volume, $V$, in the \nocoop
-strategy, both jobs take $\frac{V}{\frac{\bandavail}{2}}$ time to complete their I/O.
-In the \fifoblock strategy, the first scheduled job takes only
-$\frac{V}{\bandavail}$, while the second job waits $\frac{V}{\bandavail}$
-before its own I/O starts, but then executes at full available bandwidth completing
-in $\frac{2V}{\bandavail}$.  Reducing I/O interference reduces the average I/O
-completion time (although fairness may be decreased).  Once again, however, observed
-checkpoint durations may increase past $\ckpt{i}$, due to I/O scheduling wait time,
-and the checkpointing period may be, on average, larger than the desired
-$\period{i}$.
+Assuming a favorable linear interference model, a simple workload with two jobs
+can show the potential advantage of the \fifoblock over \nocoop strategy.  If
+the two jobs simultaneously request I/O transfers of similar data volume, $V$,
+in the \nocoop strategy, both jobs take $\frac{V}{\frac{\bandavail}{2}}$ time
+to complete their I/O.  In the \fifoblock strategy, the first scheduled job
+takes only $\frac{V}{\bandavail}$, while the second job waits
+$\frac{V}{\bandavail}$ before its own I/O starts, but then executes at full
+available bandwidth completing in $\frac{2V}{\bandavail}$.  Reducing I/O
+interference reduces the average I/O completion time (although fairness may be
+decreased).  Once again, however, observed checkpoint durations may increase
+past $\ckpt{i}$, due to I/O scheduling wait time, and the checkpointing period
+may be, on average, larger than the desired $\period{i}$.
 
 % GB: The variants are described in the Simulation
 % In the \fifoblock algorithm, we again consider two variants, where checkpoints are
@@ -90,27 +91,24 @@ $\period{i}$.
 \subsection{Non-Blocking \fifononblock FCFS I/O Scheduling}
 \label{sec:fcfsnonblock}
 
-The previous strategy trades the cost of I/O interferences for
-idle time, as jobs perform a blocking (idle) wait for the I/O token.
-If the application developer can refactor the program code to continue
-computing while awaiting I/O request completions, it becomes possible
-to replace otherwise idle wait time with useful computation. In the
-\fifononblock algorithm, when the previous checkpoint ends at time
-$t_{now}$, a tentative time for the next checkpoint is set at
-$t_{req}=t_{now}+\period{i}-\ckpt{i}$.  At time $t_{req}$, a
-non-blocking I/O request is made to request the I/O token -- the I/O
-token is still scheduled FCFS according to request arrival time.  The
-job continues its computation until the scheduler informs it that the
-I/O token is available. At this point, the job must generate its
-checkpoint data as soon as possible (or after a short
-synchronization\footnote{In user-level checkpointing, the job typically
-  finishes its current computing block before generating its
-  checkpoint data.}).  In most applications, the granularity of the
-work is small enough for a simple approach to be efficient:
-applications can use existing APIs in SCR~\cite{Moody10SCR} or
-FTI~\cite{Bautista-Gomez11_FTI} to regularly poll if a checkpoint
-should be taken at this time. In this work, we assume that this
-resynchronization cost is negligible relative to the checkpoint commit
+The previous strategy trades the cost of I/O interferences for idle time, as
+jobs perform a blocking (idle) wait for the I/O token.  If the application
+developer can refactor the program code to continue computing while awaiting
+I/O request completions, it becomes possible to replace otherwise idle wait
+time with useful computation. In the \fifononblock algorithm, when the previous
+checkpoint ends at time $t_{now}$, a tentative time for the next checkpoint is
+set at $t_{req}=t_{now}+\period{i}-\ckpt{i}$.  At time $t_{req}$, a
+non-blocking I/O request is made to request the I/O token -- the I/O token is
+still scheduled FCFS according to request arrival time.  The job continues its
+computation until the scheduler informs it that the I/O token is available. At
+this point, the job must generate its checkpoint data as soon as possible (or
+after a short synchronization\footnote{In user-level checkpointing, the job
+typically finishes its current computing block before generating its checkpoint
+data.}).  In most applications, the granularity of the work is small enough for
+a simple approach to be efficient: applications can use existing APIs in
+SCR~\cite{Moody10SCR} or FTI~\cite{Bautista-Gomez11_FTI} to regularly poll if a
+checkpoint should be taken at this time. In this work, we assume that this
+re-synchronization cost is negligible relative to the checkpoint commit
 duration.
 %
 %\dca{I commented out the example libraries because the described app-to-library
@@ -145,24 +143,26 @@ compared to \fifoblock and \nocoop algorithms.
 \subsection{Variants}
 \label{sec:variants}
 
-The periods $\period{i}$ of the checkpointing requests are  input parameters to the three strategies
- \nocoop, \fifoblock and \fifononblock. In \Cref{sec:simulator}, we instantiate each strategy with two variants. The first variant uses a fixed checkpointing period 
- for each job, while the second variant uses the Daly period of each job.
+The periods $\period{i}$ of the checkpointing requests are input parameters to
+the three strategies \nocoop, \fifoblock and \fifononblock. In
+\Cref{sec:simulator}, we instantiate each strategy with two variants. The first
+variant uses a fixed checkpointing period for each job, while the second
+variant uses the Daly period of each job.
  
 \subsection{\leastwaste Algorithm}
 \label{sec:least-waste}
 
-Finally, our \leastwaste algorithm further refines the \fifononblock algorithm by
-issuing the I/O token to the job whose I/O request minimizes the total expected waste
-(explained hereafter), rather than simply based on request arrival order.  Given the
-time-dependent nature of this decision, the selection may not be a global optimum,
-but only an approximation given currently available information about the system
-status. The \leastwaste algorithm assumes that jobs issue checkpointing requests according
- to their Daly period\footnote{Fixed checkpointing makes no sense in the \leastwaste strategy,
- which is
-designed to optimize checkpoint frequencies across jobs.}.
- For each I/O scheduling decision, at time $t$ (when a previous I/O operation
-completes), we consider a pool of $r+s$ candidates from two different categories:
+Finally, our \leastwaste algorithm further refines the \fifononblock algorithm
+by issuing the I/O token to the job whose I/O request minimizes the total
+expected waste (explained hereafter), rather than simply based on request
+arrival order.  Given the time-dependent nature of this decision, the selection
+may not be a global optimum, but only an approximation given currently
+available information about the system status. The \leastwaste algorithm
+assumes that jobs issue checkpointing requests according to their Daly
+period\footnote{Fixed checkpointing makes little sense in the \leastwaste strategy,
+it is designed to optimize checkpoint frequencies across all jobs.}.  For each
+I/O scheduling decision, at time $t$ (when a previous I/O operation completes),
+we consider a pool of $r+s$ candidates from two different categories:
 
 \begin{compactitem}
 \item Category \IOcat $\Catiocat$: Jobs $J_{i}$, $1\leq i \leq r$ with an
@@ -176,7 +176,6 @@ completes), we consider a pool of $r+s$ candidates from two different categories
   I/O token is available for a new checkpoint. Since $J_{i}$ is a candidate,
   $d_{i} \geq \period{Daly}(J_{i})$
 \end{compactitem}
-
 
 If we select job $J_{i}$ to perform I/O, the expected waste $\wap{i}$
 incurred to the other $r+s-1$ candidate jobs in  $\Catiocat \cup
