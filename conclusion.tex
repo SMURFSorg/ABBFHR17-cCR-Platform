@@ -1,25 +1,25 @@
 \section{Conclusion and Future Work} \label{sec:conclusion}
 % Primary: Aurélien
 
-As we acquire larger, likely more error-prone, platforms, effectively protecting
-applications from platform faults becomes critical. Current production
-fault-protection techniques rely on checkpoint/restart to ensure such progress.
-However, these techniques, by their very nature, regularly save the application state
-to stable storage, and therefore increase the burden of the already overtaxed I/O
-subsystem.
+As we design larger, likely more error-prone, platforms, effectively protecting
+applications from platform faults becomes critical. Current fault-protection
+techniques available on production platforms rely on checkpoint/restart to
+ensure fault protection. However, these techniques, by their very nature,
+regularly save the application state to stable storage, and therefore increase
+the burden of the already overtaxed I/O subsystem.
 
 Considering a comprehensive I/O interference model for platforms susceptible to I/O
 contention, we designed multiple I/O scheduling algorithms that target improving
 overall platform job throughput via waste minimization. We also theorized a
 lower-bound for platform waste for I/O constrained checkpointing workloads. We use
-this this theoretical lower-bound to demonstrate the effectiveness of our \emph{least
-  waste} I/O scheduling algorithm and to compare its performance with other I/O
-scheduling strategies.  Our scheduling strategy invariably outperforms the others
-with respect to the platform efficiency; Unsurprisingly, the biggest gains are
+this theoretical lower-bound to demonstrate the effectiveness of our \cooperative
+I/O scheduling and to compare its performance with other I/O
+scheduling strategies.  Our strategy invariably outperforms the others
+with respect to the platform efficiency. Unsurprisingly, the biggest gains are
 rendered on the platforms with a lowest MTBF or greater degrees of under-provisioned
-I/O; Through simulation, we also show a path to supporting application-level
-checkpointing while maintaining a 80\% platform efficiency, all without a large
-investment in the I/O partition.
+I/O. Through simulation, we also show a path to supporting C/R on a prospective
+system while maintaining 80\% platform efficiency, all without a large
+investment in the I/O subsystem.
 
 % In this paper we presented a comprehensive model to capture interference
 % between multiple applications performing fault-tolerance related I/O
@@ -45,8 +45,8 @@ investment in the I/O partition.
 % requirements when the system employs a smart checkpointing policy.
 
 As burst-buffers and other NVRAM storage mechanisms become more common, a natural
-extension of this work would consider the impact on I/O contention/interference for
-platforms that leverage burst-buffer technologies. Increasing the available I/O
+extension of this work would consider their impact on I/O contention/interference.
+Increasing the available I/O
 bandwidth leads to reduced waste (due to the decrease in checkpoint duration but also
 an increase in the optimal checkpoint frequency and therefore a decrease in the
 restart time), while providing relief to the shared I/O subsystem to better absorb
