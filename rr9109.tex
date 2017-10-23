@@ -29,9 +29,13 @@ Thomas Herault\thanks[knoxville]{University of Tennessee Knoxville, USA}%
 
 \titlehead{Optimal Cooperative Checkpointing for Shared High-Performance Computing Platforms}
 
-\RRresume{Ce rapport propose un modèle et une étude analytique de la réplication en tant que technique
-pour détecter et corriger les erreurs silencieuses. 
-Nous donnons également les résultats d'un ensemble de simulations qui viennent corroborer le modèle analytique.}
+\RRresume{Ce rapport s'intéresse aux plates-formes de calcul scientifique partagées, i.e., sur lesquelles s'exécutent simultanément plusieurs classes d'applications. Celles-ci sont en compétition pour l'accès aux ressources d'entrées-sorties, à la fois pour leurs opérations de base et pour prendre leurs checkpoints. Nous proposons un modèle et analysons plusieurs stratégies de prise de checkpoints, à période fixe ou dépendant de l'application, avec ou sans interférence, bloquante ou non. Nous déterminons une borne inférieure sur la fraction de temps nécessairement perdue  
+par la plateforme pour toute stratégie de checkpoint/redémarrage, et nous montrons 
+expérimentalement que notre  stratégie coopérative obtient des performances très proches de cette borne. Dans notre  stratégie coopérative, les périodes de checkpoint des applications ne sont pas nécessairement celles
+calculées par la formule de Young/Daly, car la bande passante 
+disponible ne permet pas toujours de les mettre en oeuvre, et certaines applications ont nécessairement une période plus longue (et donc sous-optimale).
+Nous donnons les résultats d'un ensemble de simulations menées avec des ensembles 
+de paramètres pour les applications et les plates-formes qui correspondent à des scénarios actuels et prospectifs.}
 
 \RRabstract{
 In high-performance computing environments, input/output (I/O) from various
@@ -55,9 +59,9 @@ large-scale workloads in the presence of competing I/O while minimizing the impa
 on application performance.
 }
 
-\RRmotcle{résilience, checkpoint, optimisation I/O.}
+\RRmotcle{résilience, checkpoint, optimisation I/O, stratégie d'ordonnancement.}
 
-\RRkeyword{resilience, checkpoint, I/O pressure, cooperative checkpoint.}
+\RRkeyword{checkpoint, I/O contention, shared platform, scheduling policy, cooperative checkpoint.}
 
 \RRprojet{ROMA}
 \RCGrenoble 
@@ -907,7 +911,6 @@ other platforms. In later sections, we consider similar workloads on a more
 modern platform.
 
 \begin{table}
-\begin{center}
 \begin{tabular}{|l|c|c|c|c|}
 \hline
  Workflow & EAP & LAP & Silverton & VPIC \\\hline
@@ -918,7 +921,6 @@ Initial Input (\% of memory) &  3 & 5 & 70 & 10 \\\hline
 Final Output (\% of memory) & 105 & 220 & 43 & 270 \\\hline
 Checkpoint Size (\% of memory) & 160 & 185 & 350 & 85 \\\hline
 \end{tabular}
-\end{center}
 \caption{LANL Workflow Workload from the APEX Workflows report.\label{table:lanl}}
 \end{table}
 
@@ -939,7 +941,7 @@ the boxes represent the first and last quartile, and the center the mean value.
 
 \begin{figure}
   \begin{center}
-    \resizebox{\linewidth}{!}{\input{sim/figures/synthetic-01hMTBF-waste-cielo.tex}}
+    \resizebox{1.05\linewidth}{!}{\input{sim/figures/synthetic-01hMTBF-waste-cielo.tex}}
   \end{center}
   \caption{Waste ratio as a function of the system bandwidth for the
     seven I/O and Checkpointing scheduling strategies, and the LANL workload on
@@ -994,7 +996,7 @@ waste, but such is the case for all algorithms.
 
 \begin{figure}
   \begin{center}
-    \resizebox{\linewidth}{!}{\input{sim/figures/synthetic-040gbs-waste-cielo.tex}}
+    \resizebox{1.05\linewidth}{!}{\input{sim/figures/synthetic-040gbs-waste-cielo.tex}}
   \end{center}
   \caption{Waste ratio as a function of the system MTBF for the
     seven I/O and Checkpointing scheduling strategies, and the LANL workload on
@@ -1054,7 +1056,7 @@ additional waste.
 
 \begin{figure}
   \begin{center}
-    \resizebox{\linewidth}{!}{\input{sim/figures/prosp.tex}}
+    \resizebox{1.05\linewidth}{!}{\input{sim/figures/prosp.tex}}
   \end{center}
   \caption{Minimum aggregated filesystem bandwidth to reach 80\%
     efficiency with the different approaches on the prospective
@@ -1119,14 +1121,7 @@ for the whole MTBF spectrum. These
 results highlight that checkpoint-based strategies can scale to
 satisfy the need of future platforms, whether by integrating I/O-aware scheduling
 strategies or by significantly over-provisioning the I/O partition.
-% Then the four strategies that use the Daly optimal checkpointing
-% period, alleviating significantly the I/O pressure, are the ones that
-% require the lowest bandwidth to reach 80\% of efficiency, at about
-% half the required bandwidth of the current
-% situation. %coop: 2.9 TB/s at 24 years
 
-
-%\input{related.tex}
 
 % !TEX root =  ipdps18.tex
 
