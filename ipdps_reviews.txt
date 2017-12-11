@@ -1,0 +1,315 @@
+----------------------- REVIEW 2 ---------------------
+PAPER: 311
+TITLE: Optimal Cooperative Checkpointing for Shared High-Performance Computing Platforms
+AUTHORS: Thomas Herault, Yves Robert, Aurelien Bouteiller, Dorian Arnold, Kurt Ferreira, George Bosilca and Jack Dongarra
+
+Overall first-round evaluation: -1 (weak reject)
+
+----------- Overall first-round evaluation -----------
+** Summary **
+The paper develops analytical models for optimal cooperative checkpointing, i.e., checkpoint/restart applied in space-sharing workloads in HPC systems (as opposed to capability workloads that span the entire system) where resources, such as I/O, are shared.
+
+** Strengths/Weaknesses **
++ Nice modeling work using representative workloads.
+- The applications of the proposed scheme (i.e., a cooperative scheduler) seems a bit limited in real world HPC systems and applications.
+
+The motivation of the paper appears to be that high-end HPC systems run mostly space-sharing workloads, i.e., small jobs that share I/O, instead of capability jobs (i.e., larger jobs) where the entire system is used, typically for a single application. Although this is perhaps a fact in many HPC centers, a question that arises as a result is whether space-sharing smaller jobs will see the same MTBF (i.e., low MTBF) than capability jobs. My guess would be that the former class will see a higher MTBF in comparison to the latter, so fault tolerance capabilities for space-sharing smaller jobs are perhaps less important and would probably be not a major concern for regular programmers.
+
+Although the modeling aspect of the paper appears to be solid, I have problems imagining how such a technique, i.e., cooperative scheduling, would work in practice. In the real world, applications running on space-sharing jobs are different from each other (possibly written by different programmers and/or code teams). How do we expect those different applications to use a central scheduler so that checkpoints are taken in an optimal manner? Do you expect this to be transparently done by the system? Would this require changes to the applications? If the practical implications of this (possible) approach is limited, I would think that this work requires better motivation.
+
+The paper makes a significant number of simplifications. I understand that this is to simplify the modeling part—for example: symmetric read/write bandwidths, a small number of application classes, job makespan known a priori, etc. I would suggest mentioning the implications of these simplifications, i.e., are they reasonable in today’s systems? If not, what things would need to be changed in the model to accommodate more complex scenarios?
+
+The experiments use an unrealistic system MTBF of 1 hour. How is this MTBF selected? Is this the system MTBF of Cielo? Or is this a predicted MTBF for a future system? Since different systems may have different MTBF, I would suggest showing results for different MTBFs.
+
+In figure 1, what is the meaning of the error bars? Are these standard deviations, margin of error, confidence intervals (CI)? This needs clarification to properly read the figures. For example, if the bars represent CI at 95%, many of the cases have overlapping regions, which may suggest that the distributions are not significantly different, statistically speaking.
+
+Suggestions to improve the paper:
+-       If these models are successful, please clarify how can the approach of cooperative scheduling be used in practice.
+-       Please clarify the implications of the simplifications made for modeling.
+-       Please explain the choice of MTBF, and provide results for different MTBFs.
+-       Please clarify the meaning of points and bars in the figures.
+
+
+----------------------- REVIEW 3 ---------------------
+PAPER: 311
+TITLE: Optimal Cooperative Checkpointing for Shared High-Performance Computing Platforms
+AUTHORS: Thomas Herault, Yves Robert, Aurelien Bouteiller, Dorian Arnold, Kurt Ferreira, George Bosilca and Jack Dongarra
+
+Overall first-round evaluation: 1 (weak accept)
+
+----------- Overall first-round evaluation -----------
+The paper presents a novel approach to address the limited I/O bandwidth which
+becomes a problem shared HPC systems that contend for this resource both for
+checkpointing and application I/O. The authors propose an approach which
+combines both checkpointing methods and I/O scheduling strategies. Using this,
+the system is able to provide about 80% efficiency.
+
+Problem definition: The problem is defined well, the literature study is well
+done, and both simulation and results from actual experiments are used.
+
++ Least-Waste algorithm: although highly local, this algorithm is quite
+intuitive and seems to be work well in practice as well, as suggested by the
+evaluation of the paper:
+
++ Performance evaluation: the overall performance evaluation is multi=faceted.
+Although both least-waste and ordered NB Daly perform similarly
+
+- Figure 2 indicates the deviation between the model and least-waste for low
+  MTBFs. The least value is two years. It would be good to see the trend for
+node MTBF less than two years. To argue, the authors have not considered deep
+memories which are likely to reduce the node MTBF. Hence, this consideration is of importance.
+
+- Figure 2 assumes a bandwidth of 40 GB/s. I think this is a very low value for
+  any realistic system. Higher values should improve the model fidelity. Figure
+1 indicates higher bandwidth to be an excellent coping mechanism for low MTBF.
+
+- Theorem 1: Poorly executed, does not provide any value to the paper, should be removed.
+
+
+----------------------- REVIEW 4 ---------------------
+PAPER: 311
+TITLE: Optimal Cooperative Checkpointing for Shared High-Performance Computing Platforms
+AUTHORS: Thomas Herault, Yves Robert, Aurelien Bouteiller, Dorian Arnold, Kurt Ferreira, George Bosilca and Jack Dongarra
+
+Overall first-round evaluation: 1 (weak accept)
+
+----------- Overall first-round evaluation -----------
+Summary:
+
+  In high performance computing clusters, there are a number of
+  applications that run for a long time. Because failures are likely,
+  these applications often (possibly on a periodic basis) will
+  checkpoint their state so that after a failure they can rollback to
+  the latest checkpoint and resume from that point (called CR for
+  short). It turns out that when multiple such applications are
+  executing on the cluster resources using space-sharing, then there
+  are chances that such CR activities of different applications may
+  overlap causing interference with each other while using the shared
+  I/O resources. In turn this interference will cause performance of
+  the application and overall utility of the HPC cluster to degrade
+  substantially.  Using optimal checkpointing periods as suggested by
+  Young/Daly are no good either because this algorithm focuses on just
+  one job and does not consider multi-tenant scenarios.
+
+  To that end, the authors propose to complement Young/Daly's
+  recommended checkpointing period with specific I/O scheduling
+  algorithms such that the CR activities can be scheduled in such a
+  way as to minimize interference. Authors compare and contrast their
+  scheme using four different scheduling schemes: Oblivious, Ordered,
+  Ordered-NB and Least-Waste.
+
+  Positive points:
+
+  * Well-explained (for most parts)
+  * Important problem (interference is certainly a big issue)
+  * The area to which this is applied i.e., CR, is appealing and is a
+  practical problem.
+  * simulation results using application classes taken from APEX
+  report.
+
+
+  Questions/concerns:
+
+  * It is important to discuss what "space-shared" means. I am
+  thinking it is very similar (or probably the same) as what cloud
+  multi-tenancy is which is achieved via virtualization.
+
+  * Although the authors have provided sufficient decription of the
+  system model, there still are a few missing things that need
+  clarifications.  For instance, are all resources (i.e., processors)
+  in the cluster homogeneous? Only then can one assume the Young-Daly
+  MTBF value to be same across the board.
+
+  * Secondly, is the I/O interference an issue on a single machine or
+  not just a single machine for collocated applications but also the
+  I/O bandwidth to some central storage where checkpoints are sent? Is
+  there such a central storage or else how is it?
+
+  * What about application arrival model in the HPC cluster and their
+  workloads? Or is this all known ahead of time. In that case, is your
+  system almost a "closed system" because in that case the analysis is
+  easier and can be performed offline. Dynamic changes will actually
+  make the problem harder and interesting. However, this is where I am
+  finding the system model a bit incomplete, where distinction between
+  a HPC cluster and cloud environment should be made more explicit
+  given the space-sharing model.
+
+  * The paragraph on Job Scheduling Model in section II is not
+  entirely clear to me.
+
+  * It is also not clear to me if the Ordered and Ordered-NB were
+  developed by you or someone else because only for Least-Waste you
+  refer it to as yours. But then I did not see any citation to works
+  that defined these other algorithms.
+
+  * Define system waste; in other words what is that you are trying to
+  minimize? There is some explanation of this deep down in the the
+  results section. But what is the relation of system waste to
+  interference? This is important because you are trying to minimize
+  interference.
+
+  * I think a bit more explanation about Least-Waste would be needed.
+
+  * In the cloud realm, there is quite a bit of work happening on
+  performance interference/noisy neighbors. How is this work and the
+  focus different particularly when the distinction between a HPC
+  cluster and cloud is rapidly disappearing.
+
+  * I was not completely clear as to what you meant by simulation and
+  its relation to the Cielo platform. Did you run experiments in Cielo
+  or did you create a simulation of the Cielo platform?
+
+  * Some difficulty interpreting the plots. In fig 3, is the mean time
+  between nodes in the order of 20 or 25 years? Is that realistic? But
+  no application is going to run that long. So it is unclear what this
+  is actually plotting.
+
+  Typos:
+
+  * In the abstract, "scarce" is misspelled as "scare"
+
+
+----------------------- REVIEW 5 ---------------------
+PAPER: 311
+TITLE: Optimal Cooperative Checkpointing for Shared High-Performance Computing Platforms
+AUTHORS: Thomas Herault, Yves Robert, Aurelien Bouteiller, Dorian Arnold, Kurt Ferreira, George Bosilca and Jack Dongarra
+
+Overall first-round evaluation: -2 (reject)
+
+----------- Overall first-round evaluation -----------
+The authors develop "a model allowing for the quantification
+of the I/O interference of checkpointing applications sharing
+a common underlying I/O substrate."  They then perform a simulation
+using their own discrete event simulator (as opposed to an off-the-shelf one).
+Their footnote number 5 points to their simulator software, written
+in the Maple language.
+
+The authors describe six models of I/O interference for jobs of different
+classes.  Five are based on five heuristic models for I/O schduling
+(Section III), and the sixth (Section IV) is intended to find a lower
+bound to the optimal time.
+
+My largest issue with the authors' work is that they seem to make two
+contradictory assumption in developing most of their models.  They assume a
+"large-scale workload" in which simultaneous parallel jobs would normally
+write to the back-end storage in parallel.  And they assume in most of their
+models that there is an "I/O token", and that only one of the simultaneous
+jobs (the one holding the I/O token) is allowed to perform I/O at any given
+time.
+
+(Two of the authors' less important scheduling algorithms do not assume an
+"I/O token".  The scheduling algorithm in III.A. represents the current
+practice of simultaneous I/O, and does not reflect this concept of an
+"I/O token".  Similarly, their lower bound in Section IV does not use
+an "I/O token".)
+
+To point to a source in the paper for the contradictory assumptions, I quote
+from the authors.  In the abstract, the authors say that they are motivated by
+"large-scale workloads".  This would normally assume simultaneous parallel
+jobs capable of sharing a large back-end I/O storage.
+  However, their models in sections III and IV seem to mostly assume that if a
+single job uses the I/O resources, then all other jobs cannot use any part of
+the I/O resources during that time.  They refer to an "I/O token" that can be
+assed to a job, which implicitly makes this assumption.
+  To quote as an example from their algorithm E, the authors state:
+   Section III.E., top of second column:
+     "Then J_i will use the I/O resources for v_i seconds."
+and they continue, one line lower:
+     "Every other job J_i =in C_{IO} will stay idle for v_i
+      additional seconds"
+Does this mean that if one of the jobs, occupying only 10 nodes (q_i = 10)
+decides to do I/O, then all other jobs must wait before doing their own I/O?
+
+The second criticism is that the six scheduling heuristics are fairly
+simple and lack novelty.  Hence, the use of a discrete event simulator
+becomes a simple exercise.  In particular, III.B is FCFS/blocking (with
+an I/O token); III.C is FCFS/non-blocking, which means that jobs execute
+useful work while they are waiting to gain the I/O token; III.D uses the
+"Daly period" for each jobs (but actually, the authors mean the "Young
+period"); and only in III.E (again with an I/O token), do the authors
+propose some limited novelty.  Finally, in IV (with no I/O token),
+the authors provide an obvious derivation based on the use of Lagrange
+multipliers, or kuhn-Tucker to handle a side constraint that the total
+I/O is less than 100%.
+
+====
+Next, the details follow.
+
+I first discuss the "theoretical" method, i.e., the sixth method,
+found in Section V.  This assumes no I/O token, and produces a slight
+generalization of Young's formula.  This section essentially re-derives
+Young's formula, and then uses Lagrange multipliers to add a constraint
+that the total time that all jobs are using the "I/O token" should be
+less than or equal to 100% of the time.
+
+The Lagrange multiplier constraint implies the use of them the parameter
+lambda, and they refer to this as the Karush-Kuhn-Tucker condition
+(citing the book "Convex Optimization" by Boyd and Vandenberghe).
+The (more often called) Kuhn-Tucker condition is indeed a slight generalization
+of Lagrange multipliers that uses an inequality for the constraint, but the
+authors solve the equation under the more specialized case of equality (Lagrange
+multipliers).
+
+Citing the more general Kuhn-Tucker condition instead
+of the Lagrange multipliers
+  (see: https://en.wikipedia.org/wiki/Lagrange_multiplier )
+from first-year calculus seems to overly obscure their mathematics.
+
+Thus, the authors essentially use Young's formula, modified by a
+parameter lambda found from a constraint that says that the total
+I/O due to simultaneous checkpointing by all jobs must consume
+at most 100% of the I/O resources.  After that, there would be
+a discontinuity, or modification, in Young's formula.  Yet their
+solution number 8 does not make explicit this discontinuity in
+which either of two solutions should appear depending on whether
+some inequality is true or false.
+
+Finally, since the authors need to take partial derivatives in Section V,
+I wish to point out that the correct Latex symbol for a partial derivative
+is "$\partial$", and not "$\delta$", as used by the authors.
+
+My other issue with Section IV is that the first half of Section IV
+is essentially a re-derivation of the original Young's formula.
+They should say this at the beginning.  Instead, our only clue seems to
+be their statement after equation 5 that they "retrieve the Daly period
+P_ = P_{Daly}(J_i)".  Here and elsewhere, the authors also appear to
+be confusing Young's formula with Daly's result.  Their "Daly period"
+is in fact the "Young period".  (Daly wrote a paper, "A higher order
+estimate of optimum checkpoint time ...", which is more accurate because
+it takes into account the time for restart, but the Daly paper is
+more complicated than Young's original formula.)  In a similar confusion,
+the authors refer to the Young/Daly formula (while citing only Young's
+original paper) in their introduction.
+
+Finally, in returning to Section III, I simply note, as above, that the
+various scheduling algorithms are quite obvious, and the use of a discrete
+event simulator to numerically compare them does not add large novelty.
+
+And last, I note some smaller typographical errors:
+ABSTRACT:
+ scare -> scarce
+INTRODUCTION:
+  prevelance -> prevalence
+  two applications of same size checkpoint simultaneously ->
+     two applications of the same size simultaneously checkpoint
+
+
+----------------------- REVIEW 6 ---------------------
+PAPER: 311
+TITLE: Optimal Cooperative Checkpointing for Shared High-Performance Computing Platforms
+AUTHORS: Thomas Herault, Yves Robert, Aurelien Bouteiller, Dorian Arnold, Kurt Ferreira, George Bosilca and Jack Dongarra
+
+Overall first-round evaluation: -1 (weak reject)
+
+----------- Overall first-round evaluation -----------
+This paper considers multiple jobs that share the same system and develops checkpointing solutions that consider I/O interference. Given how applications are developed and scheduled, this  does not seem like something that can be used in practice.
+
+----------- Review synthesis -----------
+Considering concerns from the reviewers, the paper not moved to the second round.
+
+
+-------------------------  METAREVIEW  ------------------------
+PAPER: 311
+TITLE: Optimal Cooperative Checkpointing for Shared High-Performance Computing Platforms
+
+The program committee carefully considered the strengths and weaknesses of the paper. Based on the reviews and discussions, the program committee decided not to move this paper to the second round.
