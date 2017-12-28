@@ -1,0 +1,1296 @@
+\documentclass[sigconf]{acmart}
+\usepackage[american]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
+
+%\usepackage[hidelinks]{hyperref}
+%\hypersetup{hypertexnames=false}
+
+\newif\ifTR
+\TRfalse
+
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb,amsfonts,amsthm}
+\DeclareMathOperator{\lcm}{lcm}
+\usepackage{paralist}
+\usepackage{color}
+\usepackage{xspace}
+\usepackage{algorithm}
+\usepackage{algorithmicx}
+\usepackage{todonotes}
+\usepackage{verbatim}
+\usepackage{cleveref}
+
+%\addtolength{\textfloatsep}{-1.5em}
+%\addtolength{\abovecaptionskip}{-1.25em}
+
+\usepackage{array}
+\newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+
+\usepackage{gnuplot-lua-tikz}
+
+%\newtheorem{example}{Example}
+%\newtheorem{theorem}{Theorem}
+
+%\newcommand*{\email}[1]{\href{mailto:#1}{\nolinkurl{#1}} }
+\newcommand{\ie}[0]{\emph{i.e.}\xspace}
+\newcommand{\eg}[0]{\emph{e.g.}\xspace}
+
+\newcommand{\muind}{\mu_{\text{ind}}}
+\newcommand{\bandtotal}{\beta_{\text{tot}}}
+\newcommand{\bandavail}{\beta_{\text{avail}}}
+\newcommand{\appset}{{\mathcal A}}
+\newcommand{\nbnodesplat}{{\mathcal N}}
+\newcommand{\nbapps}{|{\mathcal A}|}
+\newcommand{\app}[1]{A_{#1}}
+\newcommand{\application}[2]{a_{#1}^{#2}}
+\newcommand{\nbapp}[1]{n_{#1}}
+\newcommand{\nbnodes}[1]{q_{#1}}
+\newcommand{\period}[1]{P_{#1}}
+\newcommand{\ckpt}[1]{C_{#1}}
+\newcommand{\reco}[1]{R_{#1}}
+\newcommand{\size}[1]{\mathit{size}_{#1}}
+\newcommand{\wasteapp}[1]{W_{#1}}
+\newcommand{\wap}[1]{W_{#1}}
+\newcommand{\wapp}[2]{W_{#1}(#2)}
+\newcommand{\mtbfplat}{\mu}
+\newcommand{\wasteplat}{W}
+\newcommand{\ioconstraint}{F}
+\newcommand{\lastckpt}[2]{L_{#1}^{#2}}
+\newcommand{\wastefct}[2]{W_{#1}(#2)}
+\newcommand{\pool}{{\mathcal P}}
+\newcommand{\risk}{{\textsc Risk}}
+%\newcommand{\todo}[1]{\textit{TBD: [#1]}}
+\newcommand{\dca}[1]{\todo[inline]{DCA: #1}}
+\newcommand{\kbf}[1]{\todo[inline]{kbf: #1}}
+
+\newcommand{\IOcat}{\textsc{IO-Candidate}\xspace}
+\newcommand{\Ckptcat}{\textsc{Ckpt-Candidate}\xspace}
+\newcommand{\Catiocat}{\mathcal{C}_{IO}\xspace}
+\newcommand{\Catckptcat}{\mathcal{C}_{Ckpt}\xspace}
+
+\newcommand{\nocoop}{\emph{Oblivious}\xspace}
+\newcommand{\fifoblock}{\emph{Ordered}\xspace}
+\newcommand{\fifononblock}{\emph{Ordered-NB}\xspace}
+\newcommand{\leastwaste}{\emph{Least-Waste}\xspace}
+
+\def\propfixed{\nocoop-Fixed\xspace}
+\def\propdaly{\nocoop-Daly\xspace}
+\def\bfifofixed{\fifoblock-Fixed\xspace}
+\def\bfifodaly{\fifoblock-Daly\xspace}
+\def\fifofixed{\fifononblock-Fixed\xspace}
+\def\fifodaly{\fifononblock-Daly\xspace}
+\def\cooperative{\leastwaste}
+
+\setcopyright{acmcopyright}
+\acmConference[HPDC]{HPDC}{2018}{Tempe, AZ, USA}
+\acmYear{2018}
+\copyrightyear{2018}
+
+
+
+\title[Optimal Cooperative Checkpointing]{Optimal Cooperative Checkpointing for Shared High-Performance Computing Platforms}
+
+%\thanks{Based in part upon work supported by the National Science Foundation under Grant Number 1564133, ``Toward Extreme Scale Fault-Tolerance: Exploration Methods, Comparative Studies and Decision Processes''.}
+
+\author[T. Herault, Y. Robert, A. Bouteiller, D. Arnold, K.B. Ferreira, G. Bosilca, J. Dongarra]{Thomas Herault$^{1}$, Yves Robert$^{1,2}$, Aurelien Bouteiller$^{1}$, Dorian Arnold$^{3}$,\\
+Kurt B.~Ferreira$^{4}$, George Bosilca$^{1}$, Jack Dongarra$^{1,5}$}
+\affiliation{
+	\institution{$1.$ LIP, Ecole Nomrale Sup\'erieure de Lyon, France\\
+	$2.$ Innovative Computing Lab, University of Tennessee, Knoxville, TN, USA\\
+	$3.$ Emory University, Atlanta, GA, USA\\
+	$4.$ Center for Computing Research, Sandia National Laboratory, USA\\
+	$5.$ University of Manchester, UK}
+}
+\email{{herault|bouteill|bosilca|dongarra}@icl.utk;edu, yves.robert@ens-lyon.fr, darnold@cs.unm.edu, kbferre@sandia.gov}
+
+
+
+
+
+\begin{abstract}
+In high-performance computing environments, input/output (I/O) from various
+sources often contend for scarce available bandwidth. Adding to the I/O
+operations inherent to the failure-free execution of an application, I/O
+from checkpoint/restart (CR) operations (used to ensure progress in the presence
+of failures) places an additional burden as it increases I/O contention,
+leading to degraded performance.  In this work, we consider a cooperative scheduling policy that optimizes the
+overall performance of concurrently executing CR-based applications which share
+valuable I/O resources.  First, we provide a theoretical model and then derive a set
+of necessary constraints needed to minimize the global \emph{waste} on the
+platform.
+  Our results demonstrate that the optimal checkpoint interval as defined by
+Young/Daly, while providing a sensible metric for a single application, is not
+sufficient to optimally address resource contention at the platform scale.  We
+therefore show that combining optimal checkpointing periods with I/O scheduling
+strategies can provide a significant improvement on the overall application
+performance, thereby maximizing platform throughput.
+Overall, these results provide critical analysis and direct guidance on checkpointing
+large-scale workloads in the presence of competing I/O while minimizing the impact
+on application performance.
+\end{abstract}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+\label{sec:intro}
+% Primary: George & Dorian
+
+%space sharing but not quite
+\emph{Space-sharing} high-performance computing (HPC) platforms for the
+concurrent execution of multiple parallel applications is the prevalent usage
+pattern in today's HPC centers.  In fact, space-sharing in this fashion is more
+common than \emph{capability} workloads that span the entire
+platform~\cite{Weidner2016}. Furthermore, while computational nodes are
+dedicated to a particular application instance, the interconnect links and
+storage partition are typically shared amongst application instances.
+Therefore, without careful consideration, network and storage contention can
+reduce individual application and overall system
+performance~\cite{Bhatele:2013:Neighborhood}.
+
+On these platforms, checkpoint/restart (CR) is the most common strategy
+employed to protect applications from underlying faults and failures.
+Generally, CR periodically outputs snapshots (\ie checkpoints) of its global,
+distributed state to some stable storage device. When an application failure
+occurs, the last stored checkpoint is retrieved and used to restart the
+application.  Typically, concurrently executing applications independently
+decide when to take their own checkpoints.
+
+There are two widely-used approaches to determine when an application should
+\emph{commit} a checkpoint: (i)~using a fixed checkpoint period (typically one
+or a few hours) for each application; and (ii)~using platform and
+application-specific metrics to determine its optimal checkpoint period. In the
+second approach, the well-known Young/Daly formula~\cite{young74,daly04} yields
+an application optimal checkpoint period, $\sqrt{2 \mu C}$ seconds, where $C$
+is the time to commit a checkpoint and $\mu$ the application Mean Time Between
+Failures (MTBF) of the platform.  In most cases, $\mu = \frac{\muind}{q}$,
+where $q$ is the number of processors enrolled by the application and $\muind$
+is the MTBF of an individual processor~\cite{springer-monograph}. Therefore,
+both $\mu$ and $C$ in the Young/Daly formula are application-dependent, and
+optimal periods can be quite different over the application spectrum.
+
+Independent CR of concurrent application instances can incur significant
+resource wastage, because they lead to an inefficient usage of an already
+scarce resource, namely available I/O bandwidth~\cite{Luu:2015:Multiplatform}.
+There are two major reasons for this:
+
+\begin{compactitem}
+        
+\item \emph{Application-CR I/O contention}: On many systems, the I/O subsystem
+does not have enough available usable bandwidth to meet the requirements of the
+concurrent application workloads~\cite{Luu:2015:Multiplatform}. This congestion
+is expected to worsen going forward with the increased prevelance of data
+intensive workflows in HPC.  Let $\bandtotal$ be the total filesystem I/O
+bandwidth.  Concurrently executing applications typically perform regular
+(non-CR) I/O operations throughout their execution, so that only a fraction
+$\bandavail$ of the total bandwidth remains available for checkpoints.  This
+fraction may be insufficient, particularly when some applications perform
+intensive non-checkpoint I/O and others may write very large checkpoints.
+  % $\bandtotal$ of a well-provisioned platform should allow for efficient CR
+  % I/O activities.
+
+\item \emph{CR-CR I/O contention}: Most importantly, there is a high
+probability of overlapping CR activity amongst concurrent application
+instances.  Consider the simple case where two applications of same size
+checkpoint simultaneously a file of the same size. Each will be assigned half
+the fraction $\bandavail$ to checkpoint, therefore the commits will take twice
+as long. Such interferences can severely decrease application efficiency and
+overall platform throughput\footnote{When the expected checkpoint commit time
+used to compute the optimal checkpoint interval differs from the actual
+checkpoint commit time, effciency will decrease.}.
+
+\end{compactitem}
+
+In this work, we develop and investigate a cooperative CR scheduling strategy
+for concurrently executing HPC applications.  Our objective is to assess the
+impact of such interferences, and to design scheduling algorithms that optimize
+I/O bandwidth availability for CR activity.  Using these cooperative
+algorithms, applications checkpoint sequentially, with a dynamic,
+priority-dependent frequency dictated by a cooperative scheduler.  When enough
+I/O bandwidth is available, each application checkpoints with its optimal,
+Young/Daly, period.  However, when I/O bandwidth is scarce, our scheduling
+algorithm provides an optimal checkpoint period that maximizes overall platform
+throughput. This cooperative checkpoint process is calculated such that there
+is no I/O interference and minimal re-work to be done when failures occur.
+
+Therefore, the main contributions of this paper are the following:
+
+\begin{itemize}
+
+\item Development of a model allowing for the quantification of
+the I/O interference of checkpointing applications sharing a common underlying I/O
+substrate.
+
+\item Investigation of the costs of various I/O-aware scheduling
+strategies through both steady-state analysis as well as detailed simulations.
+
+\item A detailed survey of a number scheduling strategies: from oblivious
+algorithms similar to  those currently deployed on many large-scale platforms,
+to ones which exploit application knowledge in an effort to  minimize the total
+system waste by scheduling the application with the most critical I/O needs.
+
+\end{itemize}
+
+% - a model to predict the shared I/O impact on multiple applications scenarios
+% - I/O scheduling algorithms for non-cooperative application scheduling
+%   - non-cooperative I/O scheduling: apps are selected to fill the gaps based on processor count (traditional approach)
+%   - blocking FIFO I/O scheduling: favor one of the I/O application
+%   - non-blocking FIFO I/O scheduling: same as above but the cost of the queueing the app is now independent of the interference pattern
+%   - least-waste algorithm: select the app that will minimize the system waste (I/O or C/R candidate)
+% - steady state analysis
+% - simulation
+% - results
+
+The rest of the paper is organized as follows. Our model is described in
+\Cref{sec:model}, followed by a description of the various scheduling
+strategies in \Cref{sec:algorithms}. \Cref{sec:lowerbound} presents a
+theoretical analysis of the model under a steady-state scenario, and provides a
+lower bound of the optimal platform waste. \Cref{sec:simulator} describes the
+discrete event simulator used to quantitatively compare the different
+scheduling strategies.  \Cref{sec:results} presents the results of the
+simulation, providing guidance on the necessary I/O bandwidth for  current and
+future systems. This work concludes with related works described in \Cref{sec:related},
+followed by a summary and future directions outlined in \Cref{sec:conclusion}.
+
+% - Section~\ref{sec:model} describe the scenario under investigation
+% - Section~\ref{sec:algorithms} describe the different I/O scheduling
+%   algorithms that we plan to analyze, including one that is highly related to
+%   the default scheduling on most HPC platforms
+% - Section~\ref{sec:lowerbound} describe a theoretical scenario that allow us
+%   to derive the lower-bound
+% - Section~\ref{sec:simulator} describe the simulator used to validate the
+%   results
+% - Section~\ref{sec:results} present the results
+% - Section~\ref{sec:related} depicts the related work field
+% - Section~\ref{sec:conclusion} conclude
+
+
+%\input{model.tex}
+% !TEX root =  ipdps18.tex
+
+\section{Model}
+\label{sec:model}
+% Primary: Yves
+
+\paragraph*{Computational Platform Model}
+
+In this work, we consider a shared platform comprised of computational
+nodes, storage resources in the form of a parallel file system (PFS), and a network
+that interconnects the nodes and storage resources. Applications are
+scheduled on the platform by a job scheduler such that computational nodes are
+space-shared (dedicated) amongst concurrent application instances. However, the I/O
+subsystem is time-shared (contended) amongst application instances  (\ie multiple
+applications performing I/O simultaneously result in a per-application reduction
+in commit speed). Without loss of generality, we consider a straightforward linear
+interference model in which the global throughput remains constant and is evenly
+shared among contending applications, proportional to their size\footnote{A more
+adversarial interference model can be substituted, if needed.}.
+
+\paragraph*{Application Workload Model}
+
+Applications can vary in size (computational node count), duration, memory
+footprint and I/O requirements.  \emph{Application I/O} entails loading an input file
+at startup, performing regular I/O operations during their main execution phase and
+storing an output file at completion. Because applications are long-running,
+(typically, several hours or days) and the platform is failure-prone, applications
+are protected using coordinated CR that incurs periodic \emph{CR I/O}.
+
+To model these behavioral variations with minimal parameters, we make the following
+simplifying assumptions:
+\begin{compactitem}
+\item There is a large number of applications, but only a small number of application
+  classes, \ie, sets of applications with similar sizes, durations, footprints and
+  I/O needs;
+\item Excluding initialization and finalization I/O, an application's regular
+  (non-CR) I/O operations are evenly distributed over its makespan;
+\item Job makespans are known a priori. This allows us to ignore all other
+  sources of job disturbance except C/R overheads.
+\end{compactitem}
+
+We use specific numbers and characteristics of application classes based on
+documented production workloads, such as those provided in the APEX workflows report
+on the Cielo platform~\cite{apex2016}.  To avoid the side effects induced by
+hundreds of completely identical jobs, we use a normal distributions for job
+durations with a mean equal to original APEX value and small (20\%) standard
+deviation.  In the rest of the paper, we use the term \emph{job} to denote
+a specific application instance, and \emph{application class} to denote a set
+of applications with similar characteristics.
+
+\paragraph*{Checkpoint Period and I/O Interference}
+
+Both application computation and CR generate I/O requests.  In both cases, activity
+is scheduled using an I/O scheduling algorithm (see \Cref{sec:algorithms}). As
+described above, steady-state application I/O is regular. However, CR I/O
+periodicity, $P$, depends upon the CR policy being used.  In our model, applications
+either checkpoint using an application-defined periodicity or using Young and
+Daly's~\cite{young74,daly04} optimal checkpoint period detailed in
+\Cref{sec:intro}. As stated previously, the parameters in this formula are dependent
+upon application features (checkpoint dataset size) and platform features (system
+reliability and I/O bandwidth).  For fixed, application-defined periods, a common
+heuristic is to take a checkpoint every hour -- capping the worst case amount of lost
+work at one hour.  In the reminder of this paper we will refer to the two variants as
+\emph{Fixed} (with a 1 hour period unless otherwise specified) and \emph{Daly}.
+
+
+
+
+Traditionally, when a job $J_{i}$ of class $\app{i}$ completes a checkpoint, its next
+checkpoint is scheduled to happen $\period{i}-\ckpt{i}$ instants later (and the first
+checkpoint is set at date $\period{i}$). With potential CR I/O interference,
+the checkpoint commit may last longer than $\ckpt{i}$, and setting
+the appropriate checkpointing period can be challenging.
+Additionally, I/O scheduling algorithms that try to mitigate I/O interference can
+impose further CR I/O delays.  In other words, the traditional strategy of scheduling
+subsequent checkpoints at $\period{i}-\ckpt{i}$ yields the desired checkpointing
+period $\period{i}$ only in interference-free scenarios. CR I/O delays (induced by
+interferences or scheduling delays) dilate the checkpoint duration to $C_{dilated}$,
+and the effective period differs from the desired period by the difference
+$C_{dilated}-\ckpt{i}$.  \Cref{sec:algorithms} discusses how each I/O
+scheduling algorithm handles this discrepancy.
+
+\paragraph*{Job Scheduling Model}
+
+To evaluate the scheduling policies, we consider a finite segment, typically
+lasting a few days, of a representative schedule where the computing resource
+usage by each application instance (job) in each class remains nearly constant.
+Of course, with varying job execution times, we cannot enforce a fixed
+proportion of each application class at every instant. However, we ensure the
+proper proportion is enforced on average throughout the schedule execution.
+Similarly, we enforce that at every instant during the finite segment, at least
+98\% of the nodes are enrolled for the execution. This allows us to compare
+actual (simulated) performance with the theoretical performance of a
+co-scheduling policy that optimizes the steady-state I/O behavior of the job
+portfolio, assuming that all processors are used. We shuffle and simultaneously
+present all jobs to the scheduler, which uses a simple, greedy first-fit
+algorithm.  We resubmit failed jobs with a new wall-time equal to the fraction
+that remained when the last checkpoint commit started.  In this case, input I/O
+becomes recovery I/O; output I/O is unmodified.
+
+\paragraph*{The Formal Model}
+
+We consider a set $\appset$ of $\nbapps$ applications classes
+$\app{1}, \ldots \app{\nbapps}$ that execute concurrently on a platform with
+$\nbnodesplat$ nodes. Application class $\app{i}$ specifies:
+\begin{compactitem}
+\item $\nbapp{i}$: the number of jobs in $\app{i}$,
+\item $\nbnodes{i}$: the number of nodes used by each job in $\app{i}$,
+\item $\period{i}$: the checkpoint period of each job in $\app{i}$, and
+\item $\ckpt{i}$ and $\reco{i}$: the checkpoint and recovery durations for each job in $\app{i}$ when there is no interference with other I/O operations.
+\end{compactitem}
+
+Jobs inherit their characteristics from their classes. To simplify notations, 
+for a job $J_j$, we use $\nbnodes{j}, \period{j}, \ckpt{j}$ and
+$\reco{j}$ to denote respectfully the number of nodes, checkpoint
+period, and checkpoint and recovery durations of the application class
+to which $J_j$ belongs.  We let
+$\period{Daly}(J_{j}) = \sqrt{2 \ckpt{j} \mu_{j}}$ be the \emph{Daly
+  period}~\cite{young74,daly04} of a job $J_j$, where
+$\mu_{j} = \frac{\muind}{\nbnodes{j}}$ and $\muind$ is the MTBF of an
+individual processor~\cite{springer-monograph}.  At each instance, we
+schedule as many jobs as possible.  Jobs that are subject to failures
+are restarted at the head of the scheduling queue, as to restart
+immediately on the same compute nodes previously used (in most cases,
+only one node has failed and is replaced by a hot spare).
+
+
+
+%\input{algorithms.tex}
+% !TEX root =  ipdps18.tex
+
+\section{I/O Scheduling Algorithms}
+\label{sec:algorithms}
+% Aurelien & George
+
+In this section, we present the application I/O scheduling algorithms used in
+this study.  The first algorithm, \nocoop, represents the status-quo in which
+I/O activities are scheduled independently and may incur slowdowns due to I/O
+contention. The second algorithm, \fifoblock, coordinates I/O activity to
+eliminate interference: I/O operations are scheduled in a
+First-Come-First-Serve (FCFS) fashion and only one I/O operation executes at
+any given time, while other I/O requests are blocked until their turn comes.
+The third algorithm, \fifononblock, is similar except that jobs that are
+waiting for the I/O token to checkpoint continue working until their turn
+comes.  Lastly, we propose our heuristic, \leastwaste,  which improves on
+\fifononblock by giving the I/O token to the I/O operation that will minimize
+system waste. Note that unlike the blocking approaches (\nocoop and
+\fifoblock), non-blocking optimizations (\fifononblock and \cooperative) may
+require application code refactoring.
+
+ % \dca{what about the
+ %  case when an application must communicate before its computation can proceed?
+ %  E.g. it continued execution but then arrived at a point at which it needs external
+ %  input or coordination? Which brings up another question: does our model implicitly
+ %  (or explicitly) handle synchronization/barrier type communication
+ %  with no data?}
+ % TH -> DCA: We consider a workflow batch scheduling typical of HPC
+ % platforms. Applications do not communicate or synchronize with each
+ % other, except through the filesystem, through their initial input
+ % and final ouput. Initial input and final output are always blocking.
+
+%Instead of following a FCFS order to select the next I/O application,
+%for each requesting job, the heuristic computes the prospective
+%waste incurred by delaying its I/O (considering checkpoint and
+%probabilistic recovery costs, idle time, etc.) when selecting another
+%job, and selects the one that minimizes the waste increase
+%at the current instant.
+
+\subsection{\nocoop I/O Scheduling}
+
+In \nocoop I/O scheduling, jobs are executed to fill-up the system based on
+processor availability, and their I/O workload (including CR activities) are
+not coordinated by the system.  Instead, jobs use the parallel file system
+assuming they are the sole user -- with no modifications made to their access
+patterns to accommodate for possible interference. Researchers have observed
+that concurrent I/O resource access can decrease the I/O bandwidth
+observed~\cite{Dorier2015}.  Under the conditions of an under-provisioned I/O
+substrate, our model gives each I/O stream a decrease in bandwidth linearly
+proportional to the number of competing operations.  We account for the
+additional delays imposed by this decreased available bandwidth as
+\emph{waste}.  Since subsequent checkpoints are scheduled to start after
+$\period{i}-\ckpt{i}$, and delays may result in checkpoint commit times longer
+than $\ckpt{i}$, the resultant checkpoint period may be longer than
+$\period{i}$. This is consistent with a trivial I/O policy that does not
+consider potential contention.
+
+% GB: The variants are described in the Simulation
+% In the \nocoop algorithm, we consider two variants where checkpoints are
+% tentatively taken at 1) fixed frequency (\propfixed), or 2) at the Daly frequency
+% (\propdaly).
+
+\subsection{Blocking \fifoblock FCFS I/O Scheduling}
+\label{sec:fcfsblock}
+
+A simple optimization to the \nocoop scheme is to favor one jobs' I/O over all
+others. While the overall throughput may remain unchanged (given an efficient
+filesystem implementation), the favored job completes its I/O workload faster
+(\ie, in time $\ckpt{i}$ for a job of class $\app{i}$).  In the \fifoblock
+scheme, I/O requests are performed sequentially, in request arrival order. Jobs
+with outstanding I/O requests are blocked until their requests are completed.
+
+Assuming a favorable linear interference model, a simple workload with two jobs
+can show the potential advantage of the \fifoblock over \nocoop strategy.  If
+the two jobs simultaneously request I/O transfers of similar data volume, $V$,
+in the \nocoop strategy, both jobs take $\frac{V}{\frac{\bandavail}{2}}$ time
+to complete their I/O.  In the \fifoblock strategy, the first scheduled job
+takes only $\frac{V}{\bandavail}$, while the second job waits
+$\frac{V}{\bandavail}$ before its own I/O starts, but then executes at full
+available bandwidth completing in $\frac{2V}{\bandavail}$.  Reducing I/O
+interference reduces the average I/O completion time (although fairness may be
+decreased).  Once again, however, observed checkpoint durations may increase
+past $\ckpt{i}$, due to I/O scheduling wait time, and the checkpointing period
+may be, on average, larger than the desired $\period{i}$.
+
+% GB: The variants are described in the Simulation
+% In the \fifoblock algorithm, we again consider two variants, where checkpoints are
+% tentatively taken at 1) fixed frequency (\bfifofixed), or 2) at the Daly frequency
+% (\bfifodaly).
+
+\subsection{Non-Blocking \fifononblock FCFS I/O Scheduling}
+\label{sec:fcfsnonblock}
+
+The previous strategy trades the cost of I/O interferences for idle time, as
+jobs perform a blocking (idle) wait for the I/O token.  If the application
+developer can refactor the program code to continue computing while awaiting
+I/O request completions, it becomes possible to replace otherwise idle wait
+time with useful computation. In the \fifononblock algorithm, when the previous
+checkpoint ends at time $t_{now}$, a tentative time for the next checkpoint is
+set at $t_{req}=t_{now}+\period{i}-\ckpt{i}$.  At time $t_{req}$, a
+non-blocking I/O request is made to request the I/O token -- the I/O token is
+still scheduled FCFS according to request arrival time.  The job continues its
+computation until the scheduler informs it that the I/O token is available. At
+this point, the job must generate its checkpoint data as soon as possible (or
+after a short synchronization\footnote{In user-level checkpointing, the job
+typically finishes its current computing block before generating its checkpoint
+data.}).  In most applications, the granularity of the work is small enough for
+a simple approach to be efficient: applications can use existing APIs in
+SCR~\cite{Moody10SCR} or FTI~\cite{Bautista-Gomez11_FTI} to regularly poll if a
+checkpoint should be taken at this time. In this work, we assume that this
+re-synchronization cost is negligible relative to the checkpoint commit
+duration.
+%
+%\dca{I commented out the example libraries because the described app-to-library
+%  probes are different from the necessary library-to-app``callbacks'' or ``upcalls''
+% needed in this case}
+% See how the text was modified above.
+%
+Postponing checkpoint I/O increases a job's exposure to failures.  However,
+if the job successfully commits the postponed checkpoint, upon a subsequent failure,
+the job would restart from the time at which the postponed checkpoint was taken, not
+at $t_{req}$ -- a fact that may mitigate the increased risk exposure when
+compared to \fifoblock and \nocoop algorithms.
+
+% Then, the job initiates its I/O (checkpointing, initial input, final
+% output or recovery). When the active job completes its I/O, the next
+% requesting job (in FCFS order) become the active I/O job.
+
+%Aurelien: talked with Thomas and this is not what we want to study here.
+% However, that
+% state can be initially captured by copy-on-write mechanisms, or stored
+% in local memory or in compute node-local burst buffers (\eg local SSD
+% drives). Although node-local burst buffers do not offer protection
+% against faults, they permit offsetting the transfer of the checkpoint
+% data to a later date when the I/O token is available to the job.
+% When the job finaly gets the token, the previously scratch-space
+% stored checkpoint is transfered to the PFS without interference.
+%NOTTODO: something about replacing with last ckpt if token doesn't come in fast enough;
+% there's something that doesn't work with the T-C after C depiction: we would rollback unbounded amounts now.
+% that's because we do not consider whats commented down here with local scratchpads
+% the checkpoint is taken at a date t_c posterior to t_req, and we will restart at t_c, not t_req.
+
+\subsection{Variants}
+\label{sec:variants}
+
+The periods $\period{i}$ of the checkpointing requests are input parameters to
+the three strategies \nocoop, \fifoblock and \fifononblock. In
+\Cref{sec:simulator}, we instantiate each strategy with two variants. The first
+variant uses a fixed checkpointing period for each job, while the second
+variant uses the Daly period of each job.
+ 
+\subsection{\leastwaste Algorithm}
+\label{sec:least-waste}
+
+Finally, our \leastwaste algorithm further refines the \fifononblock algorithm
+by issuing the I/O token to the job whose I/O request minimizes the total
+expected waste (explained hereafter), rather than simply based on request
+arrival order.  Given the time-dependent nature of this decision, the selection
+may not be a global optimum, but only an approximation given currently
+available information about the system status. The \leastwaste algorithm
+assumes that jobs issue checkpointing requests according to their Daly
+period\footnote{Fixed checkpointing makes little sense in the \leastwaste strategy,
+it is designed to optimize checkpoint frequencies across all jobs.}.  For each
+I/O scheduling decision, at time $t$ (when a previous I/O operation completes),
+we consider a pool of $r+s$ candidates from two different categories:
+
+\begin{compactitem}
+\item Category \IOcat $\Catiocat$: Jobs $J_{i}$, $1\leq i \leq r$ with an
+  (input, output or recovery) I/O request of length $v_{i}$ seconds and enrolls $q_{i}$
+  processors. $J_{i}$ initiated its I/O request $d_{i}$ seconds ago and has been idle
+  for $d_{i}$ seconds.
+
+\item Category \Ckptcat $\Catckptcat$: Jobs $J_{i}$, $r+1\leq i \leq r+s$,
+  with a checkpoint duration of $C_{i}$ seconds and enrolls $q_{i}$ processors.
+  $J_{i}$ took its last checkpoint $d_{i}$ seconds ago and keeps executing until the
+  I/O token is available for a new checkpoint. Since $J_{i}$ is a candidate,
+  $d_{i} \geq \period{Daly}(J_{i})$
+\end{compactitem}
+
+If we select job $J_{i}$ to perform I/O, the expected waste $\wap{i}$
+incurred to the other $r+s-1$ candidate jobs in  $\Catiocat \cup
+\Catckptcat$ is computed as follows. Assume first that $J_{i} \in \Catiocat$.
+Then  $J_{i}$ will use the I/O resource for $v_{i}$ seconds.
+\begin{compactitem}
+%
+  \item Every other job $J_{j} \in \Catiocat$ will stay idle for $v_{i}$
+  additional seconds, hence its waste $\wapp{i}{j}$ is $$\wapp{i}{j} = q_{j}
+  (d_{j} + v_{i})$$ since there are $q_{j}$ processors enrolled in $J_{j}$ that
+  remain idle for $d_{j} + v_{i}$ seconds. Note that for $J_{j} \in \Catiocat$, the
+  waste $\wapp{i}{j}$ is deterministic.
+%
+  \item Every job $J_{j} \in \Catckptcat$ will continue executing for
+  $v_{i}$ additional seconds, hence will be exposed to the risk of a failure
+  that will strike within $v_{i}/2$ seconds on average. The probability of such
+  a failure is $v_{i}/\mu_{j}$, where $\mu_{j} =
+  \muind/q_{j}$. With this
+  probability, the $q_{j}$ processors will have to recover and re-execute $d_{j} +
+  v_{i}/2$ seconds of work, hence the waste $\wapp{i}{j}$ is $$\wapp{i}{j} =
+  \frac{v_{i}}{\mu_{j} } q_{j} (\reco{j} + d_{j} + \frac{v_{i}}{2}) =
+  \frac{v_{i}}{\muind} q^{2}_{j} (\reco{j} + d_{j} + \frac{v_{i}}{2})$$ where
+  $\reco{j}$ is the recovery time for $J_{j}$. Note that for $J_{j} \in
+  \Catckptcat$, the waste $\wapp{i}{j}$ is probabilistic.
+%
+ \end{compactitem}
+ Altogether, the expected waste $\wap{i}$ incurred
+to the other $r+s-1$ candidate jobs is
+$$\wap{i} = \sum_{J_{j} \in \Catiocat, j\neq i} \wapp{i}{j} + \sum_{J_{j} \in \Catckptcat} \wapp{i}{j}$$
+We obtain
+\begin{equation}
+\label{eq.selection}
+\begin{array}{ll}
+ \wap{i} = & v_{i} \times \left( \sum_{1 \leq j \leq r, j\neq i} q_{j} (d_{j} + v_{i}) \right.\\
+& + \left. \sum_{r+1 \leq j \leq r+s}   \frac{q^{2}_{j}}{\muind} (\reco{j} + d_{j} + \frac{v_{i}}{2}) \right)
+ \end{array}
+\end{equation}
+
+Assume now that the selected job $J_{i} \in \Catckptcat$. Then $J_{i}$
+will use the I/O resource for $\ckpt{i}$ seconds instead of $v_{i}$
+seconds for $J_{i} \in \Catiocat$. We directly obtain the counterpart
+of Equation~\eqref{eq.selection} for its waste $\wap{i}$:
+ \begin{equation}
+\label{eq.selection2}
+ \begin{array}{ll}
+ \wap{i} = & \ckpt{i} \times \left( \sum_{1 \leq j \leq r} q_{j} (d_{j} + \ckpt{i}) \right.\\
+& + \left. \sum_{r+1 \leq j \leq r+s, j\neq i}   \frac{q^{2}_{j}}{\muind} (\reco{j} + d_{j} + \frac{C_{i}}{2}) \right)
+ \end{array}
+\end{equation}
+
+Finally, we select the job $J_{i} \in \Catiocat \cup \Catckptcat$
+whose waste $\wap{i}$ is minimal. 
+
+
+
+%\input{steady-state.tex}
+% !TEX root =  ipdps18.tex
+
+\section{Lower Bound}
+\label{sec:lowerbound}
+% Primary: Yves (does that go into a subsec of the algorithms or models?)
+
+We now derive a lower bound for optimal platform waste.  When we assess the
+performance of the scheduling algorithms presented in \Cref{sec:algorithms}, we
+also compare their relative performance to this lower bound (in
+\Cref{sec:results}).
+
+We envision a (theoretical) scenario in which the platform operates in
+steady-state, a constant number of jobs per application class spanning the
+entire platform.  We also assume that the I/O bandwidth $\bandavail$ available
+for CR operations remains constant throughout execution. This amounts to
+ignoring initial input and final output I/O operations, or more precisely, to
+assuming these operations span the entire execution of the jobs.  Without this
+assumption, we would need to account for job durations; this renders the
+steady-state analysis intractable.  Given above, we determine the optimal
+checkpointing period for each application class with the objective to minimize
+the total waste of the platform; or equivalently, to maximize the total
+throughput of the platform. To complicate this analysis, these optimal periods
+may not be achievable, hence we derive a lower bound of the optimal waste.
+
+In steady-state operation, there are $\nbapp{i}$ jobs of class $\app{i}$, each
+using $\nbnodes{i}$ nodes, and with checkpoint time $\ckpt{i}$. Because we
+orchestrate checkpoints to avoid CR-CR interferences, we have $\ckpt{i} =
+\frac{\size{i}}{\bandavail}$, where $\size{i}$ denote the size of the
+checkpoint file of all jobs of class $\app{i}$.  The waste of a job is the
+ratio of time the job spends doing resilience operations by the time it does
+useful work. The time spent performing resilience operations include the time spent
+during each period to checkpoint; and in case of failure, the time to rollback
+to the previous checkpoint and the time to recompute lost work.
+%We assume that the recovery time $\reco{i}$ is equivalent to the checkpoint
+%time  $\ckpt{i}$.
+We can express the waste $\wasteapp{i}$ of a job $J_{i}$ of class $\app{i}$
+that checkpoints with period $\period{i}$ as follows~\cite{springer-monograph}:
+
+\begin{equation}
+\wasteapp{i} = \wastefct{i}{\ckpt{i}} = \frac{\ckpt{i}}{\period{i}} +
+\frac{\nbnodes{i}}{\mtbfplat}(\frac{\period{i}}{2} + \reco{i})
+\label{eq.wasteAi}
+\end{equation}
+
+Let $\wasteplat$ be the waste of the platform. We define this as the
+weighted arithmetic mean of the $\wasteapp{i}$ for all applications,
+where each application is weighted by the number of computing nodes
+it uses:
+
+\begin{equation}
+\wasteplat = \sum_i \frac{\nbapp{i} \nbnodes{i}}{\nbnodesplat} \wasteapp{i}
+\label{eq.waste}
+\end{equation}
+
+In the absence of I/O constraints, the checkpointing period can be minimized
+for each job independently. Indeed, the optimal period for a job
+of class $\app{i}$ is obtained by minimizing $\wasteapp{i}$ in 
+Equation~\eqref{eq.wasteAi}.
+
+Differentiating and solving
+$$\frac{\delta \wasteapp{i}}{\delta \period{i}} = - \frac{\ckpt{i}}{\period{i}^{2}} + \frac{\nbnodes{i}}{2 \mtbfplat} = 0$$
+we readily derive that
+\begin{equation}
+\period{i} = \sqrt{2 \frac{\mtbfplat}{\nbnodes{i}} \ckpt{i}} = \sqrt{2 \mu_{i} \ckpt{i}}
+\label{eq.daly}
+\end{equation}
+where $\mu_{i}$ is the MTBF of  class $\app{i}$ applications, and we retrieve the Daly period
+$\period{i} = \period{Daly}(J_{i})$.
+
+However, I/O constraints may impose the use of sub-optimal periods. If each job
+of class $\app{i}$ checkpoints in time $\ckpt{i}$ during its period $\period{i}$ (hence
+without any contention), it uses the I/O device during a fraction $\frac{\ckpt{i}}{\period{i}}$ of the time.
+The total usage fraction of the  I/O device is $\ioconstraint = \sum_{i} \frac{\nbapp{i} \ckpt{i}}{\period{i}}$
+and cannot exceed $1$. Therefore, we have to solve the following optimization problem: find
+the set of values $\period{i}$ that minimize $\wasteplat$ in Equation~\eqref{eq.waste} subject to the I/O constraint:
+
+\begin{equation}
+\ioconstraint = \sum_{i} \frac{\nbapp{i} \ckpt{i}}{\period{i}} \leq 1
+\label{eq.IOconstraint}
+\end{equation}
+
+Hence the optimization problem is to minimize:
+\begin{equation}
+\wasteplat = \sum_i \frac{\nbapp{i} \nbnodes{i}}{\nbnodesplat}  \left( \frac{\ckpt{i}}{\period{i}} +
+\frac{\nbnodes{i}}{\mtbfplat}(\frac{\period{i}}{2} + \reco{i}) \right)
+\label{eq.totalwaste}
+\end{equation}
+subject to Equation~\eqref{eq.IOconstraint}.
+Using the Karush-Kuhn-Tucker conditions~\cite{Boyd2004}, we know that there exists a nonnegative constant
+$\lambda$
+such that
+$$- \frac{\delta \wasteplat}{\delta \period{i}} = \lambda \frac{\delta \ioconstraint}{\delta \period{i}}$$
+for all $i$. We derive that
+$$\frac{\nbapp{i} \nbnodes{i} \ckpt{i}}{\nbnodesplat \period{i}^{2}} -    \frac{\nbapp{i} \nbnodes{i}^{2}}{2 \mtbfplat \nbnodesplat} = - \lambda \frac{\nbapp{i} \ckpt{i}}{\period{i}^{2}}
+$$
+for all $i$. This leads to:
+ \begin{equation}
+\period{i} = \sqrt{\frac{2 \mtbfplat  \nbnodesplat}{\nbnodes{i}^{2}} \left(\frac{\nbnodes{i}}{\nbnodesplat} +\lambda \right) \ckpt{i}}
+  \label{eq.KKT}
+\end{equation}
+for all $i$. Note that when $\lambda=0$, Equation~\eqref{eq.KKT} reduces to Equation~\eqref{eq.daly}.
+
+Because of the I/O constraint in Equation~\eqref{eq.IOconstraint}, we choose
+for $\lambda$ the minimum value such that Equation~\eqref{eq.IOconstraint} is
+satisfied. If $\lambda \neq 0$, this will lead to periods $P_{i}$ larger than
+the optimal value of Equation~\eqref{eq.daly}. Note that there is no
+closed-form expression for the minimum value of $\lambda$, it has to be found
+numerically.
+
+Altogether, we state our main result:
+
+\begin{theorem}
+     In the presence of I/O constraints, the optimal checkpoint periods are given by
+     Equation~\eqref{eq.KKT}, where $\lambda$ is the smallest non-negative value such
+     that Equation~\eqref{eq.IOconstraint} holds. The total platform waste is then
+     given by Equation~\eqref{eq.totalwaste}.
+\end{theorem}
+
+The optimal periods may not be achievable, because
+Equation~\eqref{eq.IOconstraint} is a necessary, but not sufficient condition.
+Even though the total I/O bandwidth is not exceeded, meaning there is enough
+capacity to take all the checkpoints at the given periods, we would still need
+to orchestrate these checkpoints into an appropriate, periodic, repeating
+pattern.  In other words, we only have a lower bound of the optimal platform
+waste.
+
+%\input{simulation.tex}
+% !TEX root =  ipdps18.tex
+
+\section{Simulation Framework}
+\label{sec:simulator}
+% Primary: Thomas
+
+We use discrete event simulations to evaluate the performance of the proposed
+approaches.  Our simulations\footnote{The simulator is publicly available
+from~\url{https://github.com/SMURFSorg/InterferingCheckpoints}.} are instantiated
+by a set of initial conditions that define a set of application classes, the
+distribution of resource usage between application classes, and the main
+characteristics of the platform on which application instances will execute.
+
+\paragraph*{High level parameters}
+Application classes are characterized by: initial input and output sizes, checkpoint
+size, quantity of work to execute, number of nodes to use, volume of I/O to
+execute during job makespan, and job compute time.
+
+Platforms are characterized by the number of nodes, a system Mean Time
+Between Failures, and an aggregated I/O subsystem bandwidth that is shared among the
+nodes. For simplicity, we assume symmetric read and write filesystem bandwidths, hence
+$\ckpt{i}=\reco{i}$ for each application class, $\app{i}$.
+
+A simulation first randomly selects a list of jobs that are instances
+of the different application classes. This list is ordered by job
+priority (\ie, arrival time for our FCFS algorithms) and constrained
+by two parameters: the minimum simulated time to consider, and the
+relative proportion of platform resources used by each application
+class (based on the APEX report~\cite{apex2016}).  As an example, we
+consider the subset of application classes given by the APEX workflows
+report for the subset of application classes of LANL (EAP, LAP,
+Silverton and VPIC), simulated as is executed on the Cielo
+supercomputer, for a minimal execution time of 60 days. A simulation
+will randomly instantiate one of the four classes, assigning a work
+duration uniformly distributed between $0.8w$ and $1.2w$, where $w$ is
+the typical walltime specified for the chosen application class, and
+count the resource allocated for this application class, until 1.)~the
+simulated execution would necessarily run for at least 2 months, and
+2.)~resources used by the selected class is within 1\% of the target
+goal of the representative workload percentage defined in the APEX
+workflows report (see Table~\ref{table:lanl}).
+
+In addition to the jobs list, we generate a set of node failure times according to an
+exponential distribution with the specified MTBF. At the chosen times, we randomly
+choose which of the nodes fail.  These jobs list and failure times constitute
+the initial conditions of a simulation.
+
+\paragraph*{Job Scheduling}
+
+We compute a job schedule (start and end times for all jobs in the list) using
+a simple first-fit strategy considering: job characteristics, job priority and
+resource availability.  We simulate online scheduling; whenever a job
+ends at a date different than the initially planned end date (because of
+failures, or because the I/O interference made the job extend after
+its planned end date), the schedule is amended by re-scheduling all
+jobs that were not started yet.
+
+\paragraph*{Execution Simulation}
+
+Once a job is started, it executes its initial input. It then, 1.)~executes
+some work for a certain period before it, and 2.)~checkpoints. These two steps
+are repeated until all planned work is executed, after which the final output
+is executed by the job, before it ends.  At any time during the execution, a
+node hosting the job may be subject to a failure (according to the pre-computed
+failure times and location). When that happens, the job is terminated and a new
+job is added to the list of jobs to schedule. That new job represents the
+restart of the failed one; it has similar characteristics except its initial
+input corresponds to the restart size, and its work time corresponds to the
+remaining work from the last successful checkpoint. To reflect a common job
+scheduling policy on shared platforms, restarted jobs are set to the highest
+priority, maximizing their chances of obtaining an immediate allocation and
+continuing what was the original (failed) jobs execution.
+
+
+\paragraph*{Interference Models} Our simulations implement each of the
+interference models and avoidance strategies defined in
+Section~\ref{sec:algorithms}: for \propfixed and \propdaly,
+interfering I/O and checkpoints get a portion of the available
+aggregated bandwidth proportional to the number of nodes they use, and
+inversely proportional to the number of nodes involved for all
+jobs doing I/O; for \bfifofixed and \bfifodaly, I/O requests
+and checkpoints are ordered in a first-come first-served basis, and
+when they are selected, obtain the full bandwidth; for \fifofixed and
+\fifodaly, I/O requests and checkpoints are served in order, but the
+simulation adds all the time waiting for a checkpoint to start as
+progress in the computation for the job; and for \cooperative,
+the same is implemented, but I/O is ordered to minimize the waste in
+Equations~\eqref{eq.selection} and~\eqref{eq.selection2}.
+
+Note that in the scheduled I/O methods (\fifononblock and \cooperative),
+initial inputs and final outputs are blocking (the job cannot progress during
+the I/O until it is served), but checkpoints are non-blocking, which means that
+if a failure hits the job, it may have to re-execute from a checkpoint far in
+its past if it has  not been granted access to the filesystem for an extended
+period of time.
+
+
+\paragraph*{Method of statistics collection from simulations}
+We compute the distribution of performance of each strategy using the
+Monte Carlo method: a large set of initial conditions (at least a
+thousand) is randomly chosen, and we simulate the execution of the
+system over each element of this set for each strategy. Since
+simulations for the various scheduling strategies have different
+initial conditions (including job mix), it would be misleading to
+compare simple averages of the time spent doing useful work (or time
+wasted) across simulation instances. Instead, we collect performance
+statistics over a fixed length segment of each simulation and extract
+and compare waste/work ratios that can be compared appropriately. The
+segment excludes the first and last days of the simulation: during the
+first day, jobs may be synchronized artificially because a subset
+starts at the same date, and during the last day, large amounts of
+resources may not be used as new jobs are not added to the workload.
+For each aggregate measurement, we compute and show mean, first and
+ninth decile, and first and third quartile statistics. 
+
+%\input{results.tex}
+% !TEX root =  ipdps18.tex
+
+\section{Results}\label{sec:results}
+% Primary: Thomas & all
+
+\subsection{LANL APEX Simulation Workflows on Cielo}
+
+We consider the workload from LANL found in the APEX Workflows
+report~\cite{apex2016} that consists of four applications classes: EAP, LAP,
+Silverton and VPIC. The main characteristics of these classes are reported in
+Table~\ref{table:lanl}. We simulate the behavior of these applications on the
+Cielo Platform. Cielo was a 1.37 Petaflops capability system operated from 2010
+to 2016 at the Los Alamos National Laboratory.  It consisted of 143,104 cores,
+286 TB of main memory, and a parallel filesystem with a theoretical maximum
+capacity of 160GB/s.  Cielo was chosen for this initial analysis due to the
+availability of the aforementioned workflows report, something not available for
+other platforms. In later sections, we consider similar workloads on a more
+modern platform.
+
+\begin{table}
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+ Workflow & EAP & LAP & Silverton & VPIC \\\hline
+Workload percentage & 66 & 5.5 & 16.5 & 12 \\\hline
+Work time (h) & 262.4 & 64 & 128 & 157.2 \\\hline
+Number of cores & 16384 & 4096 & 32768 & 30000 \\\hline
+Initial Input (\% of memory) &  3 & 5 & 70 & 10 \\\hline
+Final Output (\% of memory) & 105 & 220 & 43 & 270 \\\hline
+Checkpoint Size (\% of memory) & 160 & 185 & 350 & 85 \\\hline
+\end{tabular}
+\caption{LANL Workflow Workload from the APEX Workflows report.\label{table:lanl}}
+\end{table}
+
+The baseline in this comparison comprises a set of simulations with no faults,
+checkpoints, nor I/O interference. For these simulations, we selected a 60-day
+execution segment, and computed the resources used by the jobs during this
+period, \ie the total time each node spent on (non-CR) I/O and computation in a
+failure-free environment.
+
+For the I/O scheduling techniques presented in Section~\ref{sec:algorithms}, we
+compute the resource waste as the total time nodes spend not progressing jobs.
+In the figures presented, we represent the performance of each strategy by
+computing the waste ratio, \ie the resource waste over a segment of 60 days
+divided by the application resource usage over that same segment for the
+baseline simulation. Each simulation is conducted over 1,000 times; the
+candlestick extremes represent the first and last decile of the measures, while
+the boxes represent the first and last quartile, and the center the mean value.
+
+\begin{figure}
+  \begin{center}
+    \resizebox{1.05\linewidth}{!}{\input{sim/figures/synthetic-01hMTBF-waste-cielo.tex}}
+  \end{center}
+  \caption{Waste ratio as a function of the system bandwidth for the
+    seven I/O and Checkpointing scheduling strategies, and the LANL workload on
+    Cielo. \label{fig:cielo-1hmtbf}}
+\end{figure}
+
+\paragraph{The Impact of Available System Bandwidth}
+First, we explore the performance of each approach in a failure-prone
+environment. Figure~\ref{fig:cielo-1hmtbf} represents the waste ratio
+on Cielo, assuming the node MTBF $\muind$ of 2 years (\ie a system
+MTBF of 1h). We vary the filesystem bandwidth from 40 GB/s to 160GB/s
+in order to evaluate the impact of this parameter. We observe three
+classes of behavior: \propfixed and \bfifofixed exhibit a waste ratio
+that decreases as the bandwidth increases, but remains above 40\% even
+at the maximum theoretical I/O bandwidth; \fifodaly, \fifofixed, and
+\cooperative quickly decrease to below 20\% of waste, and reach
+the theoretical model performance\footnote{Maple code to compute the
+  performance predicted by the theoretical model is available at
+  \url{https://github.com/SMURFSorg/InterferingCheckpoints}.};
+%
+and \propdaly and \bfifodaly start at the same level of efficiency as
+\propfixed and \bfifofixed, and slowly reach 20\% of waste as the bandwidth
+increases.
+%
+Note, in some cases the error bars dip below the theoretical
+lower bound. In the simulations, failures have an exponential probability
+distribution centered around the desired MTBF. For some runs, a lower
+number of failures experienced during the simulation results in a larger
+MTBF than the average used in the lower-bound formula; such instances
+can experience a waste lower than the theoretical model.
+
+This figure shows that with a high frequency of failures, providing each job
+with the appropriate checkpoint interval is paramount to preventing unnecessary
+(or even detrimental) checkpoints: the two strategies that render high waste
+despite high bandwidth rely on a fixed 1h interval. However, it also shows that
+this is not the sole criteria that should be taken into account, nor a
+necessary condition to extract performance. Even with favorable bandwidth,
+\propdaly and \bfifodaly experience nearly twice the waste of the other
+strategies with same checkpointing period. All strategies that decouple the
+execution of the application from the filesystem availability (\fifodaly,
+\fifofixed, \cooperative) exhibit considerably better performance despite low
+bandwidth.
+
+Notably, \cooperative remains the most efficient technique in this study, and
+reaches the theoretical performance given by Equation~\eqref{eq.totalwaste} for
+steady-state analysis. This illustrates the efficiency of the proposed
+heuristic (Equations~\eqref{eq.selection} and~\eqref{eq.selection2}) to
+schedule checkpoints and I/O in a way that avoids interferences, allowing the
+system to behave as if no interference is experienced, in most cases. The high
+variation shows that a minority of the runs experienced a significantly higher
+waste, but such is the case for all algorithms.
+
+\begin{figure}
+  \begin{center}
+    \resizebox{1.05\linewidth}{!}{\input{sim/figures/synthetic-040gbs-waste-cielo.tex}}
+  \end{center}
+  \caption{Waste ratio as a function of the system MTBF for the
+    seven I/O and Checkpointing scheduling strategies, and the LANL workload on
+    Cielo. \label{fig:cielo-40gbs}}
+\end{figure}
+
+\paragraph{The Impact of System Reliability}
+Next, we explore the performance of each approach under low bandwidth (and
+thus high probability of interference). A scenario with such low bandwidth is not
+unrealistic.  As shown in Luu et al~\cite{Luu:2015:Multiplatform}, practical
+bandwidth can be considerably lower than theoretical.
+Figure~\ref{fig:cielo-40gbs} represents the waste ratio on Cielo, assuming the
+aggregated filesystem bandwidth of the system is 40GB/s. We vary the node MTBF
+$\muind$ from 2 years (1h of system MTBF) to 50 years (24h of system MTBF) in
+order to evaluate the impact of this parameter. Similar to
+Figure~\ref{fig:cielo-1hmtbf}, we observe three classes of behavior: \propfixed
+and \bfifofixed exhibit a waste ratio that remains constant around 80\% for all
+values of the MTBF. These approaches are critically dependent on the filesystem
+bandwidth, and a lower frequency of failures does not significantly improve
+their performance. The I/O subsystem is saturated, and the applications spends
+most of their time waiting for it.
+%
+\propdaly and \bfifodaly, see poor efficiency for small MTBF values, but
+steadily improve to come close to the theoretical bound for higher MTBF values.
+Lastly, \fifodaly, \fifofixed, and \cooperative quickly reach the theoretical
+model performance, even with a low  MTBF (4 year node MTBF or 2h of
+system MTBF).
+
+For all the strategies that use the Daly checkpointing period, increasing the
+MTBF reduces the amount of I/O required and thus relieves the pressure of a
+constrained bandwidth. All strategies that schedule the bandwidth are
+successful at increasing the efficiency close to the theoretical model.
+%
+Similarly, \fifofixed, despite its fixed checkpoint interval is capable of
+reaching a performance comparable to the Daly-based strategies (which reduce the
+number of total checkpoints). The rapid improvement of the \fifofixed approach can be
+explained by a combination of 2 factors. Foremost, the non-blocking aspect of
+the checkpoint provide the I/O subsystem with enough flexibility to order the
+checkpoint without imposing an additional wait. Delayed checkpoints only translate
+in additional waste if that application itself is subject to failure.
+Additionally, for lower MTBFs, the more frequent restarts of interfering jobs,
+despite the fact that they delay the checkpointing operation, do not introduce
+additional waste.
+
+%% HT + GB: we wanted to say the same thing but in a more clear setting
+% Surprisingly so in the case of \fifofixed, with its fixed checkpoint
+% interval, which is capable of reaching a performance
+% comparable to the strategies that reduce the number of
+% checkpoints. At 2h of system MTBF (4 years of node MTBF), the
+% supplementary I/O from restarting processes competes with the high
+% fixed checkpoint frequency for scarce I/O resources, resulting in
+% significant wastage. However, at 8h of system MTBF (16 years of node
+% MTBF), the number of restarts is greatly reduced and the non blocking
+% checkpointing approach is sufficient to even the I/O load efficiently.
+
+\subsection{Evaluating a Prospective System}
+
+\begin{figure}
+  \begin{center}
+    \resizebox{1.05\linewidth}{!}{\input{sim/figures/prosp.tex}}
+  \end{center}
+  \caption{Minimum aggregated filesystem bandwidth to reach 80\%
+    efficiency with the different approaches on the prospective
+    future system.\label{fig:prosp}}
+\end{figure}
+
+In order to understand the impact of the I/O contention on future platforms, we
+use our simulator to explore a prospective system and assess the impact of I/O
+and checkpoint scheduling when the problem size and the machine size will
+increase. We consider a future system with 7PB of main memory and 50,000
+compute nodes (\eg Aurora\footnote{\url{https://aurora.alcf.anl.gov/}}). Based
+on the APEX workflow report, we extrapolate the increase in problem size
+expected for the application classes considered previously, and project these
+applications on the prospective system.  We simulate the workload of
+Table~\ref{table:lanl}, scaling the problem size proportionally to the change
+in machine memory size. The waste is computed, as previously, by dividing the
+amount of resource used for checkpoints and lost due to failures by the amount
+of resource used in a fault-free and resilience-free run with the same initial
+conditions.
+%
+We vary system MTBF; and for each strategy, we find the required aggregated
+practical bandwidth necessary to provide a sustained 80\% efficiency of the
+system.  This 80\% target efficiency is viewed by many programs (\eg 
+The Exascale Computing Project\footnote{\url{https://exascaleproject.org}}) as a
+reasonable cost for resilience activities.
+%
+Figure~\ref{fig:prosp} shows the impact of MTBF and strategies on this
+prospective system.
+
+When failures are frequent (less than 10 year node MTBF), the most critical
+element is to reduce the I/O pressure: all strategies that use a fixed and
+frequent checkpoint interval require greater available bandwidth to reach the
+target efficiency.  In this case, strategies that combine an optimal
+checkpointing period with I/O and checkpoint scheduling (\cooperative and
+\fifodaly) perform similarly, consistently better than all other approaches.
+These two approaches exhibit a strong resilience to failures, with a bandwidth
+requirement that only increases by a factor of three between a very unstable system
+(less than one hour system MTBF), and a stable one (an 8 hour system MTBF). In
+contrast, the other strategies are much more dependent upon the frequency of
+failures; the \propfixed strategy requires up to 50 times the bandwidth of
+\cooperative to reach the same efficiency.
+
+When failures are not endemic (\ie a node MTBF is at least 15 years
+and a system MTBF of 2.6 hours), the hierarchy of different
+approaches stabilizes. The two blocking strategies relying on
+frequent checkpoints (\propfixed and \bfifofixed) remain expensive,
+requiring the highest bandwidth to reach the target
+efficiency. % 6.4TB/s at 24 years
+The next contender, \fifofixed, requires a quarter of the  bandwidth
+to reach the same efficiency.
+% \fifofixed, that uses a fixed checkpoint interval comes next, with a
+% requirement around three quarter of the one required by \propfixed and
+% \bfifofixed.
+Despite using the same fixed checkpoint interval as the previous methods, it
+benefits from not blocking when the filesystem is not available.
+This is sufficient, when failures are rare, to obtain a significant
+performance gain. % 4.9TB/s at 24 years
+All Daly-based strategies benefit from reduced I/O pressure, and reach the
+target efficiency with around half the bandwidth needed by \propfixed. 
+We also observe that \fifodaly and \leastwaste remain the most efficient strategies
+for the whole MTBF spectrum. These
+results highlight that checkpoint-based strategies can scale to
+satisfy the need of future platforms, whether by integrating I/O-aware scheduling
+strategies or by significantly over-provisioning the I/O partition.
+
+
+% !TEX root =  ipdps18.tex
+
+\section{Related Work}\label{sec:related}
+% Primary: Kurt
+
+We first discuss research regarding checkpoint-induced I/O pressure, followed by
+works that regard avoiding I/O interference.  These techniques are not necessarily
+independent: generally, reducing I/O pressure will reduce the likelihood of
+interference.  Therefore, we focus our I/O interference discussion to those
+techniques which consider the global scheduling of checkpoints and/or application I/O
+across a platform.
+
+%\todo[inline]{kbf: I am unsure about this breakdown.  These two things do not
+%seem independent; reducing pressure seems to al reduce interference ...}
+
+\paragraph*{Checkpointing and I/O}
+
+For a single application, the Young/Daly formula~\cite{young74,daly04} gives the
+optimal checkpointing period. This period minimizes platform waste, defined as the
+fraction of job execution time that does not contribute to its progress.  The two
+sources of waste are the time spent taking checkpoints (which motivates longer
+checkpoint periods) and the time needed to recover and re-execute after each failure
+(which motivates shorter checkpoint periods). The Young/Daly period achieves the
+optimal trade-off between these sources to minimize the total waste. Arunagiri et
+al.~\cite{Arunagiri2010} studied longer, sub-optimal periods with the intent of
+reducing I/O pressure and showed, both analytically and empircally using four real
+platforms, that a decrease in the I/O requirement can be achieved with only a small
+increase in waste.
+
+\paragraph*{Reducing I/O Pressure}
+
+There are two general strategies for reducing I/O pressure from a single application:
+hiding or reducing checkpoint commit times without reducing checkpoint data volumes,
+and reducing commit times by reducing checkpoint data volumes.  Strategies that
+attempt to hide checkpoint times include Diskless~\cite{Plank98Diskless} and remote
+checkpoint protocols~\cite{Cornwell11RemoteBLCR} which leverage the typically higher
+available bandwidths of the network or other storage media like RAM in order to
+mitigate the performance of slower storage media like spinning or solid-state
+disks. Additionally, remotely stored checkpoints have the additional benefit of
+allowing systems to survive non-transient node failures. Similarly, multi-level
+checkpoint protocols like SCR~\cite{Moody10SCR,Vaidya95TwoLevel} attempt to hide
+checkpoint commit times by writing checkpoints to RAM, flash storage, or local disk
+on the compute nodes~\cite{Kougkas2017} in addition to the parallel file system
+thereby improving checkpoint or general I/O bandwidth.  Finally, checkpoint-specific
+file systems like PLFS~\cite{Bent09PLFS} leverage the I/O patterns and
+characteristics specific to checkpoint data to optimize checkpoint data transfers
+to/from parallel file systems and therefore reduce checkpoint commit times.
+
+Strategies that attempt to reduce checkpoint sizes include \emph{memory
+exclusion}, which leverage user-directives or other hints to exclude portions of
+process address spaces from checkpoints~\cite{Plank99MemoryExclusion}.
+Additionally, incremental checkpointing protocols reduce checkpoint volumes by
+utilizing the OS's memory page protection facilities to detect and save only
+pages that have been updated between consecutive
+checkpoints~\cite{Bronevetsky09Compiler,
+Chen97CLIP,Elnozahy92ConsistentCheckpointing,Li94ConcurrentCheckpointing,
+Plank94Libckpt,Paun10IncrementalWeibull,Kiswany08stdchk}.  Similarly,
+page-based hashing techniques can also be used to avoid checkpointing pages
+that have been written to but whose content has not
+changed~\cite{Ferreira11Libhashckpt}.  Finally, compression-based techniques
+use standard compression algorithms to reduce checkpoint
+volumes~\cite{Ibtesham12Compression} and can be used at the
+compiler-level~\cite{Li90CATCH} or in-memory~\cite{Plank94ICKP}.  Related,
+Plank et al. proposed \textit{differential compression} to reduce checkpoint
+sizes for incremental checkpoints~\cite{Plank95CompressedDiff} and Tanzima et
+al.  show that similarities amongst checkpoint data from different processes
+can be exploited to compress and reduce checkpoint data
+volumes~\cite{tanzima12mcrengine}.  Finally, Sasaki et al propose a lossy
+compression method based on wavelet transform and vector quantization to the
+checkpoints of a production climate application~\cite{sasaki2015}, while Ni et
+al~\cite{Ni2014} study the trade-offs between the loss of precision, compression
+ratio, and application correctness due to lossy compression.
+
+\paragraph*{Avoiding I/O interference}
+
+Most closely related to our work, a number of studies have considered the global
+scheduling of checkpoints and other I/O across a platform to reduce overall
+congestion, thereby increasing performance.  Aupy et al.~\cite{Aupy:2017:Periodic}
+presented a decentralized I/O scheduling technique for minimizing the congestion due
+to checkpoint interference by taking advantage of the observed periodic and
+deterministic nature of HPC application checkpoints and I/O.  This technique allows
+the job scheduler to pre-define each application’s I/O behavior for their entire
+execution.  Similarly, a number of works have investigated the efficiency of online
+schedulers for data intensive~\cite{Groot2013,Sim:2015:AnalyzeThis} and HPC workload
+I/O~\cite{Dorier2015,Gainaru:2016:Scheduling,Zhou:2015:IOAware,Herbein2017}.
+Finally, a number of works have investigated utilizing recorded system reliability
+information~\cite{Oliner:2006:Cooperative} and the statistical properties of these
+failures~\cite{Tiwari:2014:Lazy} to determine effective checkpoint intervals for the
+portion of the system used by the workload.
+
+\paragraph*{Summary}
+
+We distinguish our work from these previous studies in a number of important ways.
+First, unlike a number of the previous studies, our technique considers existing
+non-CR application I/O. Additionally, our approach is agnostic to the I/O patterns of
+the considered applications as long as they are known.  Also, we attempt to optimize
+the efficiency of the entire platform, with the changing workloads and failures
+running on that platform, rather than just considering one workload. Finally and most
+importantly, this approach provides optimal checkpointing periods in environments
+where I/O is highly constrained and Daly/Young's formula is less appropriate, a common
+scenario on many leadership-class systems.
+
+
+%\input{conclusion.tex}
+\section{Conclusion and Future Work} \label{sec:conclusion}
+% Primary: Aurélien
+
+As we design larger, likely more error-prone, platforms, effectively protecting
+applications from platform faults becomes critical. Current fault-protection
+techniques available on production platforms rely on checkpoint/restart to
+ensure fault protection. However, these techniques, by their very nature,
+regularly save the application state to stable storage, and therefore increase
+the burden of the already overtaxed I/O subsystem.
+
+Considering a comprehensive I/O interference model for platforms susceptible to I/O
+contention, we designed multiple I/O scheduling algorithms that target improving
+overall platform job throughput via waste minimization. We also theorized a
+lower-bound for platform waste for I/O constrained checkpointing workloads. We use
+this theoretical lower-bound to demonstrate the effectiveness of our \cooperative
+I/O scheduling and to compare its performance with other I/O
+scheduling strategies.  Our strategy invariably outperforms the others
+with respect to the platform efficiency. Unsurprisingly, the biggest gains are
+rendered on the platforms with a lowest MTBF or greater degrees of under-provisioned
+I/O. Through simulation, we also show a path to supporting C/R on a prospective
+system while maintaining 80\% platform efficiency, all without a large
+investment in the I/O subsystem.
+
+% In this paper we presented a comprehensive model to capture interference
+% between multiple applications performing fault-tolerance related I/O
+% on a shared HPC system. We designed multiple algorithms
+% to schedule and order the checkpointing I/O workload, with the intent of
+% diminishing the average slowdown sustained by applications on the
+% platform induced by sharing the I/O subsystem, \ie improve the throughput
+% of the platform. We formulated a steady-state analysis of a scenario
+% where CR-CR interference is avoided, which helps us
+% define a theoretical baseline for achievable performance in I/O
+% constrained checkpointing workloads.
+% We designed a event-based simulator that permits
+% executing typical HPC workloads on current and prospective systems.
+% With this simulator we have been able to demonstrate that our proposed
+% heuristic improves the platform efficiency. Unsurprisingly the gain is
+% more marked on platforms with a challenging MTBF or with
+% under-provisioned I/O, but our heuristic improves the efficiency in
+% all cases.  We also simulated the situation on a not yet available
+% platform, this time with the goal of providing guidance in the
+% general I/O requirements for future HPC systems to be able to
+% sustain checkpointing with the desired 80\% efficiency, a goal that
+% we have found achievable with a third of the I/O aggregate bandwidth
+% requirements when the system employs a smart checkpointing policy.
+
+As burst-buffers and other NVRAM storage mechanisms become more common, a natural
+extension of this work would consider their impact on I/O contention/interference.
+Increasing the available I/O
+bandwidth leads to reduced waste (due to the decrease in checkpoint duration but also
+an increase in the optimal checkpoint frequency and therefore a decrease in the
+restart time), while providing relief to the shared I/O subsystem to better absorb
+additional checkpoint information. We speculate that scheduling parallel filesystem
+I/O with a heuristic that prioritizes jobs to minimize failure impact can help to
+improve overall burst-buffer efficiencies. Such a heuristic would build upon the
+strategies discussed in this work and extend them to the new framework.
+
+% As burst-buffers and other NVRAM storage are becoming more common
+% in PFS architecting, a natural extension of this work is to consider the effect
+% of I/O contention/interference with hierarchies, in which subgroups of
+% nodes (\eg a cabinet) may share a burst buffer, and thus experience
+% interference for I/O in that same group, but be immune to interferences
+% from I/O from other groups. Another interesting point with burst-buffers,
+% is that space availability, in addition to bandwidth, may become
+% contentious. The speed at which the burst-buffers can be committed to
+% the sink PFS (possibly creating interference between multiple burst-buffers being
+% flushed to the sink PFS simultaneously) now interplays with the
+% optimal checkpoint frequency of applications, and can cause some
+% applications running out of burst-buffer space. Again, we postulate that
+% scheduling the commits to the PFS sink with an heuristic that prioritizes
+% applications whose loss in failure cases would be more costly
+% can play a role in improving the efficiency of the whole burst-buffers
+% system.
+
+%\section*{Acknowledgement}
+
+
+\bibliographystyle{IEEEtran}
+\bibliography{biblio}
+
+
+\end{document}
