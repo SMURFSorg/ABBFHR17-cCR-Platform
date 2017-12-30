@@ -209,10 +209,19 @@ In this work, we develop and investigate a cooperative CR scheduling strategy
 for concurrently executing HPC applications.  Our objective is to assess the
 impact of such interferences, and to design scheduling algorithms that optimize
 I/O bandwidth availability for CR activity.  Using these cooperative
-algorithms, applications checkpoint sequentially, with a dynamic,
-priority-dependent frequency dictated by a cooperative scheduler.  When enough
-I/O bandwidth is available, each application checkpoints with its optimal,
-Young/Daly, period.  However, when I/O bandwidth is scarce, our scheduling
+algorithms, applications never checkpoint concurrently but always in sequence, with a dynamic,
+priority-dependent frequency dictated by a cooperative scheduler.  It may be counterintuitive to
+give an I/O token to each application, because one could expect that the aggregated I/O
+bandwidth provided by the system is always sufficient to allow for several applications to checkpoint concurrently.
+However, concurrent checkpoints always incur interferences and delays, and our simulations show that these
+interferences have a tremendous impact on performance in many realistic scenarios.
+On the contrary, our cooperative scheme eliminates all interferences. There are two cases;
+(i) When enough
+I/O bandwidth is available, each application can checkpoint with its optimal,
+Young/Daly, period. In this case, scheduling applications to checkpoint in sequence 
+is enough to provide an optimal I/O strategy; (ii) 
+When I/O bandwidth is scarce, it is no longer possible to checkpoint each application with its optimal,
+Young/Daly, period. In this case, our scheduling
 algorithm provides an optimal checkpoint period that maximizes overall platform
 throughput. This cooperative checkpoint process is calculated such that there
 is no I/O interference and minimal re-work to be done when failures occur.
@@ -233,6 +242,8 @@ algorithms similar to  those currently deployed on many large-scale platforms,
 to ones which exploit application knowledge in an effort to  minimize the total
 system waste by scheduling the application with the most critical I/O needs.
 
+\item An extensive set fo simulations that assess the dramatic impact of checkpoint interference
+and demonstrate the usefulness of cooperative strategies for current and forthcoming HPC systems.
 \end{itemize}
 
 % - a model to predict the shared I/O impact on multiple applications scenarios
