@@ -105,7 +105,7 @@ Kurt B.~Ferreira$^{4}$, George Bosilca$^{1}$, Jack Dongarra$^{1,5}$}
 	$4.$ Center for Computing Research, Sandia National Laboratory, USA\\
 	$5.$ University of Manchester, UK}
 }
-\email{{herault|bouteill|bosilca|dongarra}@icl.utk;edu, yves.robert@ens-lyon.fr, darnold@cs.unm.edu, kbferre@sandia.gov}
+\email{{herault|bouteill|bosilca|dongarra}@icl.utk.edu, yves.robert@ens-lyon.fr, darnold@cs.unm.edu, kbferre@sandia.gov}
 
 \begin{abstract}
 In high-performance computing environments, input/output (I/O) from various
@@ -202,37 +202,37 @@ checkpoint commit time, effciency will decrease.}.
 
 \end{compactitem}
 
-To illustrate the second point, we conducted a small simuation (the
-parameters and conditions of this simulation are described in more
-details in Section~\ref{sec:results}): consider a workload consisting of many
+To illustrate the second point, we conducted the following simulation (whose
+parameters and conditions are described in more
+details in Section~\ref{sec:results}). Consider a workload consisting of many
 different applications that uses C/R as their fault-tolerance
-method. Applications either apply the fixed checkpoint period of 1h,
-or the optimal period give by the Young/Daly Formula. When two
-checkpoints overlap, we can also consider two simple cases: either
+method. Applications either apply the fixed checkpoint period of one hour,
+or the optimal period give by the Young/Daly Formula. When two or more
+checkpoints overlap, we consider two scenarios: either
 they are slowed down proportionally to the amount of processes that
 share the bandwidth (we call this \emph{No Interference Management},
 or the first checkpoint completes before the next one can start (we
 call this \emph{FCFS Interference Management}, and discuss further how
-this can be implemented in Section~\ref{sec:}).
+this can be implemented in Section~\ref{sec:XX}).
 
 Depending on the filesystem availability and the MTBF of the machine
 (which impacts the results by introducing more or less failures, but
-also by changing the optimal checkpoint interval), because of
-interferences, applications spend more time to commit their checkpoint
+also by changing the optimal checkpoint interval), 
+applications spend more time to commit their checkpoint 
 than they would if there was no
 interference. Figures~\ref{fig:ckps-slow-160}
 and~\ref{fig:ckps-slow-40} illustrate how much the average checkpoint
-commit is slowed down as a function of the machine MTBF and for two
-system I/O bandwidth (160GB/s, which is the theoretical peak of the
-machine, and 40GB/s, which represents a lower bound of the achievable
-bandwidth when there is no interference).
+commit is slowed down as a function of the machine MTBF, for two
+system I/O bandwidth: 160GB/s, which is the theoretical peak of the
+machine, and 40GB/s, which represents a degraded but realistic value of the achievable
+bandwidth when there is no interference.
 
 \begin{figure}[t]
   \begin{center}
     \includegraphics[width=.9\linewidth]{sim/figures/ckpt-slowdown-160Gbs.pdf}
     \caption{\label{fig:ckps-slow-160}Slowdown of Checkpoints due to
       Interference on the Cielo Platform for the APEX Workshop
-      workflow when the bandwidth is 160GB/s}
+      workflow when the bandwidth is 160GB/s.}
   \end{center}
 \end{figure}
 
@@ -241,19 +241,19 @@ bandwidth when there is no interference).
     \includegraphics[width=.9\linewidth]{sim/figures/ckpt-slowdown-40Gbs.pdf}
     \caption{\label{fig:ckps-slow-40}Slowdown of Checkpoints due to
       Interference on the Cielo Platform for the APEX Workshop
-      workflow when the bandwidth is 40GB/s}
+      workflow when the bandwidth is 40GB/s.}
   \end{center}
-\end{figure}
+  \end{figure}
 
-When the system bandwidth is at its peak, one can see that the
+When the system bandwidth is at its peak (Figure~\ref{fig:ckps-slow-160}), the
 Young/Daly formula provides a critical tool to minimize interference;
 however, when no cooperation between the applications is enforced,
-a significant interference is observed, and applications can spend in
-average twice the time they would expect doing checkpoint. A simple
-interference management policy, like FCFS, can reduce this in
-optimistic scenarios. When the bandwidth is more constraint, or when
-the node MTBF is shorter, however, interferences introduce a
-significant slow down.
+a significant interference is observed, and applications spend in
+average twice the time in checkpointing that they did expect. A simple
+interference management policy, like FCFS, reduces this dramatically, for all values of the MTBF.  
+However, when the bandwidth is more constraint (Figure~\ref{fig:ckps-slow-40}), and when
+the node MTBF is shorter, interferences introduce a
+significant slowdown for all strategies.
 
 In this work, we develop and investigate a cooperative CR scheduling
 strategy for concurrently executing HPC applications.  Our objective
