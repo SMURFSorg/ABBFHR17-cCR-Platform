@@ -245,15 +245,18 @@ bandwidth when there is no interference.
   \end{center}
   \end{figure}
 
-When the system bandwidth is at its peak (Figure~\ref{fig:ckps-slow-160}), the
-Young/Daly formula provides a critical tool to minimize interference;
-however, when no cooperation between the applications is enforced,
-a significant interference is observed, and applications spend in
-average twice the time in checkpointing that they did expect. A simple
-interference management policy, like FCFS, reduces this dramatically, for all values of the MTBF.  
-However, when the bandwidth is more constraint (Figure~\ref{fig:ckps-slow-40}), and when
-the node MTBF is shorter, interferences introduce a
-significant slowdown for all strategies.
+When the system bandwidth is at its peak
+(Figure~\ref{fig:ckps-slow-160}), the Young/Daly formula provides a
+critical tool to minimize interference; however, when no cooperation
+between the applications is enforced, a significant interference is
+observed, and applications spend in average twice the time in
+checkpointing that they did expect. A simple interference management
+policy, like FCFS, reduces this dramatically, for all values of the
+MTBF.  However, when the bandwidth is more constraint
+(Figure~\ref{fig:ckps-slow-40}), and when the node MTBF is shorter,
+interferences introduce a significant slowdown for all
+strategies. This is consistent with practical observations of
+interference conducted on various HPC systems~\cite{Yildiz2016,MubarakCJLJSRCB17}.
 
 In this work, we develop and investigate a cooperative CR scheduling
 strategy for concurrently executing HPC applications.  Our objective
@@ -703,7 +706,8 @@ The cooperative strategies (\fifoblock, \fifononblock, and
 synchronization can happen at the filesystem level for \fifoblock:
 metadata servers in the filesystem can select which I/O stream is
 given the priority, and in the extreme case, give access to the I/O
-storage nodes only to a given application; however, \fifononblock and
+storage nodes only to a given application (\eg by using the technology
+proposed in CALCioM,~\cite{Dorier2015}); however, \fifononblock and
 \leastwaste cannot be implemented without modifying the applications,
 as work must continue until the access is granted.
 
@@ -1288,15 +1292,21 @@ portion of the system used by the workload.
 
 \paragraph*{Summary}
 
-We distinguish our work from these previous studies in a number of important ways.
-First, unlike a number of the previous studies, our technique considers existing
-non-CR application I/O. Additionally, our approach is agnostic to the I/O patterns of
-the considered applications as long as they are known.  Also, we attempt to optimize
-the efficiency of the entire platform, with the changing workloads and failures
-running on that platform, rather than just considering one workload. Finally and most
-importantly, this approach provides optimal checkpointing periods in environments
-where I/O is highly constrained and Daly/Young's formula is less appropriate, a common
-scenario on many leadership-class systems.
+We distinguish our work from these previous studies in a number of
+important ways.  First, unlike a number of the previous studies, our
+technique considers the interaction between existing non-CR
+application I/O and CR I/O. The proposed non-blocking approaches that
+we propose leverage the capability of applications to continue working
+(to the increased risk of having to re-execute this work) while they
+wait for the checkpoint token to be granted. Additionally, our
+approach is agnostic to the I/O patterns of the considered
+applications as long as they are known.  Also, we attempt to optimize
+the efficiency of the entire platform, with the changing workloads and
+failures running on that platform, rather than just considering one
+workload. Finally and most importantly, this approach provides optimal
+checkpointing periods in environments where I/O is highly constrained
+and Daly/Young's formula is less appropriate, a common scenario on
+many leadership-class systems.
 
 
 %\input{conclusion.tex}
