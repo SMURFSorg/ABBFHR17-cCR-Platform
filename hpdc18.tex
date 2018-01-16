@@ -231,8 +231,8 @@ bandwidth when there is no interference.
   \begin{center}
     \includegraphics[width=.9\linewidth]{sim/figures/ckpt-slowdown-160Gbs.pdf}
     \caption{\label{fig:ckps-slow-160}Slowdown of Checkpoints due to
-      Interference on the Cielo Platform for the APEX Workshop
-      workflow when the bandwidth is 160GB/s.}
+      Interference for the APEX Workshop workflow when simulating the
+      Cielo platform with an effective bandwidth of 160GB/s.}
   \end{center}
 \end{figure}
 
@@ -240,8 +240,8 @@ bandwidth when there is no interference.
   \begin{center}
     \includegraphics[width=.9\linewidth]{sim/figures/ckpt-slowdown-40Gbs.pdf}
     \caption{\label{fig:ckps-slow-40}Slowdown of Checkpoints due to
-      Interference on the Cielo Platform for the APEX Workshop
-      workflow when the bandwidth is 40GB/s.}
+      Interference for the APEX Workshop workflow when simulation the
+      Cielo platform with an effective bandwidth is 40GB/s.}
   \end{center}
   \end{figure}
 
@@ -880,7 +880,7 @@ relative proportion of platform resources used by each application
 class (based on the APEX report~\cite{apex2016}).  As an example, we
 consider the subset of application classes given by the APEX workflows
 report for the subset of application classes of LANL (EAP, LAP,
-Silverton and VPIC), simulated as is executed on the Cielo
+Silverton and VPIC), simulated as if executed on the Cielo
 supercomputer, for a minimal execution time of 60 days. A simulation
 will randomly instantiate one of the four classes, assigning a work
 duration uniformly distributed between $0.8w$ and $1.2w$, where $w$ is
@@ -1018,14 +1018,13 @@ the boxes represent the first and last quartile, and the center the mean value.
     \resizebox{1.05\linewidth}{!}{\input{sim/figures/synthetic-01hMTBF-waste-cielo.tex}}
   \end{center}
   \caption{Waste ratio as a function of the system bandwidth for the
-    seven I/O and Checkpointing scheduling strategies, and the LANL workload on
-    Cielo. \label{fig:cielo-1hmtbf}}
+    seven I/O and Checkpointing scheduling strategies. \label{fig:cielo-1hmtbf}}
 \end{figure}
 
 \paragraph{The Impact of Available System Bandwidth}
 First, we explore the performance of each approach in a failure-prone
 environment. Figure~\ref{fig:cielo-1hmtbf} represents the waste ratio
-on Cielo, assuming the node MTBF $\muind$ of 2 years (\ie a system
+on the simulated platform, assuming the node MTBF $\muind$ of 2 years (\ie a system
 MTBF of 1h). We vary the filesystem bandwidth from 40 GB/s to 160GB/s
 in order to evaluate the impact of this parameter. We observe three
 classes of behavior: \propfixed and \bfifofixed exhibit a waste ratio
@@ -1073,8 +1072,7 @@ waste, but such is the case for all algorithms.
     \resizebox{1.05\linewidth}{!}{\input{sim/figures/synthetic-040gbs-waste-cielo.tex}}
   \end{center}
   \caption{Waste ratio as a function of the system MTBF for the
-    seven I/O and Checkpointing scheduling strategies, and the LANL workload on
-    Cielo. \label{fig:cielo-40gbs}}
+    seven I/O and Checkpointing scheduling strategies. \label{fig:cielo-40gbs}}
 \end{figure}
 
 \paragraph{The Impact of System Reliability}
@@ -1082,7 +1080,8 @@ Next, we explore the performance of each approach under low bandwidth (and
 thus high probability of interference). A scenario with such low bandwidth is not
 unrealistic.  As shown in Luu et al~\cite{Luu:2015:Multiplatform}, practical
 bandwidth can be considerably lower than theoretical.
-Figure~\ref{fig:cielo-40gbs} represents the waste ratio on Cielo, assuming the
+Figure~\ref{fig:cielo-40gbs} represents the waste ratio on the
+simulated platform, assuming the
 aggregated filesystem bandwidth of the system is 40GB/s. We vary the node MTBF
 $\muind$ from 2 years (1h of system MTBF) to 50 years (24h of system MTBF) in
 order to evaluate the impact of this parameter. Similar to
