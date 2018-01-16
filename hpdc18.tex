@@ -107,10 +107,6 @@ Kurt B.~Ferreira$^{4}$, George Bosilca$^{1}$, Jack Dongarra$^{1,5}$}
 }
 \email{{herault|bouteill|bosilca|dongarra}@icl.utk;edu, yves.robert@ens-lyon.fr, darnold@cs.unm.edu, kbferre@sandia.gov}
 
-
-
-
-
 \begin{abstract}
 In high-performance computing environments, input/output (I/O) from various
 sources often contend for scarce available bandwidth. Adding to the I/O
@@ -152,13 +148,14 @@ Therefore, without careful consideration, network and storage contention can
 reduce individual application and overall system
 performance~\cite{Bhatele:2013:Neighborhood}.
 
-On these platforms, checkpoint/restart (CR) is the most common strategy
-employed to protect applications from underlying faults and failures.
-Generally, CR periodically outputs snapshots (\ie checkpoints) of its global,
-distributed state to some stable storage device. When an application failure
-occurs, the last stored checkpoint is retrieved and used to restart the
-application.  Typically, concurrently executing applications independently
-decide when to take their own checkpoints.
+On these platforms, checkpoint/restart (CR) is the most common
+strategy employed to protect applications from underlying faults and
+failures.  Generally, CR periodically outputs snapshots (\ie
+checkpoints) of the application's global, distributed state to some
+stable storage device. When an application failure occurs, the last
+stored checkpoint is retrieved and used to restart it. Typically,
+concurrently executing applications independently decide when to take
+their own checkpoints.
 
 There are two widely-used approaches to determine when an application should
 \emph{commit} a checkpoint: (i)~using a fixed checkpoint period (typically one
@@ -205,26 +202,84 @@ checkpoint commit time, effciency will decrease.}.
 
 \end{compactitem}
 
-In this work, we develop and investigate a cooperative CR scheduling strategy
-for concurrently executing HPC applications.  Our objective is to assess the
-impact of such interferences, and to design scheduling algorithms that optimize
-I/O bandwidth availability for CR activity.  Using these cooperative
-algorithms, applications never checkpoint concurrently but always in sequence, with a dynamic,
-priority-dependent frequency dictated by a cooperative scheduler.  It may be counterintuitive to
-give an I/O token to each application, because one could expect that the aggregated I/O
-bandwidth provided by the system is always sufficient to allow for several applications to checkpoint concurrently.
-However, concurrent checkpoints always incur interferences and delays, and our simulations show that these
-interferences have a tremendous impact on performance in many realistic scenarios.
-On the contrary, our cooperative scheme eliminates all interferences. There are two cases;
-(i) When enough
-I/O bandwidth is available, each application can checkpoint with its optimal,
-Young/Daly, period. In this case, scheduling applications to checkpoint in sequence 
-is enough to provide an optimal I/O strategy; (ii) 
-When I/O bandwidth is scarce, it is no longer possible to checkpoint each application with its optimal,
-Young/Daly, period. In this case, our scheduling
-algorithm provides an optimal checkpoint period that maximizes overall platform
-throughput. This cooperative checkpoint process is calculated such that there
-is no I/O interference and minimal re-work to be done when failures occur.
+To illustrate the second point, we conducted a small simuation (the
+parameters and conditions of this simulation are described in more
+details in Section~\ref{sec:results}): consider a workload consisting of many
+different applications that uses C/R as their fault-tolerance
+method. Applications either apply the fixed checkpoint period of 1h,
+or the optimal period give by the Young/Daly Formula. When two
+checkpoints overlap, we can also consider two simple cases: either
+they are slowed down proportionally to the amount of processes that
+share the bandwidth (we call this \emph{No Interference Management},
+or the first checkpoint completes before the next one can start (we
+call this \emph{FCFS Interference Management}, and discuss further how
+this can be implemented in Section~\ref{sec:}).
+
+Depending on the filesystem availability and the MTBF of the machine
+(which impacts the results by introducing more or less failures, but
+also by changing the optimal checkpoint interval), because of
+interferences, applications spend more time to commit their checkpoint
+than they would if there was no
+interference. Figures~\ref{fig:ckps-slow-160}
+and~\ref{fig:ckps-slow-40} illustrate how much the average checkpoint
+commit is slowed down as a function of the machine MTBF and for two
+system I/O bandwidth (160GB/s, which is the theoretical peak of the
+machine, and 40GB/s, which represents a lower bound of the achievable
+bandwidth when there is no interference).
+
+\begin{figure}[t]
+  \begin{center}
+    \includegraphics[width=.9\linewidth]{sim/figures/ckpt-slowdown-160Gbs.pdf}
+    \caption{\label{fig:ckps-slow-160}Slowdown of Checkpoints due to
+      Interference on the Cielo Platform for the APEX Workshop
+      workflow when the bandwidth is 160GB/s}
+  \end{center}
+\end{figure}
+
+\begin{figure}[t]
+  \begin{center}
+    \includegraphics[width=.9\linewidth]{sim/figures/ckpt-slowdown-40Gbs.pdf}
+    \caption{\label{fig:ckps-slow-40}Slowdown of Checkpoints due to
+      Interference on the Cielo Platform for the APEX Workshop
+      workflow when the bandwidth is 40GB/s}
+  \end{center}
+\end{figure}
+
+When the system bandwidth is at its peak, one can see that the
+Young/Daly formula provides a critical tool to minimize interference;
+however, when no cooperation between the applications is enforced,
+a significant interference is observed, and applications can spend in
+average twice the time they would expect doing checkpoint. A simple
+interference management policy, like FCFS, can reduce this in
+optimistic scenarios. When the bandwidth is more constraint, or when
+the node MTBF is shorter, however, interferences introduce a
+significant slow down.
+
+In this work, we develop and investigate a cooperative CR scheduling
+strategy for concurrently executing HPC applications.  Our objective
+is to assess the impact of such interferences in the overall platform
+efficiency, and to design scheduling algorithms that optimize I/O
+bandwidth availability for CR activity.  Using these cooperative
+algorithms, applications never checkpoint concurrently but always in
+sequence, with a dynamic, priority-dependent frequency dictated by a
+cooperative scheduler.  It may be counterintuitive to give an I/O
+token to each application, because one could expect that the
+aggregated I/O bandwidth provided by the system is always sufficient
+to allow for several applications to checkpoint concurrently.
+However, concurrent checkpoints always incur interferences and delays,
+and our simulations show that these interferences have a tremendous
+impact on performance in many realistic scenarios.  On the contrary,
+our cooperative scheme eliminates all interferences. There are two
+cases; (i) When enough I/O bandwidth is available, each application
+can checkpoint with its optimal, Young/Daly, period. In this case,
+scheduling applications to checkpoint in sequence is enough to provide
+an optimal I/O strategy; (ii) When I/O bandwidth is scarce, it is no
+longer possible to checkpoint each application with its optimal,
+Young/Daly, period. In this case, our scheduling algorithm provides an
+optimal checkpoint period that maximizes overall platform
+throughput. This cooperative checkpoint process is calculated such
+that there is no I/O interference and minimal re-work to be done when
+failures occur.
 
 Therefore, the main contributions of this paper are the following:
 
@@ -641,7 +696,30 @@ of Equation~\eqref{eq.selection} for its waste $\wap{i}$:
 Finally, we select the job $J_{i} \in \Catiocat \cup \Catckptcat$
 whose waste $\wap{i}$ is minimal. 
 
+\subsection{Feasibility of Cooperative Strategies}
 
+The cooperative strategies (\fifoblock, \fifononblock, and
+\leastwaste) require a form of synchronization to be implemented. This
+synchronization can happen at the filesystem level for \fifoblock:
+metadata servers in the filesystem can select which I/O stream is
+given the priority, and in the extreme case, give access to the I/O
+storage nodes only to a given application; however, \fifononblock and
+\leastwaste cannot be implemented without modifying the applications,
+as work must continue until the access is granted.
+
+We propose to implement these strategies in the checkpointing library
+(\eg SCR or FTI). These libraries already provide APIs for the
+applications to get informed when a checkpoint is desirable, and
+applications that use these libraries regularly poll the system to
+decide if a checkpoint should be started.
+
+Moreover, checkpointing libraries try to take advantage of the memory
+hierarchy to checkpoint first the process memory on unreliable (but
+fast) media, and then to upload the checkpoints in the background,
+while the application proceeds to compute. As the I/O Interference
+scheduling strategies rely on knowing when a checkpoint is started and
+when it is complete, implementing that strategy at the checkpointing
+library level is thus the natural place.
 
 %\input{steady-state.tex}
 % !TEX root =  ipdps18.tex
