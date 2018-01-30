@@ -199,7 +199,9 @@ platform throughput\footnote{When the expected checkpoint commit time
   used to compute the optimal checkpoint interval differs from the
   actual checkpoint commit time, efficiency will decrease.}. This is
 consistent with practical observations of interference conducted on
-various HPC systems~\cite{Yildiz2016,MubarakCJLJSRCB17}.
+various HPC systems~\cite{Yildiz2016,MubarakCJLJSRCB17}
+and is confirmed by the experiments reported in Section~\ref{sec:results}.
+
 
 In this work, we develop and investigate a cooperative CR scheduling
 strategy for concurrently executing HPC applications.  Our objective
@@ -906,6 +908,8 @@ other platforms. In later sections, we consider similar workloads on a more
 modern platform.
 
 \begin{table}
+\centering
+\scalebox{0.8}{%
 \begin{tabular}{|l|c|c|c|c|}
 \hline
  Workflow & EAP & LAP & Silverton & VPIC \\\hline
@@ -916,6 +920,7 @@ Initial Input (\% of memory) &  3 & 5 & 70 & 10 \\\hline
 Final Output (\% of memory) & 105 & 220 & 43 & 270 \\\hline
 Checkpoint Size (\% of memory) & 160 & 185 & 350 & 85 \\\hline
 \end{tabular}
+}
 \caption{LANL Workflow Workload from the APEX Workflows report.\label{table:lanl}}
 \end{table}
 
@@ -924,7 +929,6 @@ checkpoints, nor I/O interference. For these simulations, we selected a 60-day
 execution segment, and computed the resources used by the jobs during this
 period, \ie the total time each node spent on (non-CR) I/O and computation in a
 failure-free environment.
-
 For the I/O scheduling techniques presented in Section~\ref{sec:algorithms}, we
 compute the resource waste as the total time nodes spend not progressing jobs.
 In the figures presented, we represent the performance of each strategy by
@@ -966,7 +970,7 @@ theoretical peak of the machine, 80GB/s, and 40GB/s, which represent a
 degraded but realistic value of the achievable bandwidth when there is
 no interference.  When the system bandwidth is at its peak
 (top of the figure), the Young/Daly formula
-provides a critical tool to minimize interference; however, when no
+provides a critical tool to minimize interference; still, when no
 cooperation between the applications is enforced, a significant
 interference is observed, and applications spend in average twice the
 time in checkpointing that they did expect. A simple interference
@@ -1178,13 +1182,15 @@ across a platform.
 
 For a single application, the Young/Daly formula~\cite{young74,daly04} gives the
 optimal checkpointing period. This period minimizes platform waste, defined as the
-fraction of job execution time that does not contribute to its progress.  The two
-sources of waste are the time spent taking checkpoints (which motivates longer
-checkpoint periods) and the time needed to recover and re-execute after each failure
-(which motivates shorter checkpoint periods). The Young/Daly period achieves the
-optimal trade-off between these sources to minimize the total waste. Arunagiri et
+fraction of job execution time that does not contribute to its progress. 
+%The two
+%sources of waste are the time spent taking checkpoints (which motivates longer
+%checkpoint periods) and the time needed to recover and re-execute after each failure
+%(which motivates shorter checkpoint periods). The Young/Daly period achieves the
+%optimal trade-off between these sources to minimize the total waste. 
+Arunagiri et
 al.~\cite{Arunagiri2010} studied longer, sub-optimal periods with the intent of
-reducing I/O pressure and showed, both analytically and empircally using four real
+reducing I/O pressure and showed, both analytically and empirically using four real
 platforms, that a decrease in the I/O requirement can be achieved with only a small
 increase in waste.
 
