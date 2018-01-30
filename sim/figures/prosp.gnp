@@ -10,7 +10,7 @@
 #    	gnuplot home:     http://www.gnuplot.info
 #    	faq, bugs, etc:   type "help FAQ"
 #    	immediate help:   type "help"  (plot window: hit 'h')
-set terminal lua tikz
+set terminal lua tikz size 6in,3in
 set output "prosp.tex"
 unset clip points
 set clip one
@@ -117,7 +117,7 @@ unset paxis 4 tics
 unset paxis 5 tics
 unset paxis 6 tics
 unset paxis 7 tics
-set title "Prospective System"
+#set title "Prospective System"
 set title  font "" norotate
 set timestamp bottom
 set timestamp ""

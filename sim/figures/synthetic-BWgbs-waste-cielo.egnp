@@ -10,7 +10,7 @@
 #    	gnuplot home:     http://www.gnuplot.info
 #    	faq, bugs, etc:   type "help FAQ"
 #    	immediate help:   type "help"  (plot window: hit 'h')
-set terminal lua tikz
+set terminal lua tikz size 6in,3in
 set output sprintf("synthetic-%03dgbs-waste-cielo.tex", BW)
 unset clip points
 set clip one
@@ -118,7 +118,7 @@ unset paxis 4 tics
 unset paxis 5 tics
 unset paxis 6 tics
 unset paxis 7 tics
-set title sprintf("System: Cielo; System Aggregated Bandwidth: %dGB/s", BW)
+#set title sprintf("System: Cielo; System Aggregated Bandwidth: %dGB/s", BW)
 set title  font "" norotate
 set timestamp bottom 
 set timestamp "" 
@@ -178,6 +178,7 @@ base=50
 bwstr = sprintf("%g", BW*1e9)
 set key horizontal maxrows 3 width 4 at screen .5,-.07
 load "style.gnp"
+
 plot "<awk '$1==\"Simple\" && $2==" . bwstr . " {print}' 1h-ckpt-cielo.dat" u (0.925*$3*17784.0/3600.0/24.0/365.0):(1-column(base+9)):(1-column(base+7)):(1-column(base+13)):(1-column(base+11)) w candlestick t '\propfixed' ls ls_propfixed \
    ,                                                                     "" u (0.925*$3*17784.0/3600.0/24.0/365.0):(1-column(base+5)) w p t "" ls ls_whitepoint \
    , "<awk '$1==\"Simple\" && $2==" . bwstr . " {print}' daly-ckpt-cielo.dat" u (0.95*$3*17784.0/3600.0/24.0/365.0):(1-column(base+9)):(1-column(base+7)):(1-column(base+13)):(1-column(base+11)) w candlestick t '\propdaly' ls ls_propdaly \
