@@ -84,7 +84,6 @@
 \def\cooperative{\leastwaste}
 
 \title{Optimal Cooperative Checkpointing for Shared High-Performance Computing Platforms
-\thanks{Based in part upon work supported by the National Science Foundation under Grant Number 1564133, ``Toward Extreme Scale Fault-Tolerance: Exploration Methods, Comparative Studies and Decision Processes''.}
 }
 
 \author{
@@ -151,7 +150,6 @@ storage partition are typically shared amongst application instances.
 Therefore, without careful consideration, network and storage contention can
 reduce individual application and overall system
 performance~\cite{Bhatele:2013:Neighborhood}.
-
 On these platforms, checkpoint/restart (CR) is the most common
 strategy employed to protect applications from underlying faults and
 failures.  Generally, CR periodically outputs snapshots (\ie
@@ -168,20 +166,17 @@ application-specific metrics to determine its optimal checkpoint period. In the
 second approach, the well-known Young/Daly formula~\cite{young74,daly04} yields
 an application optimal checkpoint period, $\sqrt{2 \mu C}$ seconds, where $C$
 is the time to commit a checkpoint and $\mu$ the application Mean Time Between
-Failures (MTBF) of the platform.  In most cases, $\mu = \frac{\muind}{q}$,
+Failures (MTBF) of the application: $\mu = \frac{\muind}{q}$,
 where $q$ is the number of processors enrolled by the application and $\muind$
-is the MTBF of an individual processor~\cite{springer-monograph}. Therefore,
-both $\mu$ and $C$ in the Young/Daly formula are application-dependent, and
+is the MTBF of an individual processor~\cite{springer-monograph}. 
+Both $\mu$ and $C$ in the Young/Daly formula are application-dependent, and
 optimal periods can be quite different over the application spectrum.
 
 Independent CR of concurrent application instances can incur significant
 resource wastage, because they lead to an inefficient usage of an already
 scarce resource, namely available I/O bandwidth~\cite{Luu:2015:Multiplatform}.
-There are two major reasons for this:
-
-\begin{compactitem}
-        
-\item \emph{Application-CR I/O contention}: On many systems, the I/O subsystem
+There are two major reasons for this:\\
+$\bullet$ \emph{Application-CR I/O contention}: On many systems, the I/O subsystem
 does not have enough available usable bandwidth to meet the requirements of the
 concurrent application workloads~\cite{Luu:2015:Multiplatform}. This congestion
 is expected to worsen going forward with the increased prevelance of data
@@ -190,11 +185,10 @@ bandwidth.  Concurrently executing applications typically perform regular
 (non-CR) I/O operations throughout their execution, so that only a fraction
 $\bandavail$ of the total bandwidth remains available for checkpoints.  This
 fraction may be insufficient, particularly when some applications perform
-intensive non-checkpoint I/O and others may write very large checkpoints.
+intensive non-checkpoint I/O and others may write very large checkpoints.\\
   % $\bandtotal$ of a well-provisioned platform should allow for efficient CR
   % I/O activities.
-
-\item \emph{CR-CR I/O contention}: Most importantly, there is a high
+$\bullet$ \emph{CR-CR I/O contention}: Most importantly, there is a high
 probability of overlapping CR activity amongst concurrent application
 instances.  Consider the simple case where two applications of same size
 checkpoint simultaneously a file of the same size. Each will be assigned half
@@ -202,9 +196,17 @@ the fraction $\bandavail$ to checkpoint, therefore the commits will take twice
 as long. Such interferences can severely decrease application efficiency and
 overall platform throughput\footnote{When the expected checkpoint commit time
 used to compute the optimal checkpoint interval differs from the actual
-checkpoint commit time, effciency will decrease.}.
+checkpoint commit time, efficiency will decrease.}.
 
-\end{compactitem}
+\begin{figure*}[t]
+  \begin{center}
+    \includegraphics[width=.4\linewidth]{sim/figures/ckpt-slowdown-160Gbs.pdf} \quad
+     \includegraphics[width=.4\linewidth]{sim/figures/ckpt-slowdown-40Gbs.pdf}
+ \end{center}
+    \caption{\label{fig:ckps-slow-160-40}Slowdown of checkpoints due to
+      interference for the APEX Workshop workflow when simulating the
+      Cielo platform with an effective bandwidth of 160GB/s (left) and 40GB/s (right).}
+ \end{figure*}
 
 To illustrate the second point, we conducted the following simulation (whose
 parameters and conditions are described in more
@@ -224,40 +226,21 @@ Depending on the filesystem availability and the MTBF of the machine
 also by changing the optimal checkpoint interval), 
 applications spend more time to commit their checkpoint 
 than they would if there was no
-interference. Figures~\ref{fig:ckps-slow-160}
-and~\ref{fig:ckps-slow-40} illustrate how much the average checkpoint
+interference. Figures~\ref{fig:ckps-slow-160-40}
+illustrates how much the average checkpoint
 commit is slowed down as a function of the machine MTBF, for two
-system I/O bandwidth: 160GB/s, which is the theoretical peak of the
+system I/O bandwidths: 160GB/s, which is the theoretical peak of the
 machine, and 40GB/s, which represents a degraded but realistic value of the achievable
 bandwidth when there is no interference.
-
-\begin{figure}[t]
-  \begin{center}
-    \includegraphics[width=.9\linewidth]{sim/figures/ckpt-slowdown-160Gbs.pdf}
-    \caption{\label{fig:ckps-slow-160}Slowdown of Checkpoints due to
-      Interference for the APEX Workshop workflow when simulating the
-      Cielo platform with an effective bandwidth of 160GB/s.}
-  \end{center}
-\end{figure}
-
-\begin{figure}[t]
-  \begin{center}
-    \includegraphics[width=.9\linewidth]{sim/figures/ckpt-slowdown-40Gbs.pdf}
-    \caption{\label{fig:ckps-slow-40}Slowdown of Checkpoints due to
-      Interference for the APEX Workshop workflow when simulation the
-      Cielo platform with an effective bandwidth is 40GB/s.}
-  \end{center}
-  \end{figure}
-
 When the system bandwidth is at its peak
-(Figure~\ref{fig:ckps-slow-160}), the Young/Daly formula provides a
+(Figure~\ref{fig:ckps-slow-160-40}, left), the Young/Daly formula provides a
 critical tool to minimize interference; however, when no cooperation
 between the applications is enforced, a significant interference is
 observed, and applications spend in average twice the time in
 checkpointing that they did expect. A simple interference management
 policy, like FCFS, reduces this dramatically, for all values of the
 MTBF.  However, when the bandwidth is more constraint
-(Figure~\ref{fig:ckps-slow-40}), and when the node MTBF is shorter,
+(Figure~\ref{fig:ckps-slow-160-40}, right), and when the node MTBF is shorter,
 interferences introduce a significant slowdown for all
 strategies. This is consistent with practical observations of
 interference conducted on various HPC systems~\cite{Yildiz2016,MubarakCJLJSRCB17}.
@@ -288,35 +271,19 @@ throughput. This cooperative checkpoint process is calculated such
 that there is no I/O interference and minimal re-work to be done when
 failures occur.
 
-Therefore, the main contributions of this paper are the following:
-
-\begin{itemize}
-
-\item Development of a model allowing for the quantification of
+The main contributions of this paper are the following:
+(i) Development of a model allowing for the quantification of
 the I/O interference of checkpointing applications sharing a common underlying I/O
-substrate.
-
-\item Investigation of the costs of various I/O-aware scheduling
-strategies through both steady-state analysis as well as detailed simulations.
-
-\item A detailed survey of a number scheduling strategies: from oblivious
+substrate; (ii)
+Investigation of the costs of various I/O-aware scheduling
+strategies through both steady-state analysis as well as detailed simulations; (iii)
+Survey of a number scheduling strategies: from oblivious
 algorithms similar to  those currently deployed on many large-scale platforms,
 to ones which exploit application knowledge in an effort to  minimize the total
-system waste by scheduling the application with the most critical I/O needs.
-
-\item An extensive set fo simulations that assess the dramatic impact of checkpoint interference
+system waste by scheduling the application with the most critical I/O needs; and (iv)
+Extensive set of simulations that assess the dramatic impact of checkpoint interference
 and demonstrate the usefulness of cooperative strategies for current and forthcoming HPC systems.
-\end{itemize}
 
-% - a model to predict the shared I/O impact on multiple applications scenarios
-% - I/O scheduling algorithms for non-cooperative application scheduling
-%   - non-cooperative I/O scheduling: apps are selected to fill the gaps based on processor count (traditional approach)
-%   - blocking FIFO I/O scheduling: favor one of the I/O application
-%   - non-blocking FIFO I/O scheduling: same as above but the cost of the queueing the app is now independent of the interference pattern
-%   - least-waste algorithm: select the app that will minimize the system waste (I/O or C/R candidate)
-% - steady state analysis
-% - simulation
-% - results
 
 The rest of the paper is organized as follows. Our model is described in
 \Cref{sec:model}, followed by a description of the various scheduling
@@ -326,7 +293,7 @@ lower bound of the optimal platform waste. \Cref{sec:simulator} describes the
 discrete event simulator used to quantitatively compare the different
 scheduling strategies.  \Cref{sec:results} presents the results of the
 simulation, providing guidance on the necessary I/O bandwidth for  current and
-future systems. This work concludes with related works described in \Cref{sec:related},
+future systems.  \Cref{sec:related} surveys related work and is
 followed by a summary and future directions outlined in \Cref{sec:conclusion}.
 
 % - Section~\ref{sec:model} describe the scenario under investigation
@@ -351,14 +318,14 @@ followed by a summary and future directions outlined in \Cref{sec:conclusion}.
 
 \paragraph*{Computational Platform Model}
 
-In this work, we consider a shared platform comprised of computational
+We consider a shared platform comprised of computational
 nodes, storage resources in the form of a parallel file system (PFS), and a network
 that interconnects the nodes and storage resources. Applications are
 scheduled on the platform by a job scheduler such that computational nodes are
-space-shared (dedicated) amongst concurrent application instances. However, the I/O
+space-shared (dedicated) amongst concurrent application instances. The I/O
 subsystem is time-shared (contended) amongst application instances  (\ie multiple
 applications performing I/O simultaneously result in a per-application reduction
-in commit speed). Without loss of generality, we consider a straightforward linear
+in commit speed). Without loss of generality, we consider a linear
 interference model in which the global throughput remains constant and is evenly
 shared among contending applications, proportional to their size\footnote{A more
 adversarial interference model can be substituted, if needed.}.
@@ -373,16 +340,11 @@ storing an output file at completion. Because applications are long-running,
 are protected using coordinated CR that incurs periodic \emph{CR I/O}.
 
 To model these behavioral variations with minimal parameters, we make the following
-simplifying assumptions:
-\begin{compactitem}
-\item There is a large number of applications, but only a small number of application
+simplifying assumptions: (i) There is a large number of applications, but only a small number of application
   classes, \ie, sets of applications with similar sizes, durations, footprints and
-  I/O needs;
-\item Excluding initialization and finalization I/O, an application's regular
-  (non-CR) I/O operations are evenly distributed over its makespan;
-\item Job makespans are known a priori. This allows us to ignore all other
+  I/O needs; (ii) Excluding initialization and finalization I/O, an application's regular
+  (non-CR) I/O operations are evenly distributed over its makespan; and (iii) Job makespans are known a priori. This allows us to ignore all other
   sources of job disturbance except C/R overheads.
-\end{compactitem}
 
 We use specific numbers and characteristics of application classes based on
 documented production workloads, such as those provided in the APEX workflows report
@@ -658,8 +620,8 @@ Then  $J_{i}$ will use the I/O resource for $v_{i}$ seconds.
 \begin{compactitem}
 %
   \item Every other job $J_{j} \in \Catiocat$ will stay idle for $v_{i}$
-  additional seconds, hence its waste $\wapp{i}{j}$ is $$\wapp{i}{j} = q_{j}
-  (d_{j} + v_{i})$$ since there are $q_{j}$ processors enrolled in $J_{j}$ that
+  additional seconds, hence its waste $\wapp{i}{j}$ is $\wapp{i}{j} = q_{j}
+  (d_{j} + v_{i})$ since there are $q_{j}$ processors enrolled in $J_{j}$ that
   remain idle for $d_{j} + v_{i}$ seconds. Note that for $J_{j} \in \Catiocat$, the
   waste $\wapp{i}{j}$ is deterministic.
 %
@@ -669,7 +631,7 @@ Then  $J_{i}$ will use the I/O resource for $v_{i}$ seconds.
   a failure is $v_{i}/\mu_{j}$, where $\mu_{j} =
   \muind/q_{j}$. With this
   probability, the $q_{j}$ processors will have to recover and re-execute $d_{j} +
-  v_{i}/2$ seconds of work, hence the waste $\wapp{i}{j}$ is $$\wapp{i}{j} =
+  v_{i}/2$ seconds of work, hence we have $$\wapp{i}{j} =
   \frac{v_{i}}{\mu_{j} } q_{j} (\reco{j} + d_{j} + \frac{v_{i}}{2}) =
   \frac{v_{i}}{\muind} q^{2}_{j} (\reco{j} + d_{j} + \frac{v_{i}}{2})$$ where
   $\reco{j}$ is the recovery time for $J_{j}$. Note that for $J_{j} \in
@@ -678,7 +640,7 @@ Then  $J_{i}$ will use the I/O resource for $v_{i}$ seconds.
  \end{compactitem}
  Altogether, the expected waste $\wap{i}$ incurred
 to the other $r+s-1$ candidate jobs is
-$$\wap{i} = \sum_{J_{j} \in \Catiocat, j\neq i} \wapp{i}{j} + \sum_{J_{j} \in \Catckptcat} \wapp{i}{j}$$
+$\wap{i} = \sum_{J_{j} \in \Catiocat, j\neq i} \wapp{i}{j} + \sum_{J_{j} \in \Catckptcat} \wapp{i}{j}$.
 We obtain
 \begin{equation}
 \label{eq.selection}
@@ -741,7 +703,6 @@ We now derive a lower bound for optimal platform waste.  When we assess the
 performance of the scheduling algorithms presented in \Cref{sec:algorithms}, we
 also compare their relative performance to this lower bound (in
 \Cref{sec:results}).
-
 We envision a (theoretical) scenario in which the platform operates in
 steady-state, a constant number of jobs per application class spanning the
 entire platform.  We also assume that the I/O bandwidth $\bandavail$ available
@@ -766,8 +727,8 @@ during each period to checkpoint; and in case of failure, the time to rollback
 to the previous checkpoint and the time to recompute lost work.
 %We assume that the recovery time $\reco{i}$ is equivalent to the checkpoint
 %time  $\ckpt{i}$.
-We can express the waste $\wasteapp{i}$ of a job $J_{i}$ of class $\app{i}$
-that checkpoints with period $\period{i}$ as follows~\cite{springer-monograph}:
+We express the waste $\wasteapp{i}$ of a job $J_{i}$ of class $\app{i}$
+that checkpoints with period $\period{i}$ as~\cite{springer-monograph}:
 
 \begin{equation}
 \wasteapp{i} = \wastefct{i}{\ckpt{i}} = \frac{\ckpt{i}}{\period{i}} +
@@ -775,11 +736,9 @@ that checkpoints with period $\period{i}$ as follows~\cite{springer-monograph}:
 \label{eq.wasteAi}
 \end{equation}
 
-Let $\wasteplat$ be the waste of the platform. We define this as the
+Let $\wasteplat$ be the waste of the platform, defined as the
 weighted arithmetic mean of the $\wasteapp{i}$ for all applications,
-where each application is weighted by the number of computing nodes
-it uses:
-
+where each application is weighted by its number of computing nodes:
 \begin{equation}
 \wasteplat = \sum_i \frac{\nbapp{i} \nbnodes{i}}{\nbnodesplat} \wasteapp{i}
 \label{eq.waste}
@@ -789,9 +748,8 @@ In the absence of I/O constraints, the checkpointing period can be minimized
 for each job independently. Indeed, the optimal period for a job
 of class $\app{i}$ is obtained by minimizing $\wasteapp{i}$ in 
 Equation~\eqref{eq.wasteAi}.
-
 Differentiating and solving
-$$\frac{\delta \wasteapp{i}}{\delta \period{i}} = - \frac{\ckpt{i}}{\period{i}^{2}} + \frac{\nbnodes{i}}{2 \mtbfplat} = 0$$
+$\frac{\delta \wasteapp{i}}{\delta \period{i}} = - \frac{\ckpt{i}}{\period{i}^{2}} + \frac{\nbnodes{i}}{2 \mtbfplat} = 0$,
 we readily derive that
 \begin{equation}
 \period{i} = \sqrt{2 \frac{\mtbfplat}{\nbnodes{i}} \ckpt{i}} = \sqrt{2 \mu_{i} \ckpt{i}}
@@ -800,11 +758,11 @@ we readily derive that
 where $\mu_{i}$ is the MTBF of  class $\app{i}$ applications, and we retrieve the Daly period
 $\period{i} = \period{Daly}(J_{i})$.
 
-However, I/O constraints may impose the use of sub-optimal periods. If each job
+I/O constraints may impose the use of sub-optimal periods. If each job
 of class $\app{i}$ checkpoints in time $\ckpt{i}$ during its period $\period{i}$ (hence
 without any contention), it uses the I/O device during a fraction $\frac{\ckpt{i}}{\period{i}}$ of the time.
 The total usage fraction of the  I/O device is $\ioconstraint = \sum_{i} \frac{\nbapp{i} \ckpt{i}}{\period{i}}$
-and cannot exceed $1$. Therefore, we have to solve the following optimization problem: find
+and cannot exceed $1$. We have to solve the following optimization problem: find
 the set of values $\period{i}$ that minimize $\wasteplat$ in Equation~\eqref{eq.waste} subject to the I/O constraint:
 
 \begin{equation}
@@ -822,24 +780,22 @@ subject to Equation~\eqref{eq.IOconstraint}.
 Using the Karush-Kuhn-Tucker conditions~\cite{Boyd2004}, we know that there exists a nonnegative constant
 $\lambda$
 such that
-$$- \frac{\delta \wasteplat}{\delta \period{i}} = \lambda \frac{\delta \ioconstraint}{\delta \period{i}}$$
+$- \frac{\delta \wasteplat}{\delta \period{i}} = \lambda \frac{\delta \ioconstraint}{\delta \period{i}}$
 for all $i$. We derive that
-$$\frac{\nbapp{i} \nbnodes{i} \ckpt{i}}{\nbnodesplat \period{i}^{2}} -    \frac{\nbapp{i} \nbnodes{i}^{2}}{2 \mtbfplat \nbnodesplat} = - \lambda \frac{\nbapp{i} \ckpt{i}}{\period{i}^{2}}
-$$
+$\frac{\nbapp{i} \nbnodes{i} \ckpt{i}}{\nbnodesplat \period{i}^{2}} -    \frac{\nbapp{i} \nbnodes{i}^{2}}{2 \mtbfplat \nbnodesplat} = - \lambda \frac{\nbapp{i} \ckpt{i}}{\period{i}^{2}}
+$
 for all $i$. This leads to:
  \begin{equation}
 \period{i} = \sqrt{\frac{2 \mtbfplat  \nbnodesplat}{\nbnodes{i}^{2}} \left(\frac{\nbnodes{i}}{\nbnodesplat} +\lambda \right) \ckpt{i}}
   \label{eq.KKT}
 \end{equation}
 for all $i$. Note that when $\lambda=0$, Equation~\eqref{eq.KKT} reduces to Equation~\eqref{eq.daly}.
-
 Because of the I/O constraint in Equation~\eqref{eq.IOconstraint}, we choose
 for $\lambda$ the minimum value such that Equation~\eqref{eq.IOconstraint} is
 satisfied. If $\lambda \neq 0$, this will lead to periods $P_{i}$ larger than
 the optimal value of Equation~\eqref{eq.daly}. Note that there is no
 closed-form expression for the minimum value of $\lambda$, it has to be found
 numerically.
-
 Altogether, we state our main result:
 
 \begin{theorem}
