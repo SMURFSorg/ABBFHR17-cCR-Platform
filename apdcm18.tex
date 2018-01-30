@@ -1,14 +1,12 @@
-\documentclass[sigconf]{acmart}
-\usepackage[american]{babel}
-\usepackage[T1]{fontenc}
-\usepackage[utf8]{inputenc}
+\documentclass[conference,nofonttune]{IEEEtran}
 
-
-%\usepackage[hidelinks]{hyperref}
+\usepackage[hidelinks]{hyperref}
 %\hypersetup{hypertexnames=false}
 
 \newif\ifTR
 \TRfalse
+
+\IEEEoverridecommandlockouts
 
 \usepackage{graphicx}
 \usepackage{amsmath,amssymb,amsfonts,amsthm}
@@ -22,8 +20,8 @@
 \usepackage{verbatim}
 \usepackage{cleveref}
 
-%\addtolength{\textfloatsep}{-1.5em}
-%\addtolength{\abovecaptionskip}{-1.25em}
+\addtolength{\textfloatsep}{-1.5em}
+\addtolength{\abovecaptionskip}{-1.25em}
 
 \usepackage{array}
 \newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
@@ -32,10 +30,10 @@
 
 \usepackage{gnuplot-lua-tikz}
 
-%\newtheorem{example}{Example}
-%\newtheorem{theorem}{Theorem}
+\newtheorem{example}{Example}
+\newtheorem{theorem}{Theorem}
 
-%\newcommand*{\email}[1]{\href{mailto:#1}{\nolinkurl{#1}} }
+\newcommand*{\email}[1]{\href{mailto:#1}{\nolinkurl{#1}} }
 \newcommand{\ie}[0]{\emph{i.e.}\xspace}
 \newcommand{\eg}[0]{\emph{e.g.}\xspace}
 
@@ -85,27 +83,35 @@
 \def\fifodaly{\fifononblock-Daly\xspace}
 \def\cooperative{\leastwaste}
 
-\setcopyright{acmcopyright}
-\acmConference[HPDC]{HPDC}{2018}{Tempe, AZ, USA}
-\acmYear{2018}
-\copyrightyear{2018}
-
-
-
-\title[Optimal Cooperative Checkpointing]{Optimal Cooperative Checkpointing for Shared High-Performance Computing Platforms}
-
-%\thanks{Based in part upon work supported by the National Science Foundation under Grant Number 1564133, ``Toward Extreme Scale Fault-Tolerance: Exploration Methods, Comparative Studies and Decision Processes''.}
-
-\author[T. Herault, Y. Robert, A. Bouteiller, D. Arnold, K.B. Ferreira, G. Bosilca, J. Dongarra]{Thomas Herault$^{1}$, Yves Robert$^{1,2}$, Aurelien Bouteiller$^{1}$, Dorian Arnold$^{3}$,\\
-Kurt B.~Ferreira$^{4}$, George Bosilca$^{1}$, Jack Dongarra$^{1,5}$}
-\affiliation{
-	\institution{$1.$ LIP, Ecole Normale Sup\'erieure de Lyon, France\\
-	$2.$ Innovative Computing Lab, University of Tennessee, Knoxville, TN, USA\\
-	$3.$ Emory University, Atlanta, GA, USA\\
-	$4.$ Center for Computing Research, Sandia National Laboratory, USA\\
-	$5.$ University of Manchester, UK}
+\title{Optimal Cooperative Checkpointing for Shared High-Performance Computing Platforms
+\thanks{Based in part upon work supported by the National Science Foundation under Grant Number 1564133, ``Toward Extreme Scale Fault-Tolerance: Exploration Methods, Comparative Studies and Decision Processes''.}
 }
-\email{{herault|bouteill|bosilca|dongarra}@icl.utk.edu, yves.robert@ens-lyon.fr, darnold@cs.unm.edu, kbferre@sandia.gov}
+
+\author{
+\IEEEauthorblockN{Thomas Herault\IEEEauthorrefmark{1},
+Yves Robert\IEEEauthorrefmark{2}\IEEEauthorrefmark{1},
+Aurelien Bouteiller\IEEEauthorrefmark{1},
+Dorian Arnold\IEEEauthorrefmark{3},\\
+Kurt B.~Ferreira\IEEEauthorrefmark{4},
+George Bosilca\IEEEauthorrefmark{1},
+Jack Dongarra\IEEEauthorrefmark{1},\IEEEauthorrefmark{5}}
+\IEEEauthorblockA{\IEEEauthorrefmark{1}Innovative Computing Lab.
+The University of Tennessee, Knoxville, TN, USA\\
+\IEEEauthorrefmark{2}ENS Lyon, Lyon, France\\
+\IEEEauthorrefmark{3}Emory University, Atlanta, GA, USA\\
+\IEEEauthorrefmark{4}Center for Computing Research, Sandia National Laboratory, USA\\
+\IEEEauthorrefmark{5}University of Manchester, UK
+%\thanks{
+%Sandia National Laboratories is a multimission laboratory managed and operated
+%by National Technology and Engineering Solutions of Sandia, LLC., a wholly owned
+%subsidiary of Honeywell International, Inc., for the U.S. Department of Energy’s
+%National Nuclear Security Administration under contract DE-NA0003525.}
+}
+}
+
+\begin{document}
+
+\maketitle
 
 \begin{abstract}
 In high-performance computing environments, input/output (I/O) from various
@@ -129,8 +135,6 @@ large-scale workloads in the presence of competing I/O while minimizing the impa
 on application performance.
 \end{abstract}
 
-\begin{document}
-\maketitle
 
 \section{Introduction}
 \label{sec:intro}
