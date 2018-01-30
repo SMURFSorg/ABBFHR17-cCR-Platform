@@ -1,7 +1,7 @@
 MAPLE=/Applications/Maple\ 2017/maple
 
-TEXs:=synthetic-01hMTBF-waste-cielo.tex synthetic-040gbs-waste-cielo.tex prosp.tex
-DAT:=1h-ckpt-cielo.dat daly-ckpt-cielo.dat model.dat prosp.dat
+TEXs:=synthetic-01hMTBF-waste-cielo.tex synthetic-040gbs-waste-cielo.tex prosp.tex ckpt-slowdown.tex
+DAT:=1h-ckpt-cielo.dat daly-ckpt-cielo.dat model.dat prosp.dat ckpt-slowdown.dat
 
 all: $(TEXs)
 
@@ -16,6 +16,12 @@ prosp.tex: prosp.dat prosp.gnp style.gnp prosp-model.dat
 
 prosp.dat: prosp.csv prosp-csv2dat.py
 	python prosp-csv2dat.py
+
+ckpt-slowdown.tex: ckpt-slowdown.dat ckpt-slowdown.gnp
+	gnuplot ckpt-slowdown.gnp
+
+ckpt-slowdown.dat: ckpt-slowdown.py 1h-ckpt-cielo.dat daly-ckpt-cielo.dat
+	python ckpt-slowdown.py
 
 prosp-model.dat: prosp-model.mpl
 	$(MAPLE) prosp-model.mpl
