@@ -10,8 +10,10 @@
 #    	gnuplot home:     http://www.gnuplot.info
 #    	faq, bugs, etc:   type "help FAQ"
 #    	immediate help:   type "help"  (plot window: hit 'h')
-set terminal lua tikz
-set output sprintf("synthetic-%02dhMTBF-waste-cielo.tex", MTBF)
+#set terminal lua tikz
+#set output sprintf("synthetic-%02dhMTBF-waste-cielo.tex", MTBF)
+set terminal pdf
+set output sprintf("synthetic-%02dhMTBF-waste-cielo.pdf", MTBF)
 unset clip points
 set clip one
 unset clip two
@@ -117,7 +119,7 @@ unset paxis 4 tics
 unset paxis 5 tics
 unset paxis 6 tics
 unset paxis 7 tics
-set title sprintf("System: Cielo; Node MTBF: 2 years", MTBF)
+set title sprintf("System: Cielo; System MTBF: %dh", MTBF)
 set title  font "" norotate
 set timestamp bottom
 set timestamp ""

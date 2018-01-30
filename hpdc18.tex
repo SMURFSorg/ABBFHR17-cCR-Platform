@@ -213,7 +213,7 @@ they are slowed down proportionally to the amount of processes that
 share the bandwidth (we call this \emph{No Interference Management},
 or the first checkpoint completes before the next one can start (we
 call this \emph{FCFS Interference Management}, and discuss further how
-this can be implemented in Section~\ref{sec:XX}).
+this can be implemented in Section~\ref{sec:feasibility}).
 
 Depending on the filesystem availability and the MTBF of the machine
 (which impacts the results by introducing more or less failures, but
@@ -700,6 +700,7 @@ Finally, we select the job $J_{i} \in \Catiocat \cup \Catckptcat$
 whose waste $\wap{i}$ is minimal. 
 
 \subsection{Feasibility of Cooperative Strategies}
+\label{sec:feasibility}
 
 The cooperative strategies (\fifoblock, \fifononblock, and
 \leastwaste) require a form of synchronization to be implemented. This
