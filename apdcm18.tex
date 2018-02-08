@@ -324,7 +324,7 @@ Daly's~\cite{young74,daly04} optimal checkpoint period detailed in
 \Cref{sec:intro}. The parameters in this formula are dependent
 upon application features (checkpoint dataset size) and platform features (system
 reliability and I/O bandwidth).  For fixed, application-defined periods, a common
-heuristic is to take a checkpoint every hour -- capping the worst case amount of lost
+heuristic in compute centers is to take a checkpoint every hour -- capping the worst case amount of lost
 work at one hour.  In the reminder of this paper we will refer to the two variants as
 \emph{Fixed} (with a 1 hour period unless otherwise specified) and \emph{Daly}.
 
@@ -435,7 +435,7 @@ not coordinated by the system.  Instead, jobs use the parallel file system
 assuming they are the sole user -- with no modifications made to their access
 patterns to accommodate for possible interference. One has observed
 that concurrent I/O resource access can decrease the I/O bandwidth
-observed~\cite{Dorier2015}.  Under the conditions of an under-provisioned I/O
+observed by applications~\cite{Dorier2015}.  Under the conditions of an under-provisioned I/O
 substrate, our model gives each I/O stream a decrease in bandwidth linearly
 proportional to the number of competing operations.  We account for the
 additional delays imposed by this decreased available bandwidth as
@@ -466,7 +466,7 @@ in the \nocoop strategy, both jobs take $\frac{V}{\frac{\bandavail}{2}}$ time
 to complete their I/O.  In the \fifoblock strategy, the first scheduled job
 takes only $\frac{V}{\bandavail}$, while the second job waits
 $\frac{V}{\bandavail}$ before its own I/O starts, but then executes at full
-available bandwidth completing in $\frac{2V}{\bandavail}$.  Reducing I/O
+available bandwidth completing in $\frac{2V}{\bandavail}$. Thus, reducing I/O
 interference reduces the average I/O completion time (although fairness may be
 decreased).  Once again, however, observed checkpoint durations may increase
 past $\ckpt{i}$, due to I/O scheduling wait time, and the checkpointing period
@@ -572,10 +572,9 @@ $\bullet$ Every other job $J_{j} \in \Catiocat$ stays idle for $v_{i}$
   waste $\wapp{i}{j}$ is deterministic.\\
 $\bullet$ Every job $J_{j} \in \Catckptcat$ continues executing for
   $v_{i}$ additional seconds, hence will be exposed to the risk of a failure
-  striking within $v_{i}/2$ seconds on average. The probability of such
-  a failure is $v_{i}/\mu_{j}$, where $\mu_{j} =
-  \muind/q_{j}$. With this
-  probability, the $q_{j}$ processors will have to recover and re-execute $d_{j} +
+  with probability $v_{i}/\mu_{j}$, where $\mu_{j} =
+  \muind/q_{j}$. The cost of such a failure will be $v_{i}/2$ seconds on average.
+  Thus, overall, the $q_{j}$ processors will have to recover and re-execute $d_{j} +
   v_{i}/2$ seconds of work, hence we have $\wapp{i}{j} =
   \frac{v_{i}}{\mu_{j} } q_{j} (\reco{j} + d_{j} + \frac{v_{i}}{2}) =
   \frac{v_{i}}{\muind} q^{2}_{j} (\reco{j} + d_{j} + \frac{v_{i}}{2})$, where
