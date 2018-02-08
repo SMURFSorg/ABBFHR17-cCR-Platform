@@ -820,7 +820,7 @@ jobs that were not started yet.
 \paragraph*{Execution Simulation}
 
 Once a job is started, it executes its initial input. It then, 1.)~executes
-some work for a certain period before it, and 2.)~checkpoints. These two steps
+some work for a certain period, and 2.)~checkpoints. These two steps
 are repeated until all planned work is executed, after which the final output
 is executed by the job, before it ends.  At any time during the execution, a
 node hosting the job may be subject to a failure (according to the pre-computed
@@ -851,10 +851,11 @@ Equations~\eqref{eq.selection} and~\eqref{eq.selection2}.
 
 Note that in the scheduled I/O methods (\fifononblock and \cooperative),
 initial inputs and final outputs are blocking (the job cannot progress during
-the I/O until it is served), but checkpoints are non-blocking, which means that
-if a failure hits the job, it may have to re-execute from a checkpoint far in
-its past if it has  not been granted access to the filesystem for an extended
-period of time.
+the I/O until it is served), but checkpoints are non-blocking.
+%%%Aurelien: this is non-specific and also holds for blocking approaches through a different channel; also, I needed space and this is a repeat.
+%which means that if a failure hits the job, it may have to re-execute from a checkpoint far in
+%its past if it has  not been granted access to the filesystem for an extended
+%period of time.
 
 
 \paragraph*{Method of statistics collection from simulations}
