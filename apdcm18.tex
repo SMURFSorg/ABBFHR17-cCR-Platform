@@ -117,14 +117,14 @@ In high-performance computing environments, input/output (I/O) from various
 sources often contend for scarce available bandwidth. Adding to the I/O
 operations inherent to the failure-free execution of an application, I/O
 from checkpoint/restart (CR) operations (used to ensure progress in the presence
-of failures) places an additional burden as it increases I/O contention,
+of failures) place an additional burden as it increase I/O contention,
 leading to degraded performance.  In this work, we consider a cooperative scheduling policy that optimizes the
 overall performance of concurrently executing CR-based applications which share
 valuable I/O resources.  First, we provide a theoretical model and then derive a set
 of necessary constraints needed to minimize the global \emph{waste} on the
 platform.
-  Our results demonstrate that the optimal checkpoint interval as defined by
-Young/Daly, while providing a sensible metric for a single application, is not
+  Our results demonstrate that the optimal checkpoint interval, as defined by
+Young/Daly, despite providing a sensible metric for a single application, is not
 sufficient to optimally address resource contention at the platform scale.  We
 therefore show that combining optimal checkpointing periods with I/O scheduling
 strategies can provide a significant improvement on the overall application
@@ -165,10 +165,10 @@ or a few hours) for each application; and (ii)~using platform and
 application-specific metrics to determine its optimal checkpoint period. In the
 second approach, the well-known Young/Daly formula~\cite{young74,daly04} yields
 an application optimal checkpoint period, $\sqrt{2 \mu C}$ seconds, where $C$
-is the time to commit a checkpoint and $\mu$ the application Mean Time Between
-Failures (MTBF) of the application: $\mu = \frac{\muind}{q}$,
+is the time to commit a checkpoint and $\mu$ the Mean Time Between
+Failures (MTBF) for the application: $\mu = \frac{\muind}{q}$,
 where $q$ is the number of processors enrolled by the application and $\muind$
-is the MTBF of an individual processor~\cite{springer-monograph}. 
+is the MTBF of an individual processor~\cite{springer-monograph}.
 Both $\mu$ and $C$ in the Young/Daly formula are application-dependent, and
 optimal periods can be quite different over the application spectrum.
 
@@ -179,7 +179,7 @@ There are two major reasons for this:\\
 $\bullet$ \emph{Application-CR I/O contention}: On many systems, the I/O subsystem
 does not have enough available usable bandwidth to meet the requirements of the
 concurrent application workloads~\cite{Luu:2015:Multiplatform}. This congestion
-is expected to worsen going forward with the increased prevelance of data
+is expected to worsen going forward with the increased importance of data
 intensive workflows in HPC.  Let $\bandtotal$ be the total filesystem I/O
 bandwidth.  Concurrently executing applications typically perform regular
 (non-CR) I/O operations throughout their execution, so that only a fraction
@@ -371,7 +371,7 @@ $\nbnodesplat$ nodes. Application class $\app{i}$ specifies: (i) $\nbapp{i}$: th
 (ii) $\nbnodes{i}$: the number of nodes used by each job in $\app{i}$;
 (iii) $\period{i}$: the checkpoint period of each job in $\app{i}$; and
 (iv) $\ckpt{i}$ and $\reco{i}$: the checkpoint and recovery durations for each job in $\app{i}$ when there is no interference with other I/O operations.
-Jobs inherit their characteristics from their classes. 
+Jobs inherit their characteristics from their classes.
 For a job $J_j$, we use $\nbnodes{j}, \period{j}, \ckpt{j}$ and
 $\reco{j}$ to denote respectfully the number of nodes, checkpoint
 period, and checkpoint and recovery durations of the application class
@@ -536,7 +536,7 @@ The periods $\period{i}$ of the checkpointing requests are input parameters to
 the three strategies \nocoop, \fifoblock and \fifononblock. In
 \Cref{sec:simulator}, we instantiate each strategy with two variants: (i) using
 a fixed checkpointing period for each job; and (ii) using the Young/Daly period of each job.
- 
+
 \subsection{\leastwaste Algorithm}
 \label{sec:least-waste}
 
@@ -560,7 +560,7 @@ $\bullet$ Category \Ckptcat $\Catckptcat$: Jobs $J_{i}$, $r+1\leq i \leq r+s$,
   $J_{i}$ took its last checkpoint $d_{i}$ seconds ago and keeps executing until the
   I/O token is available for a new checkpoint. Since $J_{i}$ is a candidate,
   $d_{i} \geq \period{Daly}(J_{i})$.
-  
+
 If we select job $J_{i}$ to perform I/O, the expected waste $\wap{i}$
 incurred to the other $r+s-1$ candidate jobs in  $\Catiocat \cup
 \Catckptcat$ is computed as follows. Assume first that $J_{i} \in \Catiocat$.
@@ -611,7 +611,7 @@ of Equation~\eqref{eq.selection} for its waste $\wap{i}$:
 \end{equation}
 
 Finally, we select the job $J_{i} \in \Catiocat \cup \Catckptcat$
-whose waste $\wap{i}$ is minimal. 
+whose waste $\wap{i}$ is minimal.
 
 \subsection{Feasibility of Cooperative Strategies}
 \label{sec:feasibility}
@@ -693,7 +693,7 @@ where each application is weighted by its number of computing nodes:
 
 In the absence of I/O constraints, the checkpointing period can be minimized
 for each job independently. Indeed, the optimal period for a job
-of class $\app{i}$ is obtained by minimizing $\wasteapp{i}$ in 
+of class $\app{i}$ is obtained by minimizing $\wasteapp{i}$ in
 Equation~\eqref{eq.wasteAi}.
 Differentiating and solving
 $\frac{\delta \wasteapp{i}}{\delta \period{i}} = - \frac{\ckpt{i}}{\period{i}^{2}} + \frac{\nbnodes{i}}{2 \mtbfplat} = 0$,
@@ -874,7 +874,7 @@ first day, jobs may be synchronized artificially because a subset
 starts at the same date, and during the last day, large amounts of
 resources may not be used as new jobs are not added to the workload.
 For each aggregate measurement, we compute and show mean, first and
-ninth decile, and first and third quartile statistics. 
+ninth decile, and first and third quartile statistics.
 
 %\input{results.tex}
 % !TEX root =  ipdps18.tex
@@ -967,7 +967,7 @@ management policy, like \fifoblock, reduces this dramatically, for all
 values of the MTBF.  However, when the bandwidth is more constraint
 (bottom of the figure), and when the node MTBF is
 shorter, interferences introduce a significant slowdown for all
-strategies. 
+strategies.
 
 \begin{figure}
   \begin{center}
@@ -1108,7 +1108,7 @@ conditions.
 %
 We vary system MTBF; and for each strategy, we find the required aggregated
 practical bandwidth necessary to provide a sustained 80\% efficiency of the
-system.  This 80\% target efficiency is viewed by many programs (\eg 
+system.  This 80\% target efficiency is viewed by many programs (\eg
 The Exascale Computing Project~\textit{\url{https://exascaleproject.org}}) as a
 reasonable cost for resilience activities.
 %
@@ -1144,7 +1144,7 @@ benefits from not blocking when the filesystem is not available.
 This is sufficient, when failures are rare, to obtain a significant
 performance gain. % 4.9TB/s at 24 years
 All Daly-based strategies benefit from reduced I/O pressure, and reach the
-target efficiency with around half the bandwidth needed by \propfixed. 
+target efficiency with around half the bandwidth needed by \propfixed.
 We also observe that \fifodaly and \leastwaste remain the most efficient strategies
 for the whole MTBF spectrum. These
 results highlight that checkpoint-based strategies can scale to
@@ -1171,12 +1171,12 @@ across a platform.
 
 For a single application, the Young/Daly formula~\cite{young74,daly04} gives the
 optimal checkpointing period. This period minimizes platform waste, defined as the
-fraction of job execution time that does not contribute to its progress. 
+fraction of job execution time that does not contribute to its progress.
 %The two
 %sources of waste are the time spent taking checkpoints (which motivates longer
 %checkpoint periods) and the time needed to recover and re-execute after each failure
 %(which motivates shorter checkpoint periods). The Young/Daly period achieves the
-%optimal trade-off between these sources to minimize the total waste. 
+%optimal trade-off between these sources to minimize the total waste.
 Arunagiri et
 al.~\cite{Arunagiri2010} studied longer, sub-optimal periods with the intent of
 reducing I/O pressure and showed, both analytically and empirically using four real
@@ -1194,12 +1194,12 @@ checkpoint protocols~\cite{Cornwell11RemoteBLCR}.
 %available bandwidths of the network or other storage media like RAM in order to
 %mitigate the performance of slower storage media like spinning or solid-state
 %disks. Additionally, remotely stored checkpoints have the additional benefit of
-%allowing systems to survive non-transient node failures. Similarly, 
+%allowing systems to survive non-transient node failures. Similarly,
 Multi-level
 checkpoint protocols like SCR~\cite{Moody10SCR,Vaidya95TwoLevel} attempt to hide
 checkpoint commit times by writing checkpoints to RAM, flash storage, or local disk
 on the compute nodes~\cite{Kougkas2017} in addition to the parallel file system
-thereby improving checkpoint or general I/O bandwidth. 
+thereby improving checkpoint or general I/O bandwidth.
 %Finally, checkpoint-specific
 %file systems like PLFS~\cite{Bent09PLFS} leverage the I/O patterns and
 %characteristics specific to checkpoint data to optimize checkpoint data transfers
@@ -1223,7 +1223,7 @@ use standard compression algorithms to reduce checkpoint
 volumes~\cite{Ibtesham12Compression} and can be used at the
 compiler-level~\cite{Li90CATCH} or in-memory~\cite{Plank94ICKP}.
 %Plank et al. proposed \textit{differential compression} to reduce checkpoint
-%sizes for incremental checkpoints~\cite{Plank95CompressedDiff} and 
+%sizes for incremental checkpoints~\cite{Plank95CompressedDiff} and
 Tanzima et
 al.  show that similarities amongst checkpoint data from different processes
 can be exploited to reduce checkpoint data
