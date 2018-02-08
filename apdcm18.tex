@@ -1229,7 +1229,7 @@ Tanzima et
 al.  show that similarities amongst checkpoint data from different processes
 can be exploited to reduce checkpoint data
 volumes~\cite{tanzima12mcrengine}.  Lossy
-compression methods are studied in ~\cite{sasaki2015,Ni2014}.
+compression methods are studied in~\cite{sasaki2015,Ni2014}.
 
 \paragraph*{Avoiding I/O interference}
 
@@ -1257,13 +1257,13 @@ Unlike a number of the previous studies, our
 technique considers the interaction between existing non-CR
 application I/O and CR I/O. The proposed non-blocking approaches that
 we propose leverage the capability of applications to continue working
-(to the increased risk of having to re-execute this work) while they
+(to the increased risk of having to re-execute more work) while they
 wait for the checkpoint token to be granted. Additionally, our
 approach is agnostic to the I/O patterns of the considered
-applications as long as they are known.  Also, we attempt to optimize
+applications as long as they are known.  Also, we attempt at optimizing
 the efficiency of the entire platform, with the changing workloads and
 failures running on that platform, rather than just considering one
-workload. Finally and most importantly, this approach provides optimal
+workload. Finally, and most importantly, this approach provides optimal
 checkpointing periods in environments where I/O is highly constrained
 and Daly/Young's formula is less appropriate, a common scenario on
 many leadership-class systems.
@@ -1273,7 +1273,7 @@ many leadership-class systems.
 \section{Conclusion and Future Work} \label{sec:conclusion}
 % Primary: Aurélien
 
-As we design larger, likely more error-prone, platforms, effectively protecting
+As we design larger, likely more error-prone platforms, effectively protecting
 applications from platform faults becomes critical. Current fault-protection
 techniques available on production platforms rely on checkpoint/restart to
 ensure fault protection. However, these techniques, by their very nature,
@@ -1288,9 +1288,9 @@ this theoretical lower-bound to demonstrate the effectiveness of our \cooperativ
 I/O scheduling and to compare its performance with other I/O
 scheduling strategies.  Our strategy invariably outperforms the others
 with respect to the platform efficiency. Unsurprisingly, the biggest gains are
-rendered on the platforms with a lowest MTBF or greater degrees of under-provisioned
+rendered on the platforms with a lower MTBF or greater degrees of under-provisioned
 I/O. Through simulation, we also show a path to supporting C/R on a prospective
-system while maintaining 80\% platform efficiency, all without a large
+system while maintaining a 80\% platform efficiency, all without a large
 investment in the I/O subsystem.
 
 % In this paper we presented a comprehensive model to capture interference
