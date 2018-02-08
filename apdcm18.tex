@@ -898,7 +898,8 @@ modern platform.
 
 \begin{table}
 \centering
-\scalebox{0.8}{%
+%\scalebox{0.8}{%
+{\scriptsize
 \begin{tabular}{|l|c|c|c|c|}
 \hline
  Workflow & EAP & LAP & Silverton & VPIC \\\hline
@@ -910,7 +911,7 @@ Final Output (\% of memory) & 105 & 220 & 43 & 270 \\\hline
 Checkpoint Size (\% of memory) & 160 & 185 & 350 & 85 \\\hline
 \end{tabular}
 }
-\caption{LANL Workflow Workload from the APEX Workflows report.\label{table:lanl}}
+\caption{LANL Workloads from the APEX Workflows report.\label{table:lanl}}
 \end{table}
 
 The baseline in this comparison comprises a set of simulations with no faults,
@@ -964,7 +965,7 @@ cooperation between the applications is enforced, a significant
 interference is observed, and applications spend in average twice the
 time in checkpointing that they did expect. A simple interference
 management policy, like \fifoblock, reduces this dramatically, for all
-values of the MTBF.  However, when the bandwidth is more constraint
+values of the MTBF.  However, when the bandwidth is more constrained
 (bottom of the figure), and when the node MTBF is
 shorter, interferences introduce a significant slowdown for all
 strategies.
@@ -1009,7 +1010,7 @@ despite high bandwidth rely on a fixed 1h interval. However, it also shows that
 this is not the sole criteria that should be taken into account, nor a
 necessary condition to extract performance. Even with favorable bandwidth,
 \propdaly and \bfifodaly experience nearly twice the waste of the other
-strategies with same checkpointing period. All strategies that decouple the
+strategies with the same checkpointing period. All strategies that decouple the
 execution of the application from the filesystem availability (\fifodaly,
 \fifofixed, \cooperative) exhibit considerably better performance despite low
 bandwidth.
@@ -1128,7 +1129,7 @@ contrast, the other strategies are much more dependent upon the frequency of
 failures; the \propfixed strategy requires up to 50 times the bandwidth of
 \cooperative to reach the same efficiency.
 
-When failures are not endemic (\ie a node MTBF is at least 15 years
+When failures are less frequent (\ie a node MTBF is at least 15 years
 and a system MTBF of 2.6 hours), the hierarchy of different
 approaches stabilizes. The two blocking strategies relying on
 frequent checkpoints (\propfixed and \bfifofixed) remain expensive,
