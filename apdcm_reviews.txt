@@ -1,0 +1,120 @@
+We are pleased to inform you that your paper has been accepted for APDCM 2018. This year, we have received a total of 22 submissions, of which only 13 papers were accepted for presentation and publication in the proceedings.
+
+8:Optimal Cooperative Checkpointing for Shared High-Performance Computing Platforms 
+
+Below you will find comments from reviewers. Please revise your paper based on these comments. 
+
+Instructions for preparing your final camera-ready paper for publication in the  workshop proceedings is available at “IPDPSW AUTHORS (Workshops)” section in the following URL: 
+http://ipdps.org/ipdps2018/2018_author_resources.html
+The final manuscript of your paper must be submitted through the above web page by MARCH 23. Please note that EasyChair is not a submission site for final manuscripts. You will be asked to provide a paper ID. Please use APDCM-XX, where XX is the paper number 8 given by EasyChair. At least one author of a paper must be registered by MARCH 27. Please see the registration details at IPDPS web page: http://ipdps.org/ipdps2018/2018_register.html
+
+** Important: IEEE no show policy ** 
+At least one author must register for each paper, and deliver a talk at the workshop site. Papers that do not presented by the authors at the workshop site (no-show paper) will not be included in the IEEE digital library, even if the author has paid for the registration fee. Further, no-show due to VISA rejection will be considered only if VISA applications by ALL AUTHORS of the paper are rejected. 
+
+Best regards, 
+
+APDCM organizers
+
+
+----------------------- REVIEW 1 ---------------------
+PAPER: 8
+TITLE: Optimal Cooperative Checkpointing for Shared High-Performance Computing Platforms
+AUTHORS: Thomas Herault, Yves Robert, Aurelien Bouteiller, Dorian Arnold, Kurt Ferreira, George Bosilca and Jack Dongarra
+
+Overall evaluation: 3 (strong accept)
+Reviewer's confidence: 5 ((expert))
+Originality: 4 (good)
+Soundness of methods: 4 (good)
+Significance of results: 4 (good)
+Clarity of presentation: 4 (good)
+Relevance to workshop: 4 (good)
+
+----------- Summary -----------
+This paper focuses on a cooperative scheduling policy that optimizes the overall performance of concurrently executing CR-based applications which share I/O resources. A theoretical model is developed and then a set of necessary constraints needed to minimize the global waste on the platform are derived.
+
+----------- Positive aspects -----------
+This is a well written paper. The paper shows that that the optimal checkpoint interval, as defined by Young/Daly, despite providing a sensible metric for a single application, is not sufficient to optimally address resource contention at the platform scale. The paper shows that combining optimal checkpointing periods with I/O scheduling strategies can provide a significant improvement on the overall application performance, thereby maximizing platform throughput.
+
+----------- Negative aspects -----------
+-
+
+
+----------------------- REVIEW 2 ---------------------
+PAPER: 8
+TITLE: Optimal Cooperative Checkpointing for Shared High-Performance Computing Platforms
+AUTHORS: Thomas Herault, Yves Robert, Aurelien Bouteiller, Dorian Arnold, Kurt Ferreira, George Bosilca and Jack Dongarra
+
+Overall evaluation: 3 (strong accept)
+Reviewer's confidence: 3 ((medium))
+Originality: 4 (good)
+Soundness of methods: 5 (excellent)
+Significance of results: 5 (excellent)
+Clarity of presentation: 5 (excellent)
+Relevance to workshop: 5 (excellent)
+
+----------- Summary -----------
+The paper presents a cooperative Checkpoint/Restart (CR) scheduling strategy for HPC platforms.  Their strategy is developed over a generic model, that is tacking in account various common parameters of such platforms, namely computational nodes, storage resources, and network.  Over this model, they survey and compare the performances of various existing strategies and propose an optimal checkpoint periods.  Finally, they show by simulations how the period choice impacts the overall application performances.
+
+----------- Positive aspects -----------
+The work propose a quite comprehensive critical analysis of various techniques of CR-based scheduling of applications sharing I/O resources.  Furthermore, the authors provide a lower bound on the checkpoint period with respect to various parameters on which the global waste of the platform depends.
+
+A very nice job. The paper is well written and the results are of great interest.  The submitted paper definitely deserves to be presented at APDPCM 2018.
+
+----------- Negative aspects -----------
+None.
+
+----------- Other comments -----------
+Definitively a very nice work that merits an extended publication in a journal.
+
+
+----------------------- REVIEW 3 ---------------------
+PAPER: 8
+TITLE: Optimal Cooperative Checkpointing for Shared High-Performance Computing Platforms
+AUTHORS: Thomas Herault, Yves Robert, Aurelien Bouteiller, Dorian Arnold, Kurt Ferreira, George Bosilca and Jack Dongarra
+
+Overall evaluation: 2 (accept)
+Reviewer's confidence: 2 ((low))
+Originality: 4 (good)
+Soundness of methods: 3 (fair)
+Significance of results: 4 (good)
+Clarity of presentation: 4 (good)
+Relevance to workshop: 4 (good)
+
+----------- Summary -----------
+This paper presents a combination of optimal checkpointing periods with I/O scheduling. This combination address the problem of limited I/O bandwidth in high-performance computing environments. With their own simulation, the combination has a 80% effiency.
+
+----------- Positive aspects -----------
+The approach is quite intuitive and shows good results in the experiments.
+Experiments are detailed and well described.
+Maple Code is online.
+
+----------- Negative aspects -----------
+How can real applications use the system? Must be implemented in the user code?
+Some sentences are hard to parse (eg the second in the abstract).
+Keywords are missing.
+
+
+----------------------- REVIEW 4 ---------------------
+PAPER: 8
+TITLE: Optimal Cooperative Checkpointing for Shared High-Performance Computing Platforms
+AUTHORS: Thomas Herault, Yves Robert, Aurelien Bouteiller, Dorian Arnold, Kurt Ferreira, George Bosilca and Jack Dongarra
+
+Overall evaluation: 2 (accept)
+Reviewer's confidence: 4 ((high))
+Originality: 3 (fair)
+Soundness of methods: 5 (excellent)
+Significance of results: 4 (good)
+Clarity of presentation: 5 (excellent)
+Relevance to workshop: 5 (excellent)
+
+----------- Summary -----------
+This work proposes a cooperative scheduling policy that optimizes the overall performance of concurrently executing CR-based applications which share valuable I/O resources. The main contributions of this paper are the following: (i) Development of a model allowing for the quantification of the I/O interference of checkpointing applications sharing a common underlying I/O substrate; (ii) Investigation of the costs of various I/O-aware scheduling strategies through both steadystate analysis as well as detailed simulations; (iii) Survey of a number scheduling strategies; and (iv) Extensive set of simulations that assess the dramatic impact of checkpoint interference.
+
+----------- Positive aspects -----------
+This work is quite solid and looks reliable.
+The manuscript is readable and well-constructed.
+The proposed method and preceding methods are modeled and simulated to show the advantage of the proposed method.
+The references to the preceding works look adequate.
+
+----------- Negative aspects -----------
+It is desirable to use slightly larger fonts in figures.
