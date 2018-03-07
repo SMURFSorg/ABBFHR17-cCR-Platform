@@ -914,15 +914,15 @@ Checkpoint Size (\% of memory) & 160 & 185 & 350 & 85 \\\hline
 \caption{LANL Workloads from the APEX Workflows report.\label{table:lanl}}
 \end{table}
 
-The baseline in this comparison comprises a set of simulations with no faults,
-checkpoints, nor I/O interference. For these simulations, we selected a 60-day
+The baseline in this comparison comprises a set of simulations with neither faults 
+nor interferences during checkpoints and regular I/O interference. For these simulations, we selected a 60-day
 execution segment, and computed the resources used by the jobs during this
 period, \ie the total time each node spent on (non-CR) I/O and computation in a
 failure-free environment.
 For the I/O scheduling techniques presented in Section~\ref{sec:algorithms}, we
 compute the resource waste as the total time nodes spend not progressing jobs.
 In the figures, we represent the performance of each strategy by
-computing the waste ratio, \ie the resource waste over a segment of 60 days
+computing the waste, \ie the ratio of the resource waste over a segment of 60 days
 divided by the application resource usage over that same segment for the
 baseline simulation. Each simulation is conducted over 1,000 times; the
 candlestick extremes represent the first and last decile of the measures, while
@@ -974,17 +974,17 @@ strategies.
   \begin{center}
     \resizebox{1.05\linewidth}{!}{\input{sim/figures/synthetic-01hMTBF-waste-cielo.tex}}
   \end{center}
-  \caption{Waste ratio as a function of the system bandwidth for the
+  \caption{Waste as a function of the system bandwidth for the
     seven I/O and Checkpointing scheduling strategies. \label{fig:cielo-1hmtbf}}
 \end{figure}
 
 \paragraph{The Impact of Available System Bandwidth}
 First, we explore the performance of each approach in a failure-prone
-environment. Figure~\ref{fig:cielo-1hmtbf} represents the waste ratio
+environment. Figure~\ref{fig:cielo-1hmtbf} represents the waste
 on the simulated platform, assuming the node MTBF $\muind$ of 2 years (\ie a system
 MTBF of 1h). We vary the filesystem bandwidth from 40 GB/s to 160GB/s
 in order to evaluate the impact of this parameter. We observe three
-classes of behavior: \propfixed and \bfifofixed exhibit a waste ratio
+classes of behavior: \propfixed and \bfifofixed exhibit a waste
 that decreases as the bandwidth increases, but remains above 40\% even
 at the maximum theoretical I/O bandwidth; \fifodaly, \fifofixed, and
 \cooperative quickly decrease to below 20\% of waste, and reach
@@ -1028,7 +1028,7 @@ waste, but such is the case for all algorithms.
   \begin{center}
     \resizebox{1.05\linewidth}{!}{\input{sim/figures/synthetic-040gbs-waste-cielo.tex}}
   \end{center}
-  \caption{Waste ratio as a function of the system MTBF for the
+  \caption{Waste as a function of the system MTBF for the
     seven I/O and Checkpointing scheduling strategies. \label{fig:cielo-40gbs}}
 \end{figure}
 
@@ -1037,13 +1037,13 @@ Next, we explore the performance of each approach under low bandwidth (and
 thus high probability of interference). A scenario with such low bandwidth is not
 unrealistic.  As shown in Luu et al~\cite{Luu:2015:Multiplatform}, practical
 bandwidth can be considerably lower than theoretical.
-Figure~\ref{fig:cielo-40gbs} represents the waste ratio on the
+Figure~\ref{fig:cielo-40gbs} represents the waste on the
 simulated platform, assuming the
 aggregated filesystem bandwidth of the system is 40GB/s. We vary the node MTBF
 $\muind$ from 2 years (1h of system MTBF) to 50 years (24h of system MTBF) in
 order to evaluate the impact of this parameter. Similar to
 Figure~\ref{fig:cielo-1hmtbf}, we observe three classes of behavior: \propfixed
-and \bfifofixed exhibit a waste ratio that remains constant around 80\% for all
+and \bfifofixed exhibit a waste that remains constant around 80\% for all
 values of the MTBF. These approaches are critically dependent on the filesystem
 bandwidth, and a lower frequency of failures does not significantly improve
 their performance. The I/O subsystem is saturated, and the applications spends
