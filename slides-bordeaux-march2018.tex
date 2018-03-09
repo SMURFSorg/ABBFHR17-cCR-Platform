@@ -1,0 +1,775 @@
+\documentclass[compress]{beamer}
+\usepackage[utf8]{inputenc}
+%!TEX encoding = UTF-8 Unicode
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage[american]{babel}
+\usepackage{xspace}
+\usepackage{graphicx,psfrag}
+\usepackage{CJK}
+\usepackage{rotating}
+\usepackage{pstool}
+\usepackage{ifthen}
+\usepackage{figlatex}
+
+
+\graphicspath{{fig/}}
+
+
+\mode<presentation>
+{
+  \usetheme{Replica}
+  \setbeamercovered{transparent}
+%  \setbeamertemplate{mini frames}[tick]
+%  \setbeamertemplate{mini frame in other subsection}{}
+}
+
+\makeatletter
+\let\beamer@writeslidentry@miniframeson=\beamer@writeslidentry
+\def\beamer@writeslidentry@miniframesoff{%
+  \expandafter\beamer@ifempty\expandafter{\beamer@framestartpage}{}% does not happen normally
+  {%else
+    % removed \addtocontents commands
+    \clearpage\beamer@notesactions%
+  }
+}
+\newcount\beamer@writeslidentry@miniframesoneoversome@counter
+\newcount\beamer@writeslidentry@miniframesoneoversome@limit
+\beamer@writeslidentry@miniframesoneoversome@counter=1
+\newcount\beamer@writeslidentry@miniframesoneoversome@limit
+\beamer@writeslidentry@miniframesoneoversome@limit=5
+\def\beamer@writeslidentry@miniframesoneoversome{%
+  \ifnum\beamer@writeslidentry@miniframesoneoversome@counter=\beamer@writeslidentry@miniframesoneoversome@limit\relax%
+    \beamer@writeslidentry@miniframesoneoversome@counter=1\relax%
+    \beamer@writeslidentry@miniframeson%
+  \else%
+    \advance\beamer@writeslidentry@miniframesoneoversome@counter by 1%
+    \beamer@writeslidentry@miniframesoff%
+  \fi%
+}
+\newcommand*{\miniframeson}{\let\beamer@writeslidentry=\beamer@writeslidentry@miniframeson}
+\newcommand*{\miniframesoff}{\let\beamer@writeslidentry=\beamer@writeslidentry@miniframesoff}
+\newcommand*{\miniframesalternate}[1]{%
+   \beamer@writeslidentry@miniframesoneoversome@counter=1\relax%
+   \beamer@writeslidentry@miniframesoneoversome@limit=#1\relax%
+   \let\beamer@writeslidentry=\beamer@writeslidentry@miniframesoneoversome}
+
+% Define the subsectionsonly option for beamer toc
+\def\beamer@tocaction@only#1{\only<.(1)>{\usebeamertemplate**{#1}}}
+\define@key{beamertoc}{subsectionsonly}[]{\beamer@toc@subsectionstyle{show/only}\beamer@toc@subsubsectionstyle{show/shaded/hide}}
+\makeatother
+
+
+\usepackage{relsize}
+\usepackage{wasysym}
+\def\smiley{\green{\larger[2]\wasyfamily\char44}\xspace}
+\def\frownie{\blue{\larger[2]\wasyfamily\char47}\xspace}
+\def\quesley{\yyellow{\hbox to -0.08em{\textraiseglotstop}$_{\textrm{\wasyfamily\char47}}$}\xspace}
+
+
+%% Macros
+\newcommand{\probaSymbol}{\mathbb P}
+\newcommand{\proba}[1]{\probaSymbol\left(#1\right)}
+\newcommand{\esperance}[1]{\mathbb E\left(#1\right)}
+\newcommand{\Psachant} [2]{\mathbb P\left(#1\left|\,\vphantom{#1} #2\right.\right)} %proba de #1 sachant #2
+\newcommand{\Esachant} [2]{\mathbb E\left(#1\left|\,\vphantom{#1} #2\right.\right)} %proba de #1 sachant #2
+
+
+\newcommand<>{\blue}[1]{{\color#2{blue!100!black!100}#1}}
+\newcommand<>{\redd}[1]{{\color#2{red!80!black}#1}}
+\newcommand<>{\green}[1]{{\color#2{green!70!black}#1}}
+\newcommand<>{\purple}[1]{{\color#2{blue!50!red}#1}}
+\newcommand{\red}[1]{\textcolor{red}{#1}\xspace}
+\title[Cooperative Checkpointing]{Optimal Cooperative Checkpointing for Shared High-Performance Computing Platforms}
+
+\usepackage{xcolor,soul}
+\sethlcolor{green}
+\definecolor{cinnabar}{rgb}{1,0.5,0.5}
+\makeatletter
+\newcommand\SoulColor{%
+  \let\set@color\beamerorig@set@color
+  \let\reset@color\beamerorig@reset@color}
+\makeatother
+\usepackage[most]{tcolorbox}
+\newtcolorbox{myblock}[2][]{beamer,title=#2,fonttitle=\sffamily,
+  left=1mm,right=1mm,top=1mm,bottom=1mm,arc=2mm,
+  colback=black,colupper=white,colframe=yellow,
+  coltitle=black,title style={top color=red!70,bottom color=yellow},
+  #1}
+
+\usepackage{gnuplot-lua-tikz}
+\newcommand{\muind}{\mu_{\text{ind}}}
+\newcommand{\bandtotal}{\beta_{\text{tot}}}
+\newcommand{\bandavail}{\beta_{\text{avail}}}
+\newcommand{\appset}{{\mathcal A}}
+\newcommand{\nbnodesplat}{{\mathcal N}}
+\newcommand{\nbapps}{|{\mathcal A}|}
+\newcommand{\app}[1]{A_{#1}}
+\newcommand{\application}[2]{a_{#1}^{#2}}
+\newcommand{\nbapp}[1]{n_{#1}}
+\newcommand{\nbnodes}[1]{q_{#1}}
+\newcommand{\period}[1]{P_{#1}}
+\newcommand{\ckpt}[1]{C_{#1}}
+\newcommand{\reco}[1]{R_{#1}}
+\newcommand{\size}[1]{\mathit{size}_{#1}}
+\newcommand{\wasteapp}[1]{W_{#1}}
+\newcommand{\wap}[1]{W_{#1}}
+\newcommand{\wapp}[2]{W_{#1}(#2)}
+\newcommand{\mtbfplat}{\mu}
+\newcommand{\wasteplat}{W}
+\newcommand{\wasteplatt}{\textsc{Waste}\xspace}
+\newcommand{\opt}{{\textit opt}}
+\newcommand{\lost}{{\textit lost}}
+\newcommand{\EE}{{\mathbb E}}
+\newcommand{\ioconstraint}{F}
+\newcommand{\lastckpt}[2]{L_{#1}^{#2}}
+\newcommand{\wastefct}[2]{W_{#1}(#2)}
+\newcommand{\pool}{{\mathcal P}}
+\newcommand{\risk}{{\textsc Risk}}
+%\newcommand{\todo}[1]{\textit{TBD: [#1]}}
+\newcommand{\dca}[1]{\todo[inline]{DCA: #1}}
+\newcommand{\kbf}[1]{\todo[inline]{kbf: #1}}
+
+\newcommand{\IOcat}{\textsc{IO-Candidate}\xspace}
+\newcommand{\Ckptcat}{\textsc{Ckpt-Candidate}\xspace}
+\newcommand{\Catiocat}{\mathcal{C}_{IO}\xspace}
+\newcommand{\Catckptcat}{\mathcal{C}_{Ckpt}\xspace}
+
+\newcommand{\nocoop}{\emph{Oblivious}\xspace}
+\newcommand{\fifoblock}{\emph{Ordered}\xspace}
+\newcommand{\fifononblock}{\emph{Ordered-NB}\xspace}
+\newcommand{\leastwaste}{\emph{Least-Waste}\xspace}
+
+\def\propfixed{\nocoop-Fixed\xspace}
+\def\propdaly{\nocoop-Daly\xspace}
+\def\bfifofixed{\fifoblock-Fixed\xspace}
+\def\bfifodaly{\fifoblock-Daly\xspace}
+\def\fifofixed{\fifononblock-Fixed\xspace}
+\def\fifodaly{\fifononblock-Daly\xspace}
+\def\cooperative{\leastwaste}
+
+
+
+\subtitle{}
+
+\author[yves.robert@inria.fr]{%
+\includegraphics[width=1.17cm]{photos/thomas.jpg}
+\includegraphics[width=0.8cm]{photos/clooney.jpg}
+\includegraphics[width=1.14cm]{photos/aurelien.jpg}
+\includegraphics[width=1.07cm]{photos/dorian.jpg}
+\includegraphics[width=0.9cm]{photos/kurt.jpg}
+\includegraphics[width=1.16cm]{photos/george.jpg}
+\includegraphics[width=0.85cm]{photos/jack.jpg}\\
+~\\
+{\footnotesize
+Thomas Hérault$^{1}$,
+\textcolor{red}{Yves Robert}$^{1,2}$ 
+Aurélien Bouteiller$^{1}$,\\
+Dorian Arnold$^{3}$,
+Kurt Ferreira$^{4}$,
+George Bosilca$^{1}$,
+Jack Dongarra$^{1}$\\
+}
+{\tiny
+~\\
+1. University of Tennessee Knoxville, USA\\
+2. Laboratoire LIP, ENS Lyon \& Inria, France\\
+3. Emory University, Atlanta, GA, USA\\
+4. Sandia National Laboratory, USA\\
+}}
+
+
+\date[March 12, 2018]{\textcolor{green}{Inria Bordeaux -- March 12, 2018}}
+
+\AtBeginSection[]
+{
+  \begin{frame}<beamer>
+    \frametitle{Outline}
+     {\scriptsize
+       \tableofcontents[sectionstyle=show/shaded,subsectionstyle=show/show/hide]
+    }
+  \end{frame}
+}
+
+\AtBeginSubsection[]
+{
+  \begin{frame}<beamer>
+    \frametitle{Outline}
+     {\scriptsize
+       \tableofcontents[sectionstyle=show/shaded,subsectionstyle=show/shaded/hide]
+    }
+  \end{frame}
+}
+
+\begin{document}
+
+\miniframesalternate{5}
+\pgfaliasimage{figbackground}{figbackground-orange}% !!!
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Framework}
+
+\begin{itemize}
+\item \green{Space-sharing} prevalent in HPC platforms
+\item Application instances:
+\begin{itemize}
+\item have dedicated computational nodes
+\item share interconnect links and storage partition (PFS)
+\item checkpoint (to stable storage) independently
+\end{itemize}
+$\Rightarrow$ \redd{network and storage contention}
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Checkpointing 101}
+
+
+When do applications checkpoint on HPC systems?
+\begin{itemize}
+\item Standard practice:  every hour 
+\item State-of-the-art: Young/Daly period
+\end{itemize}
+
+
+\end{frame}
+
+\frame{
+    \frametitle{Platform MTBF (1/2)}
+
+
+\centering
+\includegraphics[width=11cm]{photos/faults.png}
+
+}
+
+\frame{
+    \frametitle{Platform MTBF (2/2)}
+
+
+\begin{itemize}
+\item Rebooting only faulty processor
+\item Platform failure distribution\\
+$\Rightarrow$ superposition of $p$ IID processor distributions\\
+$\Rightarrow$ IID only for Exponential\\
+\item Platform of $p$ processors:
+\begin{itemize}
+\item $n_{p}(F)$ = number of platform failures until time $F$
+\item$\lim_{F \rightarrow +\infty} \frac{F}{n_{p}(F)} \stackrel{\text{def}}{=} \mu_{p}$
+\end{itemize}
+\end{itemize}
+
+
+\red{$$\textbf{Theorem: } \mu_{p} = \frac{\muind}{p} \text{ for arbitrary 
+distributions}$$}
+
+}
+
+\frame{
+    \frametitle{Optimal checkpointing period (1/3)}
+
+
+\begin{center}
+%\vspace{-2.5mm}
+\includegraphics[width=0.65\textwidth]{photos/resilience.jpg}
+\end{center}
+
+}
+
+
+\frame{
+    \frametitle{Optimal checkpointing period (2/3)}
+
+\noindent
+With period $T$:
+
+\vfill
+$$\wasteplatt = \frac{C}{T} \oplus \frac{1}{\mu} (D+R+\frac{T}{2})$$
+
+\vfill
+$$\redd{T_{\opt} = \sqrt{2 C \mu}} \qquad \green{\text{(Young/Daly)}}$$
+$$\wasteplatt_{\opt} = \frac{2C}{\mu}$$
+
+}
+
+
+\frame{
+    \frametitle{Optimal checkpointing period (3/3)}
+
+
+$$\begin{array}{ll}
+\EE(W) & = e^{-\lambda (W+C)} (W+C)\\
+& + (1-  e^{-\lambda (W+C)})(D + \EE(R) + \EE(T_{\lost}) + \EE(W))
+\end{array}$$
+$$ \EE(T_{\lost}) = \frac{1}{1-  e^{-\lambda (W+C)}} \int_{0}^{W+C} x \lambda e^{-\lambda x} dx$$
+$$\Rightarrow \green{\EE(W) = ( \frac{1}{\lambda}+D)e^{\lambda R} (e^{\lambda(W+C)}-1)}$$
+
+\vfill
+\noindent
+\visible<2>{
+$\text{~~~~~~} \redd{W_{\opt} \leftarrow \textsc{argmin} \frac{\EE(W)}{W}}$\\
+
+$$\begin{array}{l}
+\text{let } u= \lambda(W+C)-1\\
+u e^{u} = - \frac{1}{e} \Rightarrow u = \textsc{Lambert}(- \frac{1}{e})
+\end{array}$$
+}
+
+
+}
+\section{Model}
+
+\begin{frame}
+  \frametitle{Model}
+
+\noindent
+\textbf{Platform}
+\begin{itemize}
+\item I/O subsystem time-shared (contended) 
+\item Linear interference model
+\end{itemize}
+
+\noindent
+\textbf{Workload}
+\begin{itemize}
+\item Many applications but only a few classes (sets of applications with similar sizes, durations, footprints and I/O needs)
+\item Excluding initialization and finalization I/O,\\
+regular
+  (non-CR) I/O evenly distributed over execution
+\item Job makespans known a priori
+\item Simulations based on APEX workflow and Cielo platform
+%\item Avoid side-effects with normal distributions of job durations (same mean, 20\% std)
+\end{itemize}
+
+\noindent
+\textbf{Checkpoint}
+\begin{itemize}
+\item Fixed: 1 hour (unless otherwise specified)
+\item Daly:  uses  Young/Daly application period $\sqrt{2 C_{app} \mu_{app}}$
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{Notations}
+
+
+\begin{itemize}
+\item Set $\appset$ of applications classes
+$\app{1}, \ldots \app{\nbapps}$
+\item Platform with
+$\nbnodesplat$ nodes
+\item Application class $\app{i}$ specifies
+\begin{itemize}
+\item $\nbapp{i}$: number of jobs in $\app{i}$;
+\item $\nbnodes{i}$: number of nodes used by each job in $\app{i}$;
+\item $\period{i}$: checkpoint period of each job in $\app{i}$
+\item $\ckpt{i}$ and $\reco{i}$: checkpoint and recovery for each job in $\app{i}$\\
+(when no interference with other I/O operations)
+\item Jobs inherit their characteristics from their classes
+\item $\period{Daly}(J_{j}) = \sqrt{2 \ckpt{j} \mu_{j}}$, where
+$\mu_{j} = \frac{\muind}{\nbnodes{j}}$ 
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\section{I/O Scheduling Algorithms}
+
+\begin{frame}
+  \frametitle{\nocoop }
+
+
+\begin{itemize}
+\item Jobs fill up the system based on
+processor availability
+\item I/O workloads (including CR activities) \redd{not} coordinated
+\item Each I/O stream given a decrease in bandwidth linearly
+proportional to the number of competing operations
+\item  Subsequent checkpoint scheduled to start after
+$\period{i}-\ckpt{i}$\\
+$\Rightarrow$  Resultant checkpoint period may be longer than $\period{i}$
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{\fifoblock}
+
+
+\begin{itemize}
+\item Blocking FCFS I/O Scheduling
+\item I/O requests performed sequentially, in request arrival order
+\item Jobs
+with outstanding I/O requests blocked until their requests are completed
+\item  With  two jobs simultaneously requesting I/O of volume $V$:
+\begin{itemize}
+\item \nocoop:  both jobs take $\frac{V}{\frac{\bandavail}{2}}$ time
+to complete their I/O
+\item \fifoblock:\\
+- first scheduled job
+takes $\frac{V}{\bandavail}$\\
+- second job waits
+$\frac{V}{\bandavail}$ then takes $\frac{V}{\bandavail}$
+\end{itemize}
+\item Resultant checkpoint period may be longer than $\period{i}$
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{\fifononblock}
+
+
+\begin{itemize}
+\item Non-Blocking FCFS I/O Scheduling
+\item Refactor code to continue computing while awaiting
+I/O
+\item  Previous
+checkpoint ends at time $t_{now}$\\
+$\Rightarrow$ tentative time for next checkpoint $t_{req}=t_{now}+\period{i}-\ckpt{i}$
+\item At $t_{req}$, make non-blocking I/O request (I/O token still FCFS)
+\item Job continues until I/O token is available
+\item At this point, job generates its checkpoint data
+\item Use existing APIs in SCR or FTI to regularly poll if a
+checkpoint should be taken at this time
+\item \redd{Postponed checkpoint $\Rightarrow$  increased risk exposure}
+\end{itemize}
+
+\end{frame}
+
+%\begin{frame}
+%  \frametitle{Variants}
+%
+%
+%\begin{itemize}
+%\item $\period{i}$ input parameter to \nocoop, \fifoblock and \fifononblock
+%\item  Use either Fixed or Daly in simulations
+%\end{itemize}
+%
+%\end{frame}
+
+ \begin{frame}
+  \frametitle{ \leastwaste}
+
+
+\begin{itemize}
+\item Non-Blocking \green{least waste} I/O Scheduling
+\item When an I/O request completes at time $t$, select best candidate from pool:
+\begin{itemize}
+\item \IOcat $\Catiocat$\\
+   Job $J_{i}$, $1\leq i \leq r$ with an
+  (input, output or recovery) I/O request of length $v_{i}$ seconds, has $q_{i}$
+  processors, initiated its I/O request $d_{i}$ seconds ago (idle since)
+\item \Ckptcat $\Catckptcat$\\
+Job $J_{i}$, $r+1\leq i \leq r+s$,
+  with a checkpoint duration of $C_{i}$ seconds and $q_{i}$ processors,
+   took its last checkpoint $d_{i}$ seconds ago and keeps executing, with
+  $d_{i} \geq \period{Daly}(J_{i})$
+\end{itemize}
+
+\end{itemize}
+
+\end{frame}
+
+ \begin{frame}
+  \frametitle{Job selection}
+
+
+\begin{itemize}
+
+\item $J_{i} \in \Catiocat$  uses the I/O resource for $v_{i}$ seconds
+\begin{itemize}
+\item For $J_{j} \in \Catiocat$,  $\wapp{i}{j} = q_{j} (d_{j} + v_{i})$ 
+\item For $J_{j} \in \Catckptcat$, $\wapp{i}{j} =
+  \frac{v_{i}}{\muind} q^{2}_{j} (\reco{j} + d_{j} + \frac{v_{i}}{2})$
+ \item Expected waste $\wap{i} = \sum_{J_{j} \in \Catiocat, j\neq i} \wapp{i}{j} + \sum_{J_{j} \in \Catckptcat} \wapp{i}{j}$
+ \end{itemize}
+ 
+ \item $J_{i} \in \Catckptcat$ uses  the I/O resource for $\ckpt{i}$ seconds
+ \begin{itemize}
+\item Similar equations \dots
+  \end{itemize}
+\item  Select job $J_{i} \in \Catiocat \cup \Catckptcat$
+whose waste $\wap{i}$ is minimal
+ 
+ \end{itemize}
+
+
+
+\end{frame}
+
+ \begin{frame}
+  \frametitle{Feasibility of Cooperative Strategies}
+
+
+\begin{itemize}
+\item \fifoblock, \fifononblock, 
+\leastwaste \redd{require synchronization}
+\item \fifoblock\\
+at the filesystem level
+\item  \fifononblock and
+\leastwaste:\\
+modify the apps to continue working until access is granted\\
+$\Rightarrow$ implementation in checkpointing library SCR or FTI
+\item Memory
+hierarchy:\\
+- checkpoint rocess memory on unreliable (but
+fast) media\\
+- upload checkpoints in the background,\\
+while the application proceeds to compute
+
+ \end{itemize}
+
+\end{frame}
+
+\section{Lower bound}
+
+
+ \begin{frame}
+  \frametitle{Steady-state}
+  
+  
+ \begin{itemize}
+\item$\nbapp{i}$ jobs of class $\app{i}$, $\nbnodes{i}$ nodes, $\ckpt{i} =
+\frac{\size{i}}{\bandavail}$
+\item Waste  of $J_{i}$  with checkpoint period $\period{i}$:
+$$\wasteapp{i} = \wastefct{i}{\period{i}} = \frac{\ckpt{i}}{\period{i}} +
+\frac{\nbnodes{i}}{\mtbfplat}(\frac{\period{i}}{2} + \reco{i})$$
+ \end{itemize}
+ 
+ 
+\vfill
+\noindent
+\textsc{Minimize} 
+$$\wasteplat = \sum_i \frac{\nbapp{i} \nbnodes{i}}{\nbnodesplat}  \left( \frac{\ckpt{i}}{\period{i}} +
+\frac{\nbnodes{i}}{\mtbfplat}(\frac{\period{i}}{2} + \reco{i}) \right)$$
+
+\noindent
+\textsc{Subject to} 
+$$\ioconstraint = \sum_{i} \frac{\nbapp{i} \ckpt{i}}{\period{i}} \leq 1$$
+
+
+\end{frame}
+
+ \begin{frame}
+  \frametitle{Lower bound}
+
+
+\noindent
+\textsc{KKT} 
+$$\period{i} = \sqrt{\frac{2 \mtbfplat  \nbnodesplat}{\nbnodes{i}^{2}} \left(\frac{\nbnodes{i}}{\nbnodesplat} +\lambda \right) \ckpt{i}}$$
+
+\vfill
+\begin{itemize}
+\item Choose $\lambda$ minimal s.t. $\ioconstraint \leq 1$ (solve numerically)
+\item $\lambda=0$ $\Rightarrow$ Young/Daly
+\item I/O constraint not sufficient\\
+$\Rightarrow$ orchestrate checkpoints into periodic repeating pattern\\
+$\Rightarrow$ lower bound of $\wasteplat = \sum_i \frac{\nbapp{i} \nbnodes{i}}{\nbnodesplat} \wasteapp{i}(\period{i})$
+
+ \end{itemize}
+
+\end{frame}
+
+
+\section{Simulations}
+
+
+ \begin{frame}
+  \frametitle{Simulation Framework}
+
+\begin{itemize}
+\item Random selection of jobs according to class ratios
+\item Duration uniformly distributed between $0.8w$ and $1.2w$
+\item Generation of node failures with Exponential distributions
+\item First-fit strategy (job characteristics, job priority, 
+resource availability)
+\item Simulate online scheduling
+
+\item Restarted jobs set to highest
+priority
+
+
+\end{itemize}
+
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{LANL Workloads from the APEX Workflows report}
+  
+  \centering
+  
+   {\scriptsize
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+ Workflow & EAP & LAP & Silverton & VPIC \\\hline
+Workload percentage & 66 & 5.5 & 16.5 & 12 \\\hline
+Work time (h) & 262.4 & 64 & 128 & 157.2 \\\hline
+Number of cores & 16384 & 4096 & 32768 & 30000 \\\hline
+Initial Input (\% of memory) &  3 & 5 & 70 & 10 \\\hline
+Final Output (\% of memory) & 105 & 220 & 43 & 270 \\\hline
+Checkpoint Size (\% of memory) & 160 & 185 & 350 & 85 \\\hline
+\end{tabular}
+}
+
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Slowdown of checkpoints}
+ 
+  \begin{center}
+    \resizebox{0.95\linewidth}{!}{\input{sim/figures/ckpt-slowdown.tex}}
+ \end{center}
+      
+      \end{frame}
+      
+      
+      \begin{frame}
+  \frametitle{Waste ratio as a function of system bandwidth}
+ 
+  \begin{center}
+    \resizebox{0.95\linewidth}{!}{\input{sim/figures/synthetic-01hMTBF-waste-cielo.tex}}
+  \end{center}
+        
+      \end{frame}
+
+     
+      \begin{frame}
+  \frametitle{Waste ratio as a function of system MTBF}
+ 
+  \begin{center}
+    \resizebox{0.95\linewidth}{!}{\input{sim/figures/synthetic-040gbs-waste-cielo.tex}}
+  \end{center}
+ 
+       \end{frame}
+
+    
+      \begin{frame}
+  \frametitle{Prospective system}
+ 
+ \begin{itemize}
+\item Aurora-like\\
+7PB of main memory and 50,000 compute nodes 
+\item Scale APEX workflow\\
+accordingly to Aurora/Celio memory size increase 
+
+\end{itemize}
+
+ 
+       \end{frame}
+       
+      \begin{frame}
+  \frametitle{Minimum aggregated filesystem bandwidth to reach 80\%
+    efficiency}
+ 
+  \begin{center}
+    \resizebox{0.95\linewidth}{!}{\input{sim/figures/prosp.tex}}
+  \end{center}
+ 
+       \end{frame}
+       
+     
+
+\section{Conclusion}
+
+     \begin{frame}
+  \frametitle{Conclusion}
+
+\begin{itemize}
+\item High pressure on stable storage $\Rightarrow$ I/O contention
+\item Comprehensive I/O interference model
+\item Multiple I/O scheduling algorithms 
+\item Improving platform job throughput via waste minimization
+\item Show a path to supporting C/R on prospective
+system\\
+while maintaining a 80\% platform efficiency
+\item \green{Future work}: burst buffers and NVRAM
+\end{itemize}
+
+  \end{frame}
+
+ 
+\begin{frame}
+  \frametitle{This is my 10th trip to Hawai`i}
+
+\begin{center}
+
+\includegraphics[width=8cm]{photos/hanauma.jpg}
+\vfill
+{\red{\Huge MAHALO!}}
+\end{center}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{This is my 100th trip to Knoxville}
+
+\begin{center}
+
+
+\includegraphics[width=4cm]{photos/knoxville.jpg} \hspace{0.5cm}
+\includegraphics[width=3.7cm]{photos/neyland.jpg}\\
+
+\vfill
+\includegraphics[width=4cm]{photos/fort-loudoun.jpg} \hspace{0.5cm}
+\includegraphics[width=3.5cm]{photos/mont-leconte.jpg}\
+
+\vfill
+{\red{\Huge THANK YE ALL!}}
+\end{center}
+
+
+
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{This is my 1st seminar in Bordeaux}
+
+\centering
+
+%\onslide<1->{%
+%\vspace*{-3cm}
+\begin{myblock}{Olivier Beaumont}{%
+~\\
+Je t'invite dès que les Verts finissent devant l'OL \dots\\
+}
+\end{myblock}
+%}%
+
+\vfill
+
+%\onslide<2->{%
+\begin{tabular}{ll}
+\begin{tabular}{l}
+\blue{OL}\\
+\green{ASSE~~~~~~~~~~}\\
+\end{tabular}
+\begin{tabular}{llll}
+\blue{1994}  & \blue{2002} & \blue{2010}\\
+\blue{1995} & \blue{2003} & \blue{2011}\\
+\blue{1996} & \blue{2004} & \blue{2012}\\
+\blue{1997} & \blue{2005} & \blue{2013}\\
+\blue{1998} & \blue{2006} & \green{2014}\\
+\blue{1999} & \blue{2007} & \blue{2015}\\
+\blue{2000} & \blue{2008} & \blue{2016}\\
+\blue{2001} & \blue{2003} & \blue{2017} & {\green{2}\blue{018}}\\
+\end{tabular}
+\end{tabular}
+%}
+
+\vfill
+{\red{\Huge MERCI GOPI!}}
+\end{frame}
+
+\end{document}
