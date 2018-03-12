@@ -624,8 +624,8 @@ storage nodes only to a given application (\eg by using the technology
 proposed in CALCioM,~\cite{Dorier2015}); however, \fifononblock and
 \leastwaste cannot be implemented without modifying the applications,
 as work must continue until the access is granted.
-We propose to implement these strategies in the checkpointing library
-(\eg SCR or FTI). These libraries already provide APIs for the
+Operating and runtime systems should provide these strategies at the level 
+of the checkpoint library (\eg inside SCR or FTI). These libraries already provide APIs for the
 applications to get informed when a checkpoint is desirable, and
 applications that use these libraries regularly poll the system to
 decide if a checkpoint should be started.
