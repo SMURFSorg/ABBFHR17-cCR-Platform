@@ -656,10 +656,10 @@ for CR operations remains constant throughout execution. This amounts to
 ignoring initial input and final output I/O operations, or more precisely, to
 assuming these operations span the entire execution of the jobs.  Without this
 assumption, we would need to account for job durations; this renders the
-steady-state analysis intractable.  Given above, we determine the optimal
+steady-state analysis intractable.  We determine the optimal
 checkpointing period for each application class with the objective of minimizing
 the total waste of the platform; or equivalently, of maximizing the total
-throughput of the platform. To complicate this analysis, these optimal periods
+throughput. To complicate this analysis, these optimal periods
 may not be achievable, hence we derive a lower bound of the optimal waste.
 
 In steady-state operation, there are $\nbapp{i}$ jobs of class $\app{i}$, each
@@ -831,7 +831,7 @@ input corresponds to the restart size, and its work time corresponds to the
 remaining work from the last successful checkpoint. To reflect a common job
 scheduling policy on shared platforms, restarted jobs are set to the highest
 priority, maximizing their chances of obtaining an immediate allocation and
-continuing what was the original (failed) jobs execution.
+continuing what was the original (failed) job execution.
 
 
 \paragraph*{Interference Models} Our simulations implement each of the

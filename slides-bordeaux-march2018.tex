@@ -350,7 +350,7 @@ $\text{~~~~~~} $ First order approx: \green{Young/Daly}
 regular
   (non-CR) I/O evenly distributed over execution
 \item Job makespans known a priori
-\item Simulations based on APEX workflow and Cielo platform
+\item Simulations based on APEX workflow / Cielo platform
 %\item Avoid side-effects with normal distributions of job durations (same mean, 20\% std)
 \end{itemize}
 
@@ -396,7 +396,7 @@ $\mu_{j} = \frac{\muind}{\nbnodes{j}}$
 \item Jobs fill up the system based on
 processor availability
 \item I/O workloads (including CR activities) \redd{not} coordinated
-\item Each I/O stream given a decrease in bandwidth linearly
+\item Each I/O stream given decrease in bandwidth linearly
 proportional to the number of competing operations
 \item  Subsequent checkpoint scheduled to start after
 $\period{i}-\ckpt{i}$\\
@@ -467,7 +467,8 @@ checkpoint should be taken at this time
 
 \begin{itemize}
 \item Non-Blocking \green{least waste} I/O Scheduling
-\item When an I/O request completes at time $t$, select best candidate from pool:
+\item When an I/O request completes at time $t$,\\
+select best candidate from pool:
 \begin{itemize}
 \item \IOcat $\Catiocat$\\
    Job $J_{i}$, $1\leq i \leq r$ with an
@@ -519,14 +520,14 @@ whose waste $\wap{i}$ is minimal
 \item \fifoblock, \fifononblock, 
 \leastwaste \redd{require synchronization}
 \item \fifoblock\\
-at the filesystem level
+at filesystem level
 \item  \fifononblock and
 \leastwaste:\\
-modify the apps to continue working until access is granted\\
+modify apps to continue working until access is granted\\
 $\Rightarrow$ implementation in checkpointing library SCR or FTI
 \item Memory
 hierarchy:\\
-- checkpoint rocess memory on unreliable (but
+- checkpoint process memory on unreliable (but
 fast) media\\
 - upload checkpoints in the background,\\
 while the application proceeds to compute
@@ -611,7 +612,8 @@ priority
 \begin{frame}
   \frametitle{LANL Workloads from the APEX Workflows report}
   
-  \centering
+\begin{center}
+   
   
    {\scriptsize
 \begin{tabular}{|l|c|c|c|c|}
@@ -625,7 +627,17 @@ Final Output (\% of memory) & 105 & 220 & 43 & 270 \\\hline
 Checkpoint Size (\% of memory) & 160 & 185 & 350 & 85 \\\hline
 \end{tabular}
 }
+ \end{center}
 
+\vfill
+\noindent
+\textbf{Cielo} 
+\begin{itemize}
+\item
+1.37 Petaflops capability system at LANL (2010-2016)
+\item143,104 cores, 286 TB main memory
+\item PFS with theoretical maximum capacity 160GB/s
+\end{itemize}
 \end{frame}
 
 
@@ -640,27 +652,31 @@ Checkpoint Size (\% of memory) & 160 & 185 & 350 & 85 \\\hline
       
       
       \begin{frame}
-  \frametitle{Waste ratio as a function of system bandwidth}
+  \frametitle{Waste as a function of system bandwidth}
  
   \begin{center}
     \resizebox{0.95\linewidth}{!}{\input{sim/figures/synthetic-01hMTBF-waste-cielo.tex}}
+    
+    $\muind=2 \text{year}$, $\mu=1 \text{hour}$
   \end{center}
         
       \end{frame}
 
      
       \begin{frame}
-  \frametitle{Waste ratio as a function of system MTBF}
+  \frametitle{Waste as a function of system MTBF}
  
   \begin{center}
     \resizebox{0.95\linewidth}{!}{\input{sim/figures/synthetic-040gbs-waste-cielo.tex}}
+    
+    $\bandavail=40 \text{GBs}$
   \end{center}
  
        \end{frame}
 
     
       \begin{frame}
-  \frametitle{Prospective system}
+  \frametitle{Prospective system (1/2)}
  
  \begin{itemize}
 \item Aurora-like\\
@@ -674,13 +690,18 @@ accordingly to Aurora/Celio memory size increase
        \end{frame}
        
       \begin{frame}
-  \frametitle{Minimum aggregated filesystem bandwidth to reach 80\%
-    efficiency}
+       \frametitle{Prospective system (2/2)}
+
+
  
   \begin{center}
     \resizebox{0.95\linewidth}{!}{\input{sim/figures/prosp.tex}}
   \end{center}
  
+ \vfill
+    \centerline{Minimum aggregated filesystem bandwidth to reach 80\%
+    efficiency}
+
        \end{frame}
        
      
@@ -691,7 +712,7 @@ accordingly to Aurora/Celio memory size increase
   \frametitle{Conclusion}
 
 \begin{itemize}
-\item High pressure on stable storage $\Rightarrow$ I/O contention
+\item High pressure on stable storage $\Rightarrow$ \redd{I/O contention}
 \item Comprehensive I/O interference model
 \item Multiple I/O scheduling algorithms 
 \item Improving platform job throughput via waste minimization
