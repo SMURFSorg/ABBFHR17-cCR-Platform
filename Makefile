@@ -7,7 +7,7 @@
 # macro with the name of your main .tex file -- the one that you
 # invoke LaTeX on.
 
-MAIN_TEX	= ipdps18.tex
+MAIN_TEX	= apdcm18.tex
 
 # OTHER_SRC_FILES: Put in the names of all the other .tex files that
 # this document depends on in the OTHER_SRC_FILES macro.  This is
