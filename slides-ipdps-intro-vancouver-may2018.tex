@@ -1,0 +1,203 @@
+\documentclass[compress]{beamer}
+\usepackage[utf8]{inputenc}
+%!TEX encoding = UTF-8 Unicode
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage[american]{babel}
+\usepackage{xspace}
+\usepackage{graphicx,psfrag}
+\usepackage{CJK}
+\usepackage{rotating}
+\usepackage{pstool}
+\usepackage{ifthen}
+\usepackage{figlatex}
+
+
+\graphicspath{{fig/}}
+
+
+\mode<presentation>
+{
+  \usetheme{Replica}
+  \setbeamercovered{transparent}
+%  \setbeamertemplate{mini frames}[tick]
+%  \setbeamertemplate{mini frame in other subsection}{}
+}
+
+\makeatletter
+\let\beamer@writeslidentry@miniframeson=\beamer@writeslidentry
+\def\beamer@writeslidentry@miniframesoff{%
+  \expandafter\beamer@ifempty\expandafter{\beamer@framestartpage}{}% does not happen normally
+  {%else
+    % removed \addtocontents commands
+    \clearpage\beamer@notesactions%
+  }
+}
+\newcount\beamer@writeslidentry@miniframesoneoversome@counter
+\newcount\beamer@writeslidentry@miniframesoneoversome@limit
+\beamer@writeslidentry@miniframesoneoversome@counter=1
+\newcount\beamer@writeslidentry@miniframesoneoversome@limit
+\beamer@writeslidentry@miniframesoneoversome@limit=5
+\def\beamer@writeslidentry@miniframesoneoversome{%
+  \ifnum\beamer@writeslidentry@miniframesoneoversome@counter=\beamer@writeslidentry@miniframesoneoversome@limit\relax%
+    \beamer@writeslidentry@miniframesoneoversome@counter=1\relax%
+    \beamer@writeslidentry@miniframeson%
+  \else%
+    \advance\beamer@writeslidentry@miniframesoneoversome@counter by 1%
+    \beamer@writeslidentry@miniframesoff%
+  \fi%
+}
+\newcommand*{\miniframeson}{\let\beamer@writeslidentry=\beamer@writeslidentry@miniframeson}
+\newcommand*{\miniframesoff}{\let\beamer@writeslidentry=\beamer@writeslidentry@miniframesoff}
+\newcommand*{\miniframesalternate}[1]{%
+   \beamer@writeslidentry@miniframesoneoversome@counter=1\relax%
+   \beamer@writeslidentry@miniframesoneoversome@limit=#1\relax%
+   \let\beamer@writeslidentry=\beamer@writeslidentry@miniframesoneoversome}
+
+% Define the subsectionsonly option for beamer toc
+\def\beamer@tocaction@only#1{\only<.(1)>{\usebeamertemplate**{#1}}}
+\define@key{beamertoc}{subsectionsonly}[]{\beamer@toc@subsectionstyle{show/only}\beamer@toc@subsubsectionstyle{show/shaded/hide}}
+\makeatother
+
+
+\usepackage{relsize}
+\usepackage{wasysym}
+\def\smiley{\green{\larger[2]\wasyfamily\char44}\xspace}
+\def\frownie{\blue{\larger[2]\wasyfamily\char47}\xspace}
+\def\quesley{\yyellow{\hbox to -0.08em{\textraiseglotstop}$_{\textrm{\wasyfamily\char47}}$}\xspace}
+
+
+%% Macros
+\newcommand{\probaSymbol}{\mathbb P}
+\newcommand{\proba}[1]{\probaSymbol\left(#1\right)}
+\newcommand{\esperance}[1]{\mathbb E\left(#1\right)}
+\newcommand{\Psachant} [2]{\mathbb P\left(#1\left|\,\vphantom{#1} #2\right.\right)} %proba de #1 sachant #2
+\newcommand{\Esachant} [2]{\mathbb E\left(#1\left|\,\vphantom{#1} #2\right.\right)} %proba de #1 sachant #2
+
+
+\newcommand<>{\blue}[1]{{\color#2{blue!100!black!100}#1}}
+\newcommand<>{\redd}[1]{{\color#2{red!80!black}#1}}
+\newcommand<>{\green}[1]{{\color#2{green!70!black}#1}}
+\newcommand<>{\purple}[1]{{\color#2{blue!50!red}#1}}
+\newcommand{\red}[1]{\textcolor{red}{#1}\xspace}
+\title[Cooperative Checkpointing]{Optimal Cooperative Checkpointing for Shared High-Performance Computing Platforms}
+
+\usepackage{xcolor,soul}
+\sethlcolor{green}
+\definecolor{cinnabar}{rgb}{1,0.5,0.5}
+\makeatletter
+\newcommand\SoulColor{%
+  \let\set@color\beamerorig@set@color
+  \let\reset@color\beamerorig@reset@color}
+\makeatother
+\usepackage[most]{tcolorbox}
+\newtcolorbox{myblock}[2][]{beamer,title=#2,fonttitle=\sffamily,
+  left=1mm,right=1mm,top=1mm,bottom=1mm,arc=2mm,
+  colback=black,colupper=white,colframe=yellow,
+  coltitle=black,title style={top color=red!70,bottom color=yellow},
+  #1}
+
+\usepackage{gnuplot-lua-tikz}
+\newcommand{\muind}{\mu_{\text{ind}}}
+\newcommand{\bandtotal}{\beta_{\text{tot}}}
+\newcommand{\bandavail}{\beta_{\text{avail}}}
+\newcommand{\appset}{{\mathcal A}}
+\newcommand{\nbnodesplat}{{\mathcal N}}
+\newcommand{\nbapps}{|{\mathcal A}|}
+\newcommand{\app}[1]{A_{#1}}
+\newcommand{\application}[2]{a_{#1}^{#2}}
+\newcommand{\nbapp}[1]{n_{#1}}
+\newcommand{\nbnodes}[1]{q_{#1}}
+\newcommand{\period}[1]{P_{#1}}
+\newcommand{\ckpt}[1]{C_{#1}}
+\newcommand{\reco}[1]{R_{#1}}
+\newcommand{\size}[1]{\mathit{size}_{#1}}
+\newcommand{\wasteapp}[1]{W_{#1}}
+\newcommand{\wap}[1]{W_{#1}}
+\newcommand{\wapp}[2]{W_{#1}(#2)}
+\newcommand{\mtbfplat}{\mu}
+\newcommand{\wasteplat}{W}
+\newcommand{\wasteplatt}{\textsc{Waste}\xspace}
+\newcommand{\opt}{{\textit opt}}
+\newcommand{\lost}{{\textit lost}}
+\newcommand{\EE}{{\mathbb E}}
+\newcommand{\ioconstraint}{F}
+\newcommand{\lastckpt}[2]{L_{#1}^{#2}}
+\newcommand{\wastefct}[2]{W_{#1}(#2)}
+\newcommand{\pool}{{\mathcal P}}
+\newcommand{\risk}{{\textsc Risk}}
+%\newcommand{\todo}[1]{\textit{TBD: [#1]}}
+\newcommand{\dca}[1]{\todo[inline]{DCA: #1}}
+\newcommand{\kbf}[1]{\todo[inline]{kbf: #1}}
+
+\newcommand{\IOcat}{\textsc{IO-Candidate}\xspace}
+\newcommand{\Ckptcat}{\textsc{Ckpt-Candidate}\xspace}
+\newcommand{\Catiocat}{\mathcal{C}_{IO}\xspace}
+\newcommand{\Catckptcat}{\mathcal{C}_{Ckpt}\xspace}
+
+\newcommand{\nocoop}{\emph{Oblivious}\xspace}
+\newcommand{\fifoblock}{\emph{Ordered}\xspace}
+\newcommand{\fifononblock}{\emph{Ordered-NB}\xspace}
+\newcommand{\leastwaste}{\emph{Least-Waste}\xspace}
+
+\def\propfixed{\nocoop-Fixed\xspace}
+\def\propdaly{\nocoop-Daly\xspace}
+\def\bfifofixed{\fifoblock-Fixed\xspace}
+\def\bfifodaly{\fifoblock-Daly\xspace}
+\def\fifofixed{\fifononblock-Fixed\xspace}
+\def\fifodaly{\fifononblock-Daly\xspace}
+\def\cooperative{\leastwaste}
+
+
+
+
+\title[Message from the Steering Committee]{Message from the Steering Committee}
+\subtitle{}
+\author[yves.robert@inria.fr]{%
+\includegraphics[width=1cm,height=1.26cm]{photos/viktor.jpg}
+\includegraphics[width=1cm,height=1.26cm]{photos/clooney.jpg}
+~\\
+{\footnotesize
+Viktor Prasanna,
+Yves Robert\\
+(on behalf of the Steering Committee)
+}
+}
+
+
+\date[May 22, 2018]{\includegraphics[width=5cm]{photos/ipdps2018logo.jpg}\\
+\textcolor{red}{IPDPS  Vancouver -- May 22, 2018}}
+
+
+\begin{document}
+
+\miniframesalternate{5}
+\pgfaliasimage{figbackground}{figbackground-orange}% !!!
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Message}
+
+\begin{itemize}
+\item Welcome to all participants
+\vfill
+\item Please help us shape IPDPS'19,  IPDPS'20, \dots
+\begin{itemize}
+\item \textbf{Online survey:} http://bit.ly/IPDPS18 (or email us)
+\item Give feedback:\\
+- on recent changes\\
+- on anything related to the conference\\
+- on the meaning of life
+\end{itemize}
+\vfill
+\item Thanks to the whole organization team \smiley \smiley \smiley
+\end{itemize}
+
+
+\end{frame}
+\end{document}
