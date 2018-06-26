@@ -1,0 +1,110 @@
+
+\usepackage{lastpage}
+
+\def\A{A}
+\def\B{B}
+\let\TEXTSIZE\A
+%\let\FROM\WEST
+
+
+\ifx\TEXTSIZE\A
+	\textwidth=6in
+	\textheight=9in
+	%\setlength{\textwidth}{217mm}
+	%\setlength{\textheight}{152mm}
+	%\setlength{\oddsidemargin}{-10.4mm}
+	%\setlength{\evensidemargin}{-10.4mm}
+	%\setlength{\topmargin}{-10.4mm}
+	%\setlength{\headheight}{0mm}
+	%\setlength{\headsep}{0mm}
+	%\setlength{\footskip}{0mm}
+	%\setlength{\oddsidemargin}{-10.4mm}
+	%\setlength{\evensidemargin}{-10.4mm}
+	\addtolength{\oddsidemargin}{-32pt}
+	\addtolength{\evensidemargin}{-80pt}
+	\addtolength{\topmargin}{-62pt}
+\fi
+
+\ifx\TEXTSIZE\B
+	\textwidth=5in
+	\textheight=6in
+	%\setlength{\textwidth}{217mm}
+	%\setlength{\textheight}{152mm}
+	%\setlength{\oddsidemargin}{-10.4mm}
+	%\setlength{\evensidemargin}{-10.4mm}
+	%\setlength{\topmargin}{-10.4mm}
+	%\setlength{\headheight}{0mm}
+	%\setlength{\headsep}{0mm}
+	%\setlength{\footskip}{0mm}
+	%\setlength{\oddsidemargin}{-10.4mm}
+	%\setlength{\evensidemargin}{-10.4mm}
+	\addtolength{\oddsidemargin}{-62pt}
+	\addtolength{\evensidemargin}{-62pt}
+	\addtolength{\topmargin}{-62pt}
+\fi
+
+\newcommand{\copyrightheaderS}{
+   \noindent
+   {\rm International Journal of Networking and Computing} -- {\tt www.ijnc.org}, {\rm ISSN ISSN 2185-2847}\\
+   {\rm Volume \jvolume, Number \jnumber, page \thepage, \jmonth\ \jyear}\\%
+    \vspace{3.7pc} }
+
+\newcommand{\copyrightheader}{
+   \noindent
+   {\rm International Journal of Networking and Computing} -- {\tt www.ijnc.org}, {\rm ISSN 2185-2847}\\
+   {\rm Volume \jvolume, Number \jnumber, pages \thepage--\pageref{LastPage}, \jmonth\ \jyear}\\%
+    \vspace{3.7pc} }
+
+
+\newcommand{\publisher}[4]{
+  {\footnotesize \rm
+  Received: #1\\
+  Revised: #2\\
+  Accepted: #3\\
+  Communicated by #4\\
+  \par
+  \vspace{14pt}
+  }
+}
+
+\newcommand{\publisherA}[5]{
+  {\footnotesize \rm
+  Received: #1\\
+  Revised: #2\\
+  Revised: #3\\
+  Accepted: #4\\
+  Communicated by #5\\
+  \par
+  \vspace{14pt}
+  }
+}
+
+\newcommand{\keywords}[1]{
+        \par
+        \vspace{6pt}
+        \noindent {\footnotesize \it Keywords:} #1 }
+
+\def\ps@empty{%
+  \let\@mkboth=\@gobbletwo
+  \def\@oddhead{}%
+  \def\@evenhead{}%
+  \def\@evenfoot{%
+     \makebox[\textwidth]{\thepage \hfill\ \leftmark}}%
+  \def\@oddfoot{%
+     \makebox[\textwidth]{\rightmark\ \hfill\ \thepage}}%
+}%
+
+\def\ps@plain{%
+  \let\@mkboth=\@gobbletwo
+  \def\@oddhead{%
+     \makebox[\textwidth]{International Journal of Networking and Computing \hfill\ \leftmark}}%
+  \def\@evenhead{%
+	 \makebox[\textwidth]{\rightmark\ \hfill\ \jrunningtitle}}%
+  \def\@evenfoot{%
+     \makebox[\textwidth]{\thepage \hfill\ \leftmark}}%
+  \def\@oddfoot{%
+     \makebox[\textwidth]{\rightmark\ \hfill\ \thepage}}%
+}%
+
+
+
