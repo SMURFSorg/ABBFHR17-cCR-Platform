@@ -842,14 +842,14 @@ filesystem are orchestrated according to some global scheduling
 policy. We review below the policies that we used before assuming the
 presence of burst buffers, and discuss what changes and what does
 not. Beforehand, we state that the burst buffers of all nodes of a
-given application are always processed identically and simultaneously
+given application are always processed identically and simultaneously.
 
 \begin{description}
 
 \item[\nocoop] The strategy becomes non-blocking for the applications. Burst-buffers are emptied in parallel
 when multiple files are present in several burst-buffers.
 \item[\fifoblock]  The strategy becomes non-blocking for the applications. Burst-buffers are emptied one application after the other.
-\item[\fifononblock] The strategy now collapses with \fifoblock.No change.
+\item[\fifononblock] The strategy now collapses with \fifoblock. No change.
 \item[\leastwaste] No change.
 \end{description}
 
