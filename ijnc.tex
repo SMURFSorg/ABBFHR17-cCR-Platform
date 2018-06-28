@@ -808,20 +808,41 @@ This section extends the framework to the case where each platform node is equip
 a (private) burst buffer. We investigate scenarios under which burst buffers help to mitigate I/O contention
 when several applications are checkpointing.
 
-The model with burst buffers is as follows. 
-Burst buffers enable each application to take its checkpoint asynchronously: the application
-writes its checkpoint file into the burst buffer and proceeds with its computations. When the checkpoint file
-is actually written onto stable storage is no longer a concern for the application, which can progress as soon as 
-its checkpoint file has been sent to the burst buffer. However, the checkpoint is not actually saved until it has been transferred from the burst buffer to the parallel filesystem.  Finally, if the checkpoint file of the application is still present in the burst buffer when it returns to save the next checkpoint,
- the application simply skips this new checkpoint and resumes computing. 
+The model with burst buffers is as follows.  Burst buffers enable each
+application to take its checkpoint asynchronously: the application
+writes its checkpoint file into the burst buffer and proceeds with its
+computations. The time it takes to write the checkpoint file onto
+stable storage is no longer a concern for the application, which can
+progress as soon as its checkpoint file has been sent to the burst
+buffer. However, the checkpoint is not actually saved until it has
+been transferred from the burst buffer to the parallel filesystem. As
+a consequence, it is possible that the application tries to start a
+new checkpoint before the transfer from the burst buffer to the shared
+filesystem is complete. If the previous checkpoint transfer did not
+start, the application just overwrites the checkpoint with the new one
+in the burst buffer. If the previous transfer already started, the
+burst buffer fails to overwrite it with the new checkpoint, making
+the application skip this new checkpoint and resume computing.
  
- The \emph{apparent} time for an application  $\app{i}$ to checkpoint a file of size $\size{i}$ is $\ckpt{i} = \frac{\size{i}}{\nbnodes{i} \bwbb}$, where $\bwbb$ is the bandwidth of the burst buffer. This is assuming that each of the
- $\nbnodes{i}$ nodes enrolled by the application is writing its share of the checkpoint file 
- into its private burst buffer. This checkpoint time is likely to be much smaller than  $\frac{\size{i}}{\bandtotal}$,the time that was needed when dumping the file directly to the parallel filesystem. 
- Again, we wrote  \emph{apparent} time because this is the time to checkpoint from the application perspective,
- but the checkpoint is not valid until it has reached the parallel filesystem.
+The \emph{apparent} time for an application $\app{i}$ to checkpoint a
+file of size $\size{i}$ is
+$\ckpt{i} = \frac{\size{i}}{\nbnodes{i} \bwbb}$, where $\bwbb$ is the
+bandwidth of the burst buffer. This is assuming that each of the
+$\nbnodes{i}$ nodes enrolled by the application is writing its share
+of the checkpoint file into its private burst buffer. This checkpoint
+time is likely to be much smaller than
+$\frac{\size{i}}{\bandtotal}$,the time that was needed when dumping
+the file directly to the parallel filesystem.  Again, we wrote
+\emph{apparent} time because this is the time to checkpoint from the
+application perspective, but the checkpoint is not valid until it has
+reached the parallel filesystem.
  
-Altogether, applications write checkpoint files into their burst buffer, unless the last checkpoint taken is  still present in that burst buffer. Transfers from the burst buffers of all nodes to the parallel filesystem are orchestrated according to some global scheduling policy. We review below the policies that we used before assuming the presence of burst buffers, and discuss what changes and what does not. beforehand, we state that the burst buffers of allnodes of a given application are always processed identically and simultaneously
+Transfers from the burst buffers of all nodes to the parallel
+filesystem are orchestrated according to some global scheduling
+policy. We review below the policies that we used before assuming the
+presence of burst buffers, and discuss what changes and what does
+not. Beforehand, we state that the burst buffers of all nodes of a
+given application are always processed identically and simultaneously
 
 \begin{description}
 
@@ -832,10 +853,13 @@ when multiple files are present in several burst-buffers.
 \item[\leastwaste] No change.
 \end{description}
 
-In the experiments, we assume that input and output I/O operations do not use the burst buffers, because they could fill them up and prevent their use for checkpoints and regular in-computation I/O activities (the latter decrease the available bandwidth to/from the filesystem, just as before).
- 
- 
-
+In the experiments, we assume that the burst buffer are limited in
+size, and dedicated to checkpointing. Staging is not provided by the
+job scheduling system, and as a consequence input and output I/O
+operations of the applications do not use the burst buffers, because
+they could fill them up and prevent their use for checkpoints and
+regular in-computation I/O activities (the latter decrease the
+available bandwidth to/from the filesystem, just as before).
 
 \section{Simulation Framework}
 \label{sec:simulator}
