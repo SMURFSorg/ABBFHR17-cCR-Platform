@@ -808,7 +808,7 @@ This section extends the framework to the case where each platform node is equip
 a (private) burst buffer. We investigate scenarios under which burst buffers help to mitigate I/O contention
 when several applications are checkpointing.
 
-The model with burst buffers is as follows.  Burst buffers enable each
+The model with burst buffers is as follows. Burst buffers enable each
 application to take its checkpoint asynchronously: the application
 writes its checkpoint file into the burst buffer and proceeds with its
 computations. The time it takes to write the checkpoint file onto
@@ -831,25 +831,31 @@ bandwidth of the burst buffer. This is assuming that each of the
 $\nbnodes{i}$ nodes enrolled by the application is writing its share
 of the checkpoint file into its private burst buffer. This checkpoint
 time is likely to be much smaller than
-$\frac{\size{i}}{\bandtotal}$,the time that was needed when dumping
+$\frac{\size{i}}{\bandtotal}$, the time that was needed when dumping
 the file directly to the parallel filesystem.  Again, we wrote
 \emph{apparent} time because this is the time to checkpoint from the
 application perspective, but the checkpoint is not valid until it has
 reached the parallel filesystem.
  
 Transfers from the burst buffers of all nodes to the parallel
-filesystem are orchestrated according to some global scheduling
-policy. We review below the policies that we used before assuming the
-presence of burst buffers, and discuss what changes and what does
-not. Beforehand, we state that the burst buffers of all nodes of a
-given application are always processed identically and simultaneously.
+filesystem can be orchestrated according to some global scheduling
+policy, as we did for the case of concurrent direct I/O to the
+filesystem. We review below the policies that we used before assuming
+the presence of burst buffers, and discuss what would change and what
+does not. Beforehand, we state that the burst buffers of all nodes of
+a given application are always processed identically and
+simultaneously.
 
 \begin{description}
 
-\item[\nocoop] The strategy becomes non-blocking for the applications. Burst-buffers are emptied in parallel
-when multiple files are present in several burst-buffers.
-\item[\fifoblock]  The strategy becomes non-blocking for the applications. Burst-buffers are emptied one application after the other.
-\item[\fifononblock] The strategy now collapses with \fifoblock. No change.
+\item[\nocoop] The strategy becomes non-blocking for the
+  applications. Burst-buffers are emptied in parallel when multiple
+  files are present in several burst-buffers.
+\item[\fifoblock] The strategy becomes non-blocking for the
+  applications. Burst-buffers are emptied one application after the
+  other.
+\item[\fifononblock] The strategy now collapses with \fifoblock. No
+  change.
 \item[\leastwaste] No change.
 \end{description}
 
@@ -955,6 +961,21 @@ if a failure hits the job, it may have to re-execute from a checkpoint far in
 its past if it has  not been granted access to the filesystem for an extended
 period of time.
 
+A different situation can happen with the burst buffer versions of the
+different scheduling algorithms: a checkpoint that was only apparently
+done (\emph{i.e.} transferred to the burst buffer, but not yet
+entirely to the filesystem) may become concurrent with the application
+final output or another checkpoint. As stated above, we prevent two
+checkpoints of the same application to compete for the same I/O by
+skipping checkpoints that want to start before the previous one is
+completed. This may force the application to restart earlier in its
+history that it would assume, because of the I/O
+contentions. Similarly, we prevent the final output to compete with a
+checkpoint, and if a checkpoint transfer from the burst buffer to the
+filesystem is not complete by the time the application enters its
+final output, the checkpoint transfer is cancelled (risking, in the
+case of a failure hitting during the final output to rollback more in
+the execution).
 
 \paragraph*{Method of statistics collection from simulations}
 We compute the distribution of performance of each strategy using the
@@ -992,7 +1013,7 @@ to 2016 at the Los Alamos National Laboratory.  It consisted of 143,104 cores,
 capacity of 160GB/s.  Cielo was chosen for this initial analysis due to the
 availability of the aforementioned workflows report, something not available for
 other platforms. In later sections, we consider similar workloads on a more
-modern platform.
+modern platform. Last, we consider the case of burst buffers.
 
 \begin{table}
 \begin{tabular}{|l|c|c|c|c|}
@@ -1206,8 +1227,146 @@ results highlight that checkpoint-based strategies can scale to
 satisfy the need of future platforms, whether by integrating I/O-aware scheduling
 strategies or by significantly over-provisioning the I/O partition.
 
+\subsection{Burst Buffers}
 
+We now consider how the inclusion of local burst buffers changes the
+checkpointing I/O scheduling problem. Looking back at the Celio
+platform, we assume that each node is equiped with a local burst
+buffer, of local bandwidth capacity of 10GB/s, and that is used to
+buffer the transfer of the checkpoints to the shared
+filesystem. Figures~\ref{fig:bb:avsysbw:daly}
+and~\ref{fig:bb:avsysbw:fixed} extend the evaluations done above by
+adding the projected waste of the \nocoop strategy using burst
+buffers. The figures show, for a fixed system MTBF of 1h, the waste of
+the different strategies as a function of the available system
+bandwidth. Figure~\ref{fig:bb:avsysbw:daly} considers only the
+approaches that checkpoint using the optimal checkpointing period (or
+the best approximation achievable considering the I/O contention),
+while Figure~\ref{fig:bb:avsysbw:fixed} considers the approaches that
+checkpoint at a fixed period of 1h.
+
+\begin{figure}
+  \begin{center}
+    \resizebox{1.05\linewidth}{!}{\input{sim/figures/cielo-bb-comp-1hMTBF-1h.tex}}
+  \end{center}
+  \caption{Waste as a function of the system bandwidth for the
+    Checkpointing scheduling strategies with and without burst buffer
+    that checkpoint every 1h, and the LANL workload on
+    Cielo.\label{fig:bb:avsysbw:1h}}
+\end{figure}
+
+\begin{figure}
+  \begin{center}
+    \resizebox{1.05\linewidth}{!}{\input{sim/figures/cielo-bb-comp-1hMTBF-daly.tex}}
+  \end{center}
+  \caption{Waste as a function of the system bandwidth for the
+    Checkpointing scheduling strategies with and without burst buffer
+    that checkpoint according to their optimal checkpointing interval,
+    and the LANL workload on Cielo. \label{fig:bb:avsysbw:daly}}
+\end{figure}
+
+Both figures show that the inclusion of burst buffers in the system
+completely change the behavior of the I/O scheduling strategy: even
+the simplest strategy, that does not impose any coordination between
+the competiting I/Os performs as well as the best scheduling strategy
+(\cooperative, see Figure~\ref{fig:bb:avsysbw:daly}), and outperforms
+the best scheduling strategy when using a fixed checkpoint interval
+(\fifofixed, see Figure~\ref{fig:bb:avsysbw:fixed}).
+
+Figures~\ref{fig:bb:mtbf:daly} and~\ref{fig:bb:mtbf:fixed} completes
+the evaluation by considering a variable system MTBF. As done above,
+the figures show, for a fixed available filesystem bandwidth of 40
+GB/s, the waste of the different strategies as a function of the
+system MTBF. Again, we separated the approaches in two categories:
+Figure~\ref{fig:bb:mtbf:daly} considers only the approaches that
+checkpoint using the optimal checkpointing period (or the best
+approximation achievable considering the I/O contention), while
+Figure~\ref{fig:bb:mtbf:fixed} considers the approaches that
+checkpoint at a fixed period of 1h.
+
+\begin{figure}
+  \begin{center}
+    \resizebox{1.05\linewidth}{!}{\input{sim/figures/cielo-bb-comp-40gbs-1h.tex}}
+  \end{center}
+  \caption{Waste as a function of the system MTBF for the
+    Checkpointing scheduling strategies with and without burst buffer
+    that checkpoint every 1h, and the LANL workload on
+    Cielo.\label{fig:bb:mtbf:1h}}
+\end{figure}
+
+\begin{figure}
+  \begin{center}
+    \resizebox{1.05\linewidth}{!}{\input{sim/figures/cielo-bb-comp-40gbs-daly.tex}}
+  \end{center}
+  \caption{Waste as a function of the system MTBF for the
+    Checkpointing scheduling strategies with and without burst buffer
+    that checkpoint according to their optimal checkpointing interval,
+    and the LANL workload on Cielo. \label{fig:bb:mtbf:daly}}
+\end{figure}
 % !TEX root =  ipdps18.tex
+
+The accelerating effect observed in Figures~\ref{fig:bb:avsysbw:fixed}
+and~\ref{fig:bb:avsysbw:daly} is confirmed in
+Figures~\ref{fig:bb:mtbf:fixed} and~\ref{fig:bb:mtbf:daly}. The
+addition of burst buffers to \propfixed or \propdaly make them equal
+or outperform any other I/O scheduling strategy. The effect of the
+burst buffers is best illustrated in
+Figure~\ref{fig:bb:mtbf:fixed}. In this situation (very scarce
+available bandwidth to the filesystem, and very frequent checkpoints),
+the \propfixed strategy is thrashing and I/O competition makes all
+checkpoints to occupy 80\% to 90\% of the time; with the inclusion of
+the burst buffers (and the fact that checkpoints that would compete
+with ongoing transfers of the same application do not block the
+execution), the waste drops to 5\% to 10\%.
+
+These evaluation demonstrate the dramatic effect that buffering the
+checkpoints can have on the performance of the platform. The effect is
+so significant that if such hardware is available, no particular
+scheduling strategy seems required to ensure the progress of I/Os in
+the background. To validate this hypothesis, we designed another
+'\emph{Ideal}' I/O scheduling strategy. To define this strategy, we
+assume that there exists a scheduling that would avoid any contention
+between two I/Os. This is unrealistic, but provides a rough lower
+bound on the waste.
+
+Figure~\ref{fig:bb:comp:fixed} shows the difference of waste between
+the \propfixed strategy and the Ideal strategy checkpointing every
+hour, while Figure~\ref{fig:bb:comp:daly} shows the difference of
+waste between the \propdaly strategy and the Ideal strategy
+checkpointing optimally.
+
+\begin{figure}
+  \begin{center}
+    \resizebox{1.05\linewidth}{!}{\input{sim/figures/cielo-bb-diff-1h.tex}}
+  \end{center}
+  \caption{Difference of Waste between the \propfixed scheduling
+    strategy with burst buffers and the Ideal scheduling strategy with
+    burst buffers as a function of the system MTBF and the system
+    available bandwidth to the shared filesystem for the LANL workload on
+    Cielo.\label{fig:bb:comp:fixed}}
+\end{figure}
+
+\begin{figure}
+  \begin{center}
+    \resizebox{1.05\linewidth}{!}{\input{sim/figures/cielo-bb-diff-daly.tex}}
+  \end{center}
+  \caption{Difference of Waste between the \propdaly scheduling
+    strategy with burst buffers and the Ideal scheduling strategy with
+    burst buffers as a function of the system MTBF and the system
+    available bandwidth to the shared filesystem for the LANL workload on
+    Cielo. \label{fig:bb:comp:daly}}
+\end{figure}
+
+These figures show that the potential gain of any I/O scheduling
+strategy, once burst buffers are available, is below 10\% for most
+configurations of the Cielo platform. Only when at the same time the
+available shared filesystem bandwidth is low (under 60GB/s), and the
+system is very unreliable (the system MTBF is under 1h), are there
+cases where the scheduling strategy can impact significantly the waste
+of the system. If the system MTBF is higher or equal 3h, the inclusion
+of burst buffers and the simplest I/O scheduling strategy is
+sufficient to raise the performance that would be achievable by the
+best theoretical scheduling strategy.
 
 \section{Related Work}\label{sec:related}
 % Primary: Kurt
@@ -1357,16 +1516,28 @@ investment in the I/O subsystem.
 % we have found achievable with a third of the I/O aggregate bandwidth
 % requirements when the system employs a smart checkpointing policy.
 
-As burst-buffers and other NVRAM storage mechanisms become more common, a natural
-extension of this work would consider their impact on I/O contention/interference.
-Increasing the available I/O
-bandwidth leads to reduced waste (due to the decrease in checkpoint duration but also
-an increase in the optimal checkpoint frequency and therefore a decrease in the
-restart time), while providing relief to the shared I/O subsystem to better absorb
-additional checkpoint information. We speculate that scheduling parallel filesystem
-I/O with a heuristic that prioritizes jobs to minimize failure impact can help to
-improve overall burst-buffer efficiencies. Such a heuristic would build upon the
-strategies discussed in this work and extend them to the new framework.
+As burst-buffers and other NVRAM storage mechanisms become more
+common, we also considered the impact of this hardware support on I/O
+contention and interference. Simulations show that the inclusion of
+such hardware has a dramatic impact on the performance: even the
+simplest strategy becomes more efficient that the most intricate ones
+that cannot rely on these buffers, if they become available. Moreover,
+the performance gain is so significant that considering complex I/O
+scheduling strategies can only enable additional gains in extreme
+circumstances.
+
+We considered in this study performance from the platform utilization
+perspective. Because the platform is shared, and failures that
+interrupt running applications make the surviving resource available
+for other applications, the effect of failures on the platform
+efficiency is only significant in extreme conditions (when the MTBF is
+very low). This study could be extended to also evaluate the
+performance loss from the applications perspective. Applications that
+are forced to de-prioritize their checkpoints to favor others (or
+because their checkpoint is so slow to complete that they have to skip
+most of them) risk having to re-execute a significant part of the work
+already completed. There is a trade-off between the platform
+utilization and the worst time to completion of an application.
 
 % As burst-buffers and other NVRAM storage are becoming more common
 % in PFS architecting, a natural extension of this work is to consider the effect
@@ -1385,8 +1556,9 @@ strategies discussed in this work and extend them to the new framework.
 % can play a role in improving the efficiency of the whole burst-buffers
 % system.
 
-%\section*{Acknowledgement}
+\section*{Acknowledgement}
 
+This research is partially supported by the NSF (award \#1564133).
 
 \bibliographystyle{IEEEtran}
 \bibliography{biblio}
