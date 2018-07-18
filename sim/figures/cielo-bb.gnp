@@ -171,10 +171,44 @@ GNUTERM = "aqua"
 set style fill empty
 load "style.gnp"
 set title ""
-set yrange [0:0.2]
+
+set terminal lua tikz size 3in,3in
+
+set ylabel "Waste"
+set xlabel "System MTBF (h)"
+#set title "Fixed Shared File System Bandwidth: 40 GB/s"
+
+set output "cielo-bbuf-1h.tex"
+
+plot   "< awk '$1==\"Simple_bb\" && $2==\"1h\" && $5==3600 && $4==5.12e8 {print}' cielo-bb.dat" u ($3/1e9-2):(1-$63):(1-$65):(1-$59):(1-$61) w candlestick t "" lt 1 \
+     ,  "< awk '$1==\"Simple_bb\" && $2==\"1h\" && $5==3600 && $4==1.024e9 {print}' cielo-bb.dat" u ($3/1e9-1):(1-$63):(1-$65):(1-$59):(1-$61) w candlestick t "" lt 2 \
+     ,  "< awk '$1==\"Simple_bb\" && $2==\"1h\" && $5==3600 && $4==2.048e9 {print}' cielo-bb.dat" u ($3/1e9):(1-$63):(1-$65):(1-$59):(1-$61) w candlestick t "" lt 4 \
+     ,  "< awk '$1==\"Simple_bb\" && $2==\"1h\" && $5==3600 && $4==4.096e9 {print}' cielo-bb.dat" u ($3/1e9+1):(1-$63):(1-$65):(1-$59):(1-$61) w candlestick t "" lt 5 \
+     ,  "< awk '$1==\"Simple_bb\" && $2==\"1h\" && $5==3600 && $4==8.192e9 {print}' cielo-bb.dat" u ($3/1e9+2):(1-$63):(1-$65):(1-$59):(1-$61) w candlestick t "" lt 6 \
+     , "< awk '$1==\"Simple_bb\" && $2==\"1h\" && $5==3600 && $4==5.12e8 {print}' cielo-bb.dat" u ($3/1e9):(1-$57) t '512MB/s' w lines lt 1 \
+     , "< awk '$1==\"Simple_bb\" && $2==\"1h\" && $5==3600 && $4==1.024e9 {print}' cielo-bb.dat" u ($3/1e9):(1-$57) t '1GB/s' w lines lt 2 \
+     , "< awk '$1==\"Simple_bb\" && $2==\"1h\" && $5==3600 && $4==2.048e9 {print}' cielo-bb.dat" u ($3/1e9):(1-$57) t '2GB/s' w lines lt 4 \
+     , "< awk '$1==\"Simple_bb\" && $2==\"1h\" && $5==3600 && $4==4.096e9 {print}' cielo-bb.dat" u ($3/1e9):(1-$57) t '4GB/s' w lines lt 5 \
+     , "< awk '$1==\"Simple_bb\" && $2==\"1h\" && $5==3600 && $4==8.192e9 {print}' cielo-bb.dat" u ($3/1e9):(1-$57) t '8GB/s' w lines lt 6
+
+set output "cielo-bbuf-daly.tex"
+
+plot   "< awk '$1==\"Simple_bb\" && $2==\"Daly\" && $5==3600 && $4==5.12e8 {print}' cielo-bb.dat" u ($3/1e9-2):(1-$63):(1-$65):(1-$59):(1-$61) w candlestick t "" lt 1 \
+     ,  "< awk '$1==\"Simple_bb\" && $2==\"Daly\" && $5==3600 && $4==1.024e9 {print}' cielo-bb.dat" u ($3/1e9-1):(1-$63):(1-$65):(1-$59):(1-$61) w candlestick t "" lt 2 \
+     ,  "< awk '$1==\"Simple_bb\" && $2==\"Daly\" && $5==3600 && $4==2.048e9 {print}' cielo-bb.dat" u ($3/1e9):(1-$63):(1-$65):(1-$59):(1-$61) w candlestick t "" lt 4 \
+     ,  "< awk '$1==\"Simple_bb\" && $2==\"Daly\" && $5==3600 && $4==4.096e9 {print}' cielo-bb.dat" u ($3/1e9+1):(1-$63):(1-$65):(1-$59):(1-$61) w candlestick t "" lt 5 \
+     ,  "< awk '$1==\"Simple_bb\" && $2==\"Daly\" && $5==3600 && $4==8.192e9 {print}' cielo-bb.dat" u ($3/1e9+2):(1-$63):(1-$65):(1-$59):(1-$61) w candlestick t "" lt 6 \
+     , "< awk '$1==\"Simple_bb\" && $2==\"Daly\" && $5==3600 && $4==5.12e8 {print}' cielo-bb.dat" u ($3/1e9):(1-$57) t '512MB/s' w lines lt 1 \
+     , "< awk '$1==\"Simple_bb\" && $2==\"Daly\" && $5==3600 && $4==1.024e9 {print}' cielo-bb.dat" u ($3/1e9):(1-$57) t '1GB/s' w lines lt 2 \
+     , "< awk '$1==\"Simple_bb\" && $2==\"Daly\" && $5==3600 && $4==2.048e9 {print}' cielo-bb.dat" u ($3/1e9):(1-$57) t '2GB/s' w lines lt 4 \
+     , "< awk '$1==\"Simple_bb\" && $2==\"Daly\" && $5==3600 && $4==4.096e9 {print}' cielo-bb.dat" u ($3/1e9):(1-$57) t '4GB/s' w lines lt 5 \
+     , "< awk '$1==\"Simple_bb\" && $2==\"Daly\" && $5==3600 && $4==8.192e9 {print}' cielo-bb.dat" u ($3/1e9):(1-$57) t '8GB/s' w lines lt 6
+
+
+set terminal lua tikz size 3in,3in
+set yrange [-0.05:0.2]
 
 #set terminal pdf font "Arial,18" enhanced
-set terminal lua tikz size 6in,3in
 
 set output "cielo-bb-diff-1h.tex"
 
@@ -182,34 +216,34 @@ set ylabel "Waste Difference"
 set xlabel "Filesystem Bandwidth (GB/s)"
 #set title "Checkpoint Period: 1h"
 
-plot   "< awk '$2==\"1h\" && $5==3600 {print}' cielo-bb-diff.dat" u ($3/1e9):7:6:8 t "" w errorbars lt 1 \
+plot   "< awk '$2==\"1h\" && $5==3600 && $4==5.12e8 {print}' cielo-bb-diff.dat" u ($3/1e9):7:6:8 t "" w errorbars lt 1 \
      , "" u ($3/1e9):7 w lines lt 1 t "System MTBF: 1h" \
-     , "< awk '$2==\"1h\" && $5==2*3600 {print}' cielo-bb-diff.dat" u ($3/1e9):7:6:8 t "" w errorbars lt 2 \
+     , "< awk '$2==\"1h\" && $5==2*3600 && $4==5.12e8 {print}' cielo-bb-diff.dat" u ($3/1e9):7:6:8 t "" w errorbars lt 2 \
      , "" u ($3/1e9):7 w lines lt 2 t "System MTBF: 2h" \
-     , "< awk '$2==\"1h\" && $5==4*3600 {print}' cielo-bb-diff.dat" u ($3/1e9):7:6:8 t "" w errorbars lt 3 \
+     , "< awk '$2==\"1h\" && $5==4*3600 && $4==5.12e8 {print}' cielo-bb-diff.dat" u ($3/1e9):7:6:8 t "" w errorbars lt 3 \
      , "" u ($3/1e9):7 w lines lt 3 t "System MTBF: 4h" \
-     , "< awk '$2==\"1h\" && $5==8*3600 {print}' cielo-bb-diff.dat" u ($3/1e9):7:6:8 t "" w errorbars lt 4 \
+     , "< awk '$2==\"1h\" && $5==8*3600 && $4==5.12e8 {print}' cielo-bb-diff.dat" u ($3/1e9):7:6:8 t "" w errorbars lt 4 \
      , "" u ($3/1e9):7 w lines lt 4 t "System MTBF: 8h" \
-     , "< awk '$2==\"1h\" && $5==16*3600 {print}' cielo-bb-diff.dat" u ($3/1e9):7:6:8 t "" w errorbars lt 5 \
+     , "< awk '$2==\"1h\" && $5==16*3600 && $4==5.12e8 {print}' cielo-bb-diff.dat" u ($3/1e9):7:6:8 t "" w errorbars lt 5 \
      , "" u ($3/1e9):7 w lines lt 5 t "System MTBF: 16h" \
-     , "< awk '$2==\"1h\" && $5==24*3600 {print}' cielo-bb-diff.dat" u ($3/1e9):7:6:8 t "" w errorbars lt 6 \
+     , "< awk '$2==\"1h\" && $5==24*3600 && $4==5.12e8 {print}' cielo-bb-diff.dat" u ($3/1e9):7:6:8 t "" w errorbars lt 6 \
      , "" u ($3/1e9):7 w lines lt 6 t "System MTBF: 24h" \
 
 set output "cielo-bb-diff-daly.tex"
 
 #set title "Checkpoint Period: Optimal (Daly)"
 
-plot   "< awk '$2==\"Daly\" && $5==3600 {print}' cielo-bb-diff.dat" u ($3/1e9):7:6:8 t "" w errorbars lt 1 \
+plot   "< awk '$2==\"Daly\" && $5==3600 && $4==5.12e8 {print}' cielo-bb-diff.dat" u ($3/1e9):7:6:8 t "" w errorbars lt 1 \
      , "" u ($3/1e9):7 w lines lt 1 t "System MTBF: 1h" \
-     , "< awk '$2==\"Daly\" && $5==2*3600 {print}' cielo-bb-diff.dat" u ($3/1e9):7:6:8 t "" w errorbars lt 2 \
+     , "< awk '$2==\"Daly\" && $5==2*3600 && $4==5.12e8 {print}' cielo-bb-diff.dat" u ($3/1e9):7:6:8 t "" w errorbars lt 2 \
      , "" u ($3/1e9):7 w lines lt 2 t "System MTBF: 2h" \
-     , "< awk '$2==\"Daly\" && $5==4*3600 {print}' cielo-bb-diff.dat" u ($3/1e9):7:6:8 t "" w errorbars lt 3 \
+     , "< awk '$2==\"Daly\" && $5==4*3600 && $4==5.12e8 {print}' cielo-bb-diff.dat" u ($3/1e9):7:6:8 t "" w errorbars lt 3 \
      , "" u ($3/1e9):7 w lines lt 3 t "System MTBF: 4h" \
-     , "< awk '$2==\"Daly\" && $5==8*3600 {print}' cielo-bb-diff.dat" u ($3/1e9):7:6:8 t "" w errorbars lt 4 \
+     , "< awk '$2==\"Daly\" && $5==8*3600 && $4==5.12e8 {print}' cielo-bb-diff.dat" u ($3/1e9):7:6:8 t "" w errorbars lt 4 \
      , "" u ($3/1e9):7 w lines lt 4 t "System MTBF: 8h" \
-     , "< awk '$2==\"Daly\" && $5==16*3600 {print}' cielo-bb-diff.dat" u ($3/1e9):7:6:8 t "" w errorbars lt 5 \
+     , "< awk '$2==\"Daly\" && $5==16*3600 && $4==5.12e8 {print}' cielo-bb-diff.dat" u ($3/1e9):7:6:8 t "" w errorbars lt 5 \
      , "" u ($3/1e9):7 w lines lt 5 t "System MTBF: 16h" \
-     , "< awk '$2==\"Daly\" && $5==24*3600 {print}' cielo-bb-diff.dat" u ($3/1e9):7:6:8 t "" w errorbars lt 6 \
+     , "< awk '$2==\"Daly\" && $5==24*3600 && $4==5.12e8 {print}' cielo-bb-diff.dat" u ($3/1e9):7:6:8 t "" w errorbars lt 6 \
      , "" u ($3/1e9):7 w lines lt 6 t "System MTBF: 24h" \
 
 set yrange [0:1]
@@ -217,16 +251,17 @@ set yrange [0:1]
 set ylabel "Waste"
 set xlabel "System MTBF (h)"
 #set title "Fixed Shared File System Bandwidth: 40 GB/s"
+set terminal lua tikz size 6in,3in
 
 set output "cielo-bb-comp-40gbs-1h.tex"
 set key right center
 
-plot   "< awk '$1==\"Simple\" && $2==\"1h\" && $3==4e10 {print}' cielo-bb.dat" u ($5/3600-.2):(1-$63):(1-$65):(1-$59):(1-$61) w candlestick t "" ls ls_propfixed \
-     , "< awk '$1==\"Simple_bb\" && $2==\"1h\" && $3==4e10 {print}' cielo-bb.dat" u ($5/3600-.1):(1-$63):(1-$65):(1-$59):(1-$61) w candlestick t "" ls ls_simple_bb_fixed \
+plot   "< awk '$1==\"Simple\" && $2==\"1h\" && $3==4e10 && $4==5.12e8 {print}' cielo-bb.dat" u ($5/3600-.2):(1-$63):(1-$65):(1-$59):(1-$61) w candlestick t "" ls ls_propfixed \
+     , "< awk '$1==\"Simple_bb\" && $2==\"1h\" && $3==4e10 && $4==5.12e8 {print}' cielo-bb.dat" u ($5/3600-.1):(1-$63):(1-$65):(1-$59):(1-$61) w candlestick t "" ls ls_simple_bb_fixed \
      , "< awk '$1==\"BLOCKING_FCFS\" && $2==4e10 {print}' 1h-ckpt-cielo.dat" u ($3/3600.0):(1-$61):(1-$63):(1-$57):(1-$59) w candlestick t "" ls ls_bfifofixed \
      , "< awk '$1==\"FCFS\" && $2==4e10 {print}' 1h-ckpt-cielo.dat" u ($3/3600.0+.1):(1-$61):(1-$63):(1-$57):(1-$59) w candlestick t "" ls ls_fifofixed \
-     , "< awk '$1==\"Simple\" && $2==\"1h\" && $3==4e10 {print}' cielo-bb.dat" u ($5/3600):(1-$57) t '\propfixed' w lines ls ls_propfixed \
-     , "< awk '$1==\"Simple_bb\" && $2==\"1h\" && $3==4e10 {print}' cielo-bb.dat" u ($5/3600):(1-$57) t '\propfixed with Burst Buffers' w lines ls ls_simple_bb_fixed \
+     , "< awk '$1==\"Simple\" && $2==\"1h\" && $3==4e10 && $4==5.12e8 {print}' cielo-bb.dat" u ($5/3600):(1-$57) t '\propfixed' w lines ls ls_propfixed \
+     , "< awk '$1==\"Simple_bb\" && $2==\"1h\" && $3==4e10 && $4==5.12e8 {print}' cielo-bb.dat" u ($5/3600):(1-$57) t '\propfixed with Burst Buffers' w lines ls ls_simple_bb_fixed \
      , "< awk '$1==\"BLOCKING_FCFS\" && $2==4e10 {print}' 1h-ckpt-cielo.dat"  u ($3/3600.0):(1-$55) w lines t '\bfifofixed' ls ls_bfifofixed \
      , "< awk '$1==\"FCFS\" && $2==4e10 {print}' 1h-ckpt-cielo.dat"  u ($3/3600.0):(1-$55) w lines t '\fifofixed' ls ls_fifofixed 
 
@@ -234,12 +269,12 @@ plot   "< awk '$1==\"Simple\" && $2==\"1h\" && $3==4e10 {print}' cielo-bb.dat" u
 set key top right
 set output "cielo-bb-comp-160gbs-1h.tex"
 
-plot   "< awk '$1==\"Simple\" && $2==\"1h\" && $3==16e10 {print}' cielo-bb.dat" u ($5/3600-.2):(1-$63):(1-$65):(1-$59):(1-$61) w candlestick t "" ls ls_propfixed \
-     , "< awk '$1==\"Simple_bb\" && $2==\"1h\" && $3==16e10 {print}' cielo-bb.dat" u ($5/3600-.1):(1-$63):(1-$65):(1-$59):(1-$61) w candlestick t "" ls ls_simple_bb_fixed \
+plot   "< awk '$1==\"Simple\" && $2==\"1h\" && $3==16e10 && $4==5.12e8 {print}' cielo-bb.dat" u ($5/3600-.2):(1-$63):(1-$65):(1-$59):(1-$61) w candlestick t "" ls ls_propfixed \
+     , "< awk '$1==\"Simple_bb\" && $2==\"1h\" && $3==16e10 && $4==5.12e8 {print}' cielo-bb.dat" u ($5/3600-.1):(1-$63):(1-$65):(1-$59):(1-$61) w candlestick t "" ls ls_simple_bb_fixed \
      , "< awk '$1==\"BLOCKING_FCFS\" && $2==16e10 {print}' 1h-ckpt-cielo.dat" u ($3/3600.0):(1-$61):(1-$63):(1-$57):(1-$59) w candlestick t "" ls ls_bfifofixed \
      , "< awk '$1==\"FCFS\" && $2==16e10 {print}' 1h-ckpt-cielo.dat" u ($3/3600.0+.1):(1-$61):(1-$63):(1-$57):(1-$59) w candlestick t "" ls ls_fifofixed \
-     , "< awk '$1==\"Simple\" && $2==\"1h\" && $3==16e10 {print}' cielo-bb.dat" u ($5/3600):(1-$57) t '\propfixed' w lines ls ls_propfixed \
-     , "< awk '$1==\"Simple_bb\" && $2==\"1h\" && $3==16e10 {print}' cielo-bb.dat" u ($5/3600):(1-$57) t '\propfixed with Burst Buffers' w lines ls ls_simple_bb_fixed \
+     , "< awk '$1==\"Simple\" && $2==\"1h\" && $3==16e10 && $4==5.12e8 {print}' cielo-bb.dat" u ($5/3600):(1-$57) t '\propfixed' w lines ls ls_propfixed \
+     , "< awk '$1==\"Simple_bb\" && $2==\"1h\" && $3==16e10 && $4==5.12e8 {print}' cielo-bb.dat" u ($5/3600):(1-$57) t '\propfixed with Burst Buffers' w lines ls ls_simple_bb_fixed \
      , "< awk '$1==\"BLOCKING_FCFS\" && $2==16e10 {print}' 1h-ckpt-cielo.dat"  u ($3/3600.0):(1-$55) w lines t '\bfifofixed' ls ls_bfifofixed \
      , "< awk '$1==\"FCFS\" && $2==16e10 {print}' 1h-ckpt-cielo.dat"  u ($3/3600.0):(1-$55) w lines t '\fifofixed' ls ls_fifofixed 
 
@@ -247,36 +282,36 @@ plot   "< awk '$1==\"Simple\" && $2==\"1h\" && $3==16e10 {print}' cielo-bb.dat" 
 set xlabel "Shared File System Bandiwdth (GB/s)"
 set output "cielo-bb-comp-1hMTBF-1h.tex"
 
-plot   "< awk '$1==\"Simple\" && $2==\"1h\" && $5==3600 {print}' cielo-bb.dat" u ($3/1e9):(1-$63):(1-$65):(1-$59):(1-$61) w candlestick t "" ls ls_propfixed \
-     , "< awk '$1==\"Simple_bb\" && $2==\"1h\" && $5==3600 {print}' cielo-bb.dat" u ($3/1e9):(1-$63):(1-$65):(1-$59):(1-$61) w candlestick t "" ls ls_simple_bb_fixed \
+plot   "< awk '$1==\"Simple\" && $2==\"1h\" && $5==3600 && $4==5.12e8 {print}' cielo-bb.dat" u ($3/1e9):(1-$63):(1-$65):(1-$59):(1-$61) w candlestick t "" ls ls_propfixed \
+     , "< awk '$1==\"Simple_bb\" && $2==\"1h\" && $5==3600 && $4==5.12e8 {print}' cielo-bb.dat" u ($3/1e9):(1-$63):(1-$65):(1-$59):(1-$61) w candlestick t "" ls ls_simple_bb_fixed \
      , "< awk '$1==\"BLOCKING_FCFS\" && $3==3600 {print}' 1h-ckpt-cielo.dat" u ($2/1e9):(1-$61):(1-$63):(1-$57):(1-$59) w candlestick t "" ls ls_bfifofixed \
      , "< awk '$1==\"FCFS\" && $3==3600 {print}' 1h-ckpt-cielo.dat" u ($2/1e9):(1-$61):(1-$63):(1-$57):(1-$59) w candlestick t "" ls ls_fifofixed \
-     , "< awk '$1==\"Simple\" && $2==\"1h\" && $5==3600 {print}' cielo-bb.dat" u ($3/1e9):(1-$57) t '\propfixed' w lines ls ls_propfixed \
-     , "< awk '$1==\"Simple_bb\" && $2==\"1h\" && $5==3600 {print}' cielo-bb.dat" u ($3/1e9):(1-$57) t '\propfixed with Burst Buffers' w lines ls ls_simple_bb_fixed \
+     , "< awk '$1==\"Simple\" && $2==\"1h\" && $5==3600 && $4==5.12e8 {print}' cielo-bb.dat" u ($3/1e9):(1-$57) t '\propfixed' w lines ls ls_propfixed \
+     , "< awk '$1==\"Simple_bb\" && $2==\"1h\" && $5==3600 && $4==5.12e8 {print}' cielo-bb.dat" u ($3/1e9):(1-$57) t '\propfixed with Burst Buffers' w lines ls ls_simple_bb_fixed \
      , "< awk '$1==\"BLOCKING_FCFS\" && $3==3600 {print}' 1h-ckpt-cielo.dat"  u ($2/1e9):(1-$55) w lines t '\bfifofixed' ls ls_bfifofixed \
      , "< awk '$1==\"FCFS\" && $3==3600 {print}' 1h-ckpt-cielo.dat"  u ($2/1e9):(1-$55) w lines t '\fifofixed' ls ls_fifofixed 
 
 #set title "Fixed System MTBF (8h)"
 set output "cielo-bb-comp-8hMTBF-1h.tex"
 
-plot   "< awk '$1==\"Simple\" && $2==\"1h\" && $5==28800 {print}' cielo-bb.dat" u ($3/1e9):(1-$63):(1-$65):(1-$59):(1-$61) w candlestick t "" ls ls_propfixed \
-     , "< awk '$1==\"Simple_bb\" && $2==\"1h\" && $5==28800 {print}' cielo-bb.dat" u ($3/1e9):(1-$63):(1-$65):(1-$59):(1-$61) w candlestick t "" ls ls_simple_bb_fixed \
+plot   "< awk '$1==\"Simple\" && $2==\"1h\" && $5==28800 && $4==5.12e8 {print}' cielo-bb.dat" u ($3/1e9):(1-$63):(1-$65):(1-$59):(1-$61) w candlestick t "" ls ls_propfixed \
+     , "< awk '$1==\"Simple_bb\" && $2==\"1h\" && $5==28800 && $4==5.12e8 {print}' cielo-bb.dat" u ($3/1e9):(1-$63):(1-$65):(1-$59):(1-$61) w candlestick t "" ls ls_simple_bb_fixed \
      , "< awk '$1==\"BLOCKING_FCFS\" && $3==28800 {print}' 1h-ckpt-cielo.dat" u ($2/1e9):(1-$61):(1-$63):(1-$57):(1-$59) w candlestick t "" ls ls_bfifofixed \
      , "< awk '$1==\"FCFS\" && $3==28800 {print}' 1h-ckpt-cielo.dat" u ($2/1e9):(1-$61):(1-$63):(1-$57):(1-$59) w candlestick t "" ls ls_fifofixed \
-     , "< awk '$1==\"Simple\" && $2==\"1h\" && $5==28800 {print}' cielo-bb.dat" u ($3/1e9):(1-$57) t '\propfixed' w lines ls ls_propfixed \
-     , "< awk '$1==\"Simple_bb\" && $2==\"1h\" && $5==28800 {print}' cielo-bb.dat" u ($3/1e9):(1-$57) t '\propfixed with Burst Buffers' w lines ls ls_simple_bb_fixed \
+     , "< awk '$1==\"Simple\" && $2==\"1h\" && $5==28800 && $4==5.12e8 {print}' cielo-bb.dat" u ($3/1e9):(1-$57) t '\propfixed' w lines ls ls_propfixed \
+     , "< awk '$1==\"Simple_bb\" && $2==\"1h\" && $5==28800 && $4==5.12e8 {print}' cielo-bb.dat" u ($3/1e9):(1-$57) t '\propfixed with Burst Buffers' w lines ls ls_simple_bb_fixed \
      , "< awk '$1==\"BLOCKING_FCFS\" && $3==28800 {print}' 1h-ckpt-cielo.dat"  u ($2/1e9):(1-$55) w lines t '\bfifofixed' ls ls_bfifofixed \
      , "< awk '$1==\"FCFS\" && $3==28800 {print}' 1h-ckpt-cielo.dat"  u ($2/1e9):(1-$55) w lines t '\fifofixed' ls ls_fifofixed
 
 #set title "Fixed System MTBF (24h)"
 set output "cielo-bb-comp-24hMTBF-1h.tex"
 
-plot   "< awk '$1==\"Simple\" && $2==\"1h\" && $5==86400 {print}' cielo-bb.dat" u ($3/1e9-.2):(1-$63):(1-$65):(1-$59):(1-$61) w candlestick t "" ls ls_propfixed \
-     , "< awk '$1==\"Simple_bb\" && $2==\"1h\" && $5==86400 {print}' cielo-bb.dat" u ($3/1e9-.1):(1-$63):(1-$65):(1-$59):(1-$61) w candlestick t "" ls ls_simple_bb_fixed \
+plot   "< awk '$1==\"Simple\" && $2==\"1h\" && $5==86400 && $4==5.12e8 {print}' cielo-bb.dat" u ($3/1e9-.2):(1-$63):(1-$65):(1-$59):(1-$61) w candlestick t "" ls ls_propfixed \
+     , "< awk '$1==\"Simple_bb\" && $2==\"1h\" && $5==86400 && $4==5.12e8 {print}' cielo-bb.dat" u ($3/1e9-.1):(1-$63):(1-$65):(1-$59):(1-$61) w candlestick t "" ls ls_simple_bb_fixed \
      , "< awk '$1==\"BLOCKING_FCFS\" && $3==86400 {print}' 1h-ckpt-cielo.dat" u ($2/1e9):(1-$61):(1-$63):(1-$57):(1-$59) w candlestick t "" ls ls_bfifofixed \
      , "< awk '$1==\"FCFS\" && $3==86400 {print}' 1h-ckpt-cielo.dat" u ($2/1e9+.1):(1-$61):(1-$63):(1-$57):(1-$59) w candlestick t "" ls ls_fifofixed \
-     , "< awk '$1==\"Simple\" && $2==\"1h\" && $5==86400 {print}' cielo-bb.dat" u ($3/1e9):(1-$57) t '\propfixed' w lines ls ls_propfixed \
-     , "< awk '$1==\"Simple_bb\" && $2==\"1h\" && $5==86400 {print}' cielo-bb.dat" u ($3/1e9):(1-$57) t '\propfixed with Burst Buffers' w lines ls ls_simple_bb_fixed \
+     , "< awk '$1==\"Simple\" && $2==\"1h\" && $5==86400 && $4==5.12e8 {print}' cielo-bb.dat" u ($3/1e9):(1-$57) t '\propfixed' w lines ls ls_propfixed \
+     , "< awk '$1==\"Simple_bb\" && $2==\"1h\" && $5==86400 && $4==5.12e8 {print}' cielo-bb.dat" u ($3/1e9):(1-$57) t '\propfixed with Burst Buffers' w lines ls ls_simple_bb_fixed \
      , "< awk '$1==\"BLOCKING_FCFS\" && $3==86400 {print}' 1h-ckpt-cielo.dat"  u ($2/1e9):(1-$55) w lines t '\bfifofixed' ls ls_bfifofixed \
      , "< awk '$1==\"FCFS\" && $3==86400 {print}' 1h-ckpt-cielo.dat"  u ($2/1e9):(1-$55) w lines t '\fifofixed' ls ls_fifofixed 
 
@@ -285,13 +320,13 @@ plot   "< awk '$1==\"Simple\" && $2==\"1h\" && $5==86400 {print}' cielo-bb.dat" 
 set xlabel "System MTBF (h)"
 set output "cielo-bb-comp-40gbs-daly.tex"
 
-plot   "< awk '$1==\"Simple\" && $2==\"Daly\" && $3==4e10 {print}' cielo-bb.dat" u ($5/3600-.2):(1-$63):(1-$65):(1-$59):(1-$61) w candlestick t "" ls ls_propdaly \
-     , "< awk '$1==\"Simple_bb\" && $2==\"Daly\" && $3==4e10 {print}' cielo-bb.dat" u ($5/3600-.1):(1-$63):(1-$65):(1-$59):(1-$61) w candlestick t "" ls ls_simple_bb_daly \
+plot   "< awk '$1==\"Simple\" && $2==\"Daly\" && $3==4e10 && $4==5.12e8 {print}' cielo-bb.dat" u ($5/3600-.2):(1-$63):(1-$65):(1-$59):(1-$61) w candlestick t "" ls ls_propdaly \
+     , "< awk '$1==\"Simple_bb\" && $2==\"Daly\" && $3==4e10 && $4==5.12e8 {print}' cielo-bb.dat" u ($5/3600-.1):(1-$63):(1-$65):(1-$59):(1-$61) w candlestick t "" ls ls_simple_bb_daly \
      , "< awk '$1==\"BLOCKING_FCFS\" && $2==4e10 {print}' daly-ckpt-cielo.dat" u ($3/3600.0):(1-$61):(1-$63):(1-$57):(1-$59) w candlestick t "" ls ls_bfifodaly \
      , "< awk '$1==\"FCFS\" && $2==4e10 {print}' daly-ckpt-cielo.dat" u ($3/3600.0+.1):(1-$61):(1-$63):(1-$57):(1-$59) w candlestick t "" ls ls_fifodaly \
      , "< awk '$1==\"Coop\" && $2==4e10 {print}' daly-ckpt-cielo.dat" u ($3/3600.0+.2):(1-$61):(1-$63):(1-$57):(1-$59) w candlestick t "" ls ls_cooperative \
-     , "< awk '$1==\"Simple\" && $2==\"Daly\" && $3==4e10 {print}' cielo-bb.dat" u ($5/3600):(1-$57) t '\propdaly' w lines ls ls_propdaly \
-     , "< awk '$1==\"Simple_bb\" && $2==\"Daly\" && $3==4e10 {print}' cielo-bb.dat" u ($5/3600):(1-$57) t '\propdaly with Burst Buffers' w lines ls ls_simple_bb_daly \
+     , "< awk '$1==\"Simple\" && $2==\"Daly\" && $3==4e10 && $4==5.12e8 {print}' cielo-bb.dat" u ($5/3600):(1-$57) t '\propdaly' w lines ls ls_propdaly \
+     , "< awk '$1==\"Simple_bb\" && $2==\"Daly\" && $3==4e10 && $4==5.12e8 {print}' cielo-bb.dat" u ($5/3600):(1-$57) t '\propdaly with Burst Buffers' w lines ls ls_simple_bb_daly \
      , "< awk '$1==\"BLOCKING_FCFS\" && $2==4e10 {print}' daly-ckpt-cielo.dat"  u ($3/3600.0):(1-$55) w lines t '\bfifodaly' ls ls_bfifodaly \
      , "< awk '$1==\"FCFS\" && $2==4e10 {print}' daly-ckpt-cielo.dat"  u ($3/3600.0):(1-$55) w lines t '\fifodaly' ls ls_fifodaly \
      , "< awk '$1==\"Coop\" && $2==4e10 {print}' daly-ckpt-cielo.dat"  u ($3/3600.0):(1-$55) w lines t '\cooperative' ls ls_cooperative
@@ -299,13 +334,13 @@ plot   "< awk '$1==\"Simple\" && $2==\"Daly\" && $3==4e10 {print}' cielo-bb.dat"
 #set title "Fixed Shared File System Bandwidth: 160 GB/s"
 set output "cielo-bb-comp-160gbs-daly.tex"
 
-plot   "< awk '$1==\"Simple\" && $2==\"Daly\" && $3==16e10 {print}' cielo-bb.dat" u ($5/3600-.2):(1-$63):(1-$65):(1-$59):(1-$61) w candlestick t "" ls ls_propdaly \
-     , "< awk '$1==\"Simple_bb\" && $2==\"Daly\" && $3==16e10 {print}' cielo-bb.dat" u ($5/3600-.1):(1-$63):(1-$65):(1-$59):(1-$61) w candlestick t "" ls ls_simple_bb_daly \
+plot   "< awk '$1==\"Simple\" && $2==\"Daly\" && $3==16e10 && $4==5.12e8 {print}' cielo-bb.dat" u ($5/3600-.2):(1-$63):(1-$65):(1-$59):(1-$61) w candlestick t "" ls ls_propdaly \
+     , "< awk '$1==\"Simple_bb\" && $2==\"Daly\" && $3==16e10 && $4==5.12e8 {print}' cielo-bb.dat" u ($5/3600-.1):(1-$63):(1-$65):(1-$59):(1-$61) w candlestick t "" ls ls_simple_bb_daly \
      , "< awk '$1==\"BLOCKING_FCFS\" && $2==16e10 {print}' daly-ckpt-cielo.dat" u ($3/3600.0):(1-$61):(1-$63):(1-$57):(1-$59) w candlestick t "" ls ls_bfifodaly \
      , "< awk '$1==\"FCFS\" && $2==16e10 {print}' daly-ckpt-cielo.dat" u ($3/3600.0+.1):(1-$61):(1-$63):(1-$57):(1-$59) w candlestick t "" ls ls_fifodaly \
      , "< awk '$1==\"Coop\" && $2==16e10 {print}' daly-ckpt-cielo.dat" u ($3/3600.0+.2):(1-$61):(1-$63):(1-$57):(1-$59) w candlestick t "" ls ls_cooperative \
-     , "< awk '$1==\"Simple\" && $2==\"Daly\" && $3==16e10 {print}' cielo-bb.dat" u ($5/3600):(1-$57) t '\propdaly' w lines ls ls_propdaly \
-     , "< awk '$1==\"Simple_bb\" && $2==\"Daly\" && $3==16e10 {print}' cielo-bb.dat" u ($5/3600):(1-$57) t '\propdaly with Burst Buffers' w lines ls ls_simple_bb_daly \
+     , "< awk '$1==\"Simple\" && $2==\"Daly\" && $3==16e10 && $4==5.12e8 {print}' cielo-bb.dat" u ($5/3600):(1-$57) t '\propdaly' w lines ls ls_propdaly \
+     , "< awk '$1==\"Simple_bb\" && $2==\"Daly\" && $3==16e10 && $4==5.12e8 {print}' cielo-bb.dat" u ($5/3600):(1-$57) t '\propdaly with Burst Buffers' w lines ls ls_simple_bb_daly \
      , "< awk '$1==\"BLOCKING_FCFS\" && $2==16e10 {print}' daly-ckpt-cielo.dat"  u ($3/3600.0):(1-$55) w lines t '\bfifodaly' ls ls_bfifodaly \
      , "< awk '$1==\"FCFS\" && $2==16e10 {print}' daly-ckpt-cielo.dat"  u ($3/3600.0):(1-$55) w lines t '\fifodaly' ls ls_fifodaly \
      , "< awk '$1==\"Coop\" && $2==16e10 {print}' daly-ckpt-cielo.dat"  u ($3/3600.0):(1-$55) w lines t '\cooperative' ls ls_cooperative
@@ -314,13 +349,13 @@ plot   "< awk '$1==\"Simple\" && $2==\"Daly\" && $3==16e10 {print}' cielo-bb.dat
 set xlabel "Shared File System Bandiwdth (GB/s)"
 set output "cielo-bb-comp-1hMTBF-daly.tex"
 
-plot   "< awk '$1==\"Simple\" && $2==\"Daly\" && $5==3600 {print}' cielo-bb.dat" u ($3/1e9):(1-$63):(1-$65):(1-$59):(1-$61) w candlestick t "" ls ls_propdaly \
-     , "< awk '$1==\"Simple_bb\" && $2==\"Daly\" && $5==3600 {print}' cielo-bb.dat" u ($3/1e9):(1-$63):(1-$65):(1-$59):(1-$61) w candlestick t "" ls ls_simple_bb_daly \
+plot   "< awk '$1==\"Simple\" && $2==\"Daly\" && $5==3600 && $4==5.12e8 {print}' cielo-bb.dat" u ($3/1e9):(1-$63):(1-$65):(1-$59):(1-$61) w candlestick t "" ls ls_propdaly \
+     , "< awk '$1==\"Simple_bb\" && $2==\"Daly\" && $5==3600 && $4==5.12e8 {print}' cielo-bb.dat" u ($3/1e9):(1-$63):(1-$65):(1-$59):(1-$61) w candlestick t "" ls ls_simple_bb_daly \
      , "< awk '$1==\"BLOCKING_FCFS\" && $3==3600 {print}' daly-ckpt-cielo.dat" u ($2/1e9):(1-$61):(1-$63):(1-$57):(1-$59) w candlestick t "" ls ls_bfifodaly \
      , "< awk '$1==\"FCFS\" && $3==3600 {print}' daly-ckpt-cielo.dat" u ($2/1e9):(1-$61):(1-$63):(1-$57):(1-$59) w candlestick t "" ls ls_fifodaly \
      , "< awk '$1==\"Coop\" && $3==3600 {print}' daly-ckpt-cielo.dat" u ($2/1e9):(1-$61):(1-$63):(1-$57):(1-$59) w candlestick t "" ls ls_cooperative \
-     , "< awk '$1==\"Simple\" && $2==\"Daly\" && $5==3600 {print}' cielo-bb.dat" u ($3/1e9):(1-$57) t '\propdaly' w lines ls ls_propdaly \
-     , "< awk '$1==\"Simple_bb\" && $2==\"Daly\" && $5==3600 {print}' cielo-bb.dat" u ($3/1e9):(1-$57) t '\propdaly with Burst Buffers' w lines ls ls_simple_bb_daly \
+     , "< awk '$1==\"Simple\" && $2==\"Daly\" && $5==3600 && $4==5.12e8 {print}' cielo-bb.dat" u ($3/1e9):(1-$57) t '\propdaly' w lines ls ls_propdaly \
+     , "< awk '$1==\"Simple_bb\" && $2==\"Daly\" && $5==3600 && $4==5.12e8 {print}' cielo-bb.dat" u ($3/1e9):(1-$57) t '\propdaly with Burst Buffers' w lines ls ls_simple_bb_daly \
      , "< awk '$1==\"BLOCKING_FCFS\" && $3==3600 {print}' daly-ckpt-cielo.dat"  u ($2/1e9):(1-$55) w lines t '\bfifodaly' ls ls_bfifodaly \
      , "< awk '$1==\"FCFS\" && $3==3600 {print}' daly-ckpt-cielo.dat"  u ($2/1e9):(1-$55) w lines t '\fifodaly' ls ls_fifodaly \
      , "< awk '$1==\"Coop\" && $3==3600 {print}' daly-ckpt-cielo.dat"  u ($2/1e9):(1-$55) w lines t '\cooperative' ls ls_cooperative
@@ -328,13 +363,13 @@ plot   "< awk '$1==\"Simple\" && $2==\"Daly\" && $5==3600 {print}' cielo-bb.dat"
 #set title "Fixed System MTBF (8h)"
 set output "cielo-bb-comp-8hMTBF-daly.tex"
 
-plot   "< awk '$1==\"Simple\" && $2==\"Daly\" && $5==28800 {print}' cielo-bb.dat" u ($3/1e9):(1-$63):(1-$65):(1-$59):(1-$61) w candlestick t "" ls ls_propdaly \
-     , "< awk '$1==\"Simple_bb\" && $2==\"Daly\" && $5==28800 {print}' cielo-bb.dat" u ($3/1e9):(1-$63):(1-$65):(1-$59):(1-$61) w candlestick t "" ls ls_simple_bb_daly \
+plot   "< awk '$1==\"Simple\" && $2==\"Daly\" && $5==28800 && $4==5.12e8 {print}' cielo-bb.dat" u ($3/1e9):(1-$63):(1-$65):(1-$59):(1-$61) w candlestick t "" ls ls_propdaly \
+     , "< awk '$1==\"Simple_bb\" && $2==\"Daly\" && $5==28800 && $4==5.12e8 {print}' cielo-bb.dat" u ($3/1e9):(1-$63):(1-$65):(1-$59):(1-$61) w candlestick t "" ls ls_simple_bb_daly \
      , "< awk '$1==\"BLOCKING_FCFS\" && $3==28800 {print}' daly-ckpt-cielo.dat" u ($2/1e9):(1-$61):(1-$63):(1-$57):(1-$59) w candlestick t "" ls ls_bfifodaly \
      , "< awk '$1==\"FCFS\" && $3==28800 {print}' daly-ckpt-cielo.dat" u ($2/1e9):(1-$61):(1-$63):(1-$57):(1-$59) w candlestick t "" ls ls_fifodaly \
      , "< awk '$1==\"Coop\" && $3==28800 {print}' daly-ckpt-cielo.dat" u ($2/1e9):(1-$61):(1-$63):(1-$57):(1-$59) w candlestick t "" ls ls_cooperative \
-     , "< awk '$1==\"Simple\" && $2==\"Daly\" && $5==28800 {print}' cielo-bb.dat" u ($3/1e9):(1-$57) t '\propdaly' w lines ls ls_propdaly \
-     , "< awk '$1==\"Simple_bb\" && $2==\"Daly\" && $5==28800 {print}' cielo-bb.dat" u ($3/1e9):(1-$57) t '\propdaly with Burst Buffers' w lines ls ls_simple_bb_daly \
+     , "< awk '$1==\"Simple\" && $2==\"Daly\" && $5==28800 && $4==5.12e8 {print}' cielo-bb.dat" u ($3/1e9):(1-$57) t '\propdaly' w lines ls ls_propdaly \
+     , "< awk '$1==\"Simple_bb\" && $2==\"Daly\" && $5==28800 && $4==5.12e8 {print}' cielo-bb.dat" u ($3/1e9):(1-$57) t '\propdaly with Burst Buffers' w lines ls ls_simple_bb_daly \
      , "< awk '$1==\"BLOCKING_FCFS\" && $3==28800 {print}' daly-ckpt-cielo.dat"  u ($2/1e9):(1-$55) w lines t '\bfifodaly' ls ls_bfifodaly \
      , "< awk '$1==\"FCFS\" && $3==28800 {print}' daly-ckpt-cielo.dat"  u ($2/1e9):(1-$55) w lines t '\fifodaly' ls ls_fifodaly \
      , "< awk '$1==\"Coop\" && $3==28800 {print}' daly-ckpt-cielo.dat"  u ($2/1e9):(1-$55) w lines t '\cooperative' ls ls_cooperative
@@ -342,13 +377,13 @@ plot   "< awk '$1==\"Simple\" && $2==\"Daly\" && $5==28800 {print}' cielo-bb.dat
 #set title "Fixed System MTBF (24h)"
 set output "cielo-bb-comp-24hMTBF-daly.tex"
 
-plot   "< awk '$1==\"Simple\" && $2==\"Daly\" && $5==86400 {print}' cielo-bb.dat" u ($3/1e9-.2):(1-$63):(1-$65):(1-$59):(1-$61) w candlestick t "" ls ls_propdaly \
-     , "< awk '$1==\"Simple_bb\" && $2==\"Daly\" && $5==86400 {print}' cielo-bb.dat" u ($3/1e9-.1):(1-$63):(1-$65):(1-$59):(1-$61) w candlestick t "" ls ls_simple_bb_daly \
+plot   "< awk '$1==\"Simple\" && $2==\"Daly\" && $5==86400 && $4==5.12e8 {print}' cielo-bb.dat" u ($3/1e9-.2):(1-$63):(1-$65):(1-$59):(1-$61) w candlestick t "" ls ls_propdaly \
+     , "< awk '$1==\"Simple_bb\" && $2==\"Daly\" && $5==86400 && $4==5.12e8 {print}' cielo-bb.dat" u ($3/1e9-.1):(1-$63):(1-$65):(1-$59):(1-$61) w candlestick t "" ls ls_simple_bb_daly \
      , "< awk '$1==\"BLOCKING_FCFS\" && $3==86400 {print}' daly-ckpt-cielo.dat" u ($2/1e9):(1-$61):(1-$63):(1-$57):(1-$59) w candlestick t "" ls ls_bfifodaly \
      , "< awk '$1==\"FCFS\" && $3==86400 {print}' daly-ckpt-cielo.dat" u ($2/1e9+.1):(1-$61):(1-$63):(1-$57):(1-$59) w candlestick t "" ls ls_fifodaly \
      , "< awk '$1==\"Coop\" && $3==86400 {print}' daly-ckpt-cielo.dat" u ($2/1e9+.2):(1-$61):(1-$63):(1-$57):(1-$59) w candlestick t "" ls ls_cooperative \
-     , "< awk '$1==\"Simple\" && $2==\"Daly\" && $5==86400 {print}' cielo-bb.dat" u ($3/1e9):(1-$57) t '\propdaly' w lines ls ls_propdaly \
-     , "< awk '$1==\"Simple_bb\" && $2==\"Daly\" && $5==86400 {print}' cielo-bb.dat" u ($3/1e9):(1-$57) t '\propdaly with Burst Buffers' w lines ls ls_simple_bb_daly \
+     , "< awk '$1==\"Simple\" && $2==\"Daly\" && $5==86400 && $4==5.12e8 {print}' cielo-bb.dat" u ($3/1e9):(1-$57) t '\propdaly' w lines ls ls_propdaly \
+     , "< awk '$1==\"Simple_bb\" && $2==\"Daly\" && $5==86400 && $4==5.12e8 {print}' cielo-bb.dat" u ($3/1e9):(1-$57) t '\propdaly with Burst Buffers' w lines ls ls_simple_bb_daly \
      , "< awk '$1==\"BLOCKING_FCFS\" && $3==86400 {print}' daly-ckpt-cielo.dat"  u ($2/1e9):(1-$55) w lines t '\bfifodaly' ls ls_bfifodaly \
      , "< awk '$1==\"FCFS\" && $3==86400 {print}' daly-ckpt-cielo.dat"  u ($2/1e9):(1-$55) w lines t '\fifodaly' ls ls_fifodaly \
      , "< awk '$1==\"Coop\" && $3==86400 {print}' daly-ckpt-cielo.dat"  u ($2/1e9):(1-$55) w lines t '\cooperative' ls ls_cooperative

@@ -1232,7 +1232,7 @@ strategies or by significantly over-provisioning the I/O partition.
 We now consider how the inclusion of local burst buffers changes the
 checkpointing I/O scheduling problem. Looking back at the Celio
 platform, we assume that each node is equiped with a local burst
-buffer, of local bandwidth capacity of 10GB/s, and that is used to
+buffer, of local bandwidth capacity of 1GB/s, and that is used to
 buffer the transfer of the checkpoints to the shared
 filesystem. Figures~\ref{fig:bb:avsysbw:daly}
 and~\ref{fig:bb:avsysbw:fixed} extend the evaluations done above by
@@ -1336,25 +1336,27 @@ waste between the \propdaly strategy and the Ideal strategy
 checkpointing optimally.
 
 \begin{figure}
-  \begin{center}
-    \resizebox{1.05\linewidth}{!}{\input{sim/figures/cielo-bb-diff-1h.tex}}
-  \end{center}
-  \caption{Difference of Waste between the \propfixed scheduling
-    strategy with burst buffers and the Ideal scheduling strategy with
-    burst buffers as a function of the system MTBF and the system
-    available bandwidth to the shared filesystem for the LANL workload on
-    Cielo.\label{fig:bb:comp:fixed}}
-\end{figure}
-
-\begin{figure}
-  \begin{center}
-    \resizebox{1.05\linewidth}{!}{\input{sim/figures/cielo-bb-diff-daly.tex}}
-  \end{center}
-  \caption{Difference of Waste between the \propdaly scheduling
-    strategy with burst buffers and the Ideal scheduling strategy with
-    burst buffers as a function of the system MTBF and the system
-    available bandwidth to the shared filesystem for the LANL workload on
-    Cielo. \label{fig:bb:comp:daly}}
+  \begin{minipage}{0.49\linewidth}
+    \begin{center}
+      \resizebox{\linewidth}{!}{\input{sim/figures/cielo-bb-diff-1h.tex}}
+    \end{center}
+    \caption{Difference of Waste between the \propfixed scheduling
+      strategy with burst buffers and the Ideal scheduling strategy with
+      burst buffers as a function of the system MTBF and the system
+      available bandwidth to the shared filesystem for the LANL workload on
+      Cielo.\label{fig:bb:comp:fixed}}
+  \end{minipage}
+  \hspace{\stretch{1}}
+  \begin{minipage}{0.49\linewidth}
+    \begin{center}
+      \resizebox{\linewidth}{!}{\input{sim/figures/cielo-bb-diff-daly.tex}}
+    \end{center}
+    \caption{Difference of Waste between the \propdaly scheduling
+      strategy with burst buffers and the Ideal scheduling strategy with
+      burst buffers as a function of the system MTBF and the system
+      available bandwidth to the shared filesystem for the LANL workload on
+      Cielo. \label{fig:bb:comp:daly}}
+  \end{minipage}
 \end{figure}
 
 These figures show that the potential gain of any I/O scheduling
@@ -1367,6 +1369,50 @@ of the system. If the system MTBF is higher or equal 3h, the inclusion
 of burst buffers and the simplest I/O scheduling strategy is
 sufficient to raise the performance that would be achievable by the
 best theoretical scheduling strategy.
+
+Last, we measure the impact of the local bandwidth between the
+computing node and the burst buffer in Figures~\ref{fig:bb:bw:fixed}
+and~\ref{fig:bb:bw:daly}. Figure~\ref{fig:bb:bw:fixed} considers the
+waste of the \propfixed with burst buffers strategy for variable
+available bandwidth to the filesystem and the bandwidth to the burst
+buffer, and Figure~\ref{fig:bb:bw:daly} considers the waste of the
+\propdaly with burst buffers strategy for variable available bandwidth
+to the filesystem and to the burst buffer. Interestingly, the figures
+show that the bandwidth between the computing node and the burst
+buffer has no significant impact, compared to the other parameters. As
+long as checkpointing on the burst buffer remains multiple orders of
+magnitude faster than transferring the checkpoint to the filesystem,
+the factor that dominates the waste is due to rollbacks and to I/O
+that access directly the shared filesystem. As the locality of the burst
+buffers architecture allows a perfect scaling, and the number of nodes
+participating to the same application is significantly higher than the
+ratio between the shared filesystem bandwidth and a burst buffer
+bandwidth, the time to checkpoint on the burst buffers remains
+a small portion of the time to checkpoint on the shared filesystem for
+any reasonable value of the burst buffers bandwidth.
+
+\begin{figure}
+  \begin{minipage}{0.49\linewidth}
+    \begin{center}
+      \resizebox{\linewidth}{!}{\input{sim/figures/cielo-bbuf-1h.tex}}
+    \end{center}
+    \caption{Waste of the \propfixed with burst buffers scheduling
+      strategy as a function of the burst buffer local bandwidth and the system
+      available bandwidth to the shared filesystem for the LANL workload on
+      Cielo.\label{fig:bb:bw:fixed}}
+  \end{minipage}
+  \hspace{\stretch{1}}
+  \begin{minipage}{0.49\linewidth}
+    \begin{center}
+      \resizebox{\linewidth}{!}{\input{sim/figures/cielo-bbuf-daly.tex}}
+    \end{center}
+    \caption{Waste of the \propdaly with burst buffers scheduling
+      strategy as a function of the burst buffer local bandwidth and the system
+      available bandwidth to the shared filesystem for the LANL workload on
+      Cielo.\label{fig:bb:bw:daly}}
+  \end{minipage}
+\end{figure}
+
 
 \section{Related Work}\label{sec:related}
 % Primary: Kurt
