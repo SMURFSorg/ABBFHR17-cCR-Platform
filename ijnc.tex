@@ -1578,7 +1578,17 @@ circumstances.
 %TODO: review this. which systems? what do we have to say in more details in such cases?
  Note however that, presumably for cost reasons, 
 some systems have seen the deployment 
-of shared burst buffers which are still subject to contentions.
+of shared burst buffers (e.g., OLCF Summit). Shared burst buffers 
+may still be subject to write contention, depending on the sharing level; 
+such contentions may be greatly mitigated (or worsened) by an I/O aware 
+allocation strategy and job mapping, but possibly at the expense of 
+communication efficiency on the high performance network (e.g., a strategy 
+that spreads the allocation on as many compute cabinets as possible so as to 
+avoid I/O contention on shared buffers would maximize long distance high 
+performance messaging). In addition, given that the resource hosting the 
+shared burst buffer may itself be subject to failures, one would have to
+incorporate that failure probability into the expectation of the 
+rollback amount per fault. Such considerations are left for future works.
 
 We considered in this study performance from the platform utilization
 perspective. Because the platform is shared, and failures that
