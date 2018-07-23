@@ -1,0 +1,16 @@
+Dear Editor,
+
+please find enclosed our submission ``Checkpointing Strategies for
+Shared High-Performance Computing Platforms" that we submit to IJNC.
+This manuscript is intended for the APDCM 2018 special issue.
+
+A shorter version of this work has appeared in the proceedings of
+APDCM 2018 under the title ``Optimal Cooperative Checkpointing for
+Shared High-Performance Computing Platforms''.  We have extended the
+latter version by considering the integration of burst buffers into
+the machine architecture. We extended the simulations to take this
+hardware into account and demonstrate how this impacts the contention
+issue and provides an alternative solution to scheduling of I/Os due
+to periodical checkpointing.
+
+With regards,

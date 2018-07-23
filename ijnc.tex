@@ -83,7 +83,7 @@
 
 \newcommand{\bwbb}{\beta_{\text{bb}}}
 
-\newcommand{\jtitle}{Optimal Cooperative Checkpointing for Shared High-Performance Computing Platforms}
+\newcommand{\jtitle}{Checkpointing Strategies for Shared High-Performance Computing Platforms}
 
 \pagestyle{plain}
 
@@ -162,7 +162,8 @@ sources often contend for scarce available bandwidth. Adding to the I/O
 operations inherent to the failure-free execution of an application, I/O
 from checkpoint/restart (CR) operations (used to ensure progress in the presence
 of failures) place an additional burden as it increase I/O contention,
-leading to degraded performance.  In this work, we consider a cooperative scheduling policy that optimizes the
+leading to degraded performance.  In this work, we consider scheduling
+policies and hardware that optimize the
 overall performance of concurrently executing CR-based applications which share
 valuable I/O resources.  First, we provide a theoretical model and then derive a set
 of necessary constraints needed to minimize the global \emph{waste} on the
@@ -172,7 +173,10 @@ Young/Daly, despite providing a sensible metric for a single application, is not
 sufficient to optimally address resource contention at the platform scale.  We
 therefore show that combining optimal checkpointing periods with I/O scheduling
 strategies can provide a significant improvement on the overall application
-performance, thereby maximizing platform throughput.
+performance, thereby maximizing platform throughput. We then consider
+how specialized hardware (namely burst buffers) may impact the I/O
+contention problem, and evaluate if they are an alternative solution
+to I/O scheduling.
 Overall, these results provide critical analysis and direct guidance on checkpointing
 large-scale workloads in the presence of competing I/O while minimizing the impact
 on application performance.
@@ -258,23 +262,35 @@ I/O bandwidth is available, each application checkpoints with its optimal,
 Young/Daly, period.  However, when I/O bandwidth is scarce, our scheduling
 algorithm provides an optimal checkpoint period that maximizes overall platform
 throughput. This cooperative checkpoint process is calculated such that there
-is no I/O interference and minimal re-work to be done when failures occur.
+is no I/O interference and minimal re-work to be done when failures
+occur.
 
+Last, an alternative approach that has been proposed consists in
+adding specialized hardware, the burst buffers, to the computing nodes
+in order to provide an efficient way to overlap I/O operations with
+computing operations. In this work, we also consider how the
+integration of such components redefines the I/O contention problem.
 Therefore, the main contributions of this paper are the following:
 
 \begin{itemize}
 
-\item Development of a model allowing for the quantification of
-the I/O interference of checkpointing applications sharing a common underlying I/O
-substrate.
+\item Development of a model allowing for the quantification of the
+  I/O interference of checkpointing applications sharing a common
+  underlying I/O substrate.
 
 \item Investigation of the costs of various I/O-aware scheduling
-strategies through both steady-state analysis as well as detailed simulations.
+  strategies through both steady-state analysis as well as detailed
+  simulations.
 
-\item A detailed survey of a number scheduling strategies: from oblivious
-algorithms similar to  those currently deployed on many large-scale platforms,
-to ones which exploit application knowledge in an effort to  minimize the total
-system waste by scheduling the application with the most critical I/O needs.
+\item Investigation of the impact of burst buffers with respect to
+  checkpointing strategies for multiple applications sharing the same
+  high performance computing infrastructure.
+
+\item A detailed survey of a number scheduling strategies: from
+  oblivious algorithms similar to those currently deployed on many
+  large-scale platforms, to ones which exploit application knowledge
+  in an effort to minimize the total system waste by scheduling the
+  application with the most critical I/O needs.
 
 \end{itemize}
 
@@ -288,16 +304,20 @@ system waste by scheduling the application with the most critical I/O needs.
 % - simulation
 % - results
 
-The rest of the paper is organized as follows. Our model is described in
-\Cref{sec:model}, followed by a description of the various scheduling
-strategies in \Cref{sec:algorithms}. \Cref{sec:lowerbound} presents a
-theoretical analysis of the model under a steady-state scenario, and provides a
-lower bound of the optimal platform waste. \Cref{sec:simulator} describes the
-discrete event simulator used to quantitatively compare the different
-scheduling strategies.  \Cref{sec:results} presents the results of the
-simulation, providing guidance on the necessary I/O bandwidth for  current and
-future systems. This work concludes with related works described in \Cref{sec:related},
-followed by a summary and future directions outlined in \Cref{sec:conclusion}.
+The rest of the paper is organized as follows. Our model is described
+in \Cref{sec:model}, followed by a description of the various
+scheduling strategies in \Cref{sec:algorithms}. \Cref{sec:lowerbound}
+presents a theoretical analysis of the model under a steady-state
+scenario, and provides a lower bound of the optimal platform
+waste. \Cref{sec:burstbuffers} introduces how we model burst buffers
+in this context, and \Cref{sec:simulator} describes the discrete event
+simulator used to quantitatively compare the different scheduling
+strategies.  \Cref{sec:results} presents the results of the
+simulation, providing guidance on the necessary I/O bandwidth for
+current and future systems, and the impact of burst buffers on the
+overall contention. This work concludes with related works
+described in \Cref{sec:related}, followed by a summary and future
+directions outlined in \Cref{sec:conclusion}.
 
 % - Section~\ref{sec:model} describe the scenario under investigation
 % - Section~\ref{sec:algorithms} describe the different I/O scheduling
@@ -803,10 +823,16 @@ pattern.  In other words, we only have a lower bound of the optimal platform
 waste.
 
 \section{Burst Buffers}
+\label{sec:burstbuffers}
 
-This section extends the framework to the case where each platform node is equipped with
-a (private) burst buffer. We investigate scenarios under which burst buffers help to mitigate I/O contention
-when several applications are checkpointing.
+This section extends the framework to the case where each platform
+node is equipped with a (private) burst buffer. Multiple architectures
+are being considered to integrate these components into the
+supercomputers to serve as distributed scalable storage mechanisms and
+reduce the I/O contention (see~\cite{amm2014} extended
+in~\cite{ammecp2018} for a taxonomy of envisionned architectures). We
+investigate scenarios under which burst buffers help to mitigate I/O
+contention when several applications are checkpointing.
 
 The model with burst buffers is as follows. Burst buffers enable each
 application to take its checkpoint asynchronously: the application
@@ -1255,7 +1281,7 @@ checkpoint at a fixed period of 1h.
   \caption{Waste, with and without burst buffer, as a function of the system bandwidth for the
     Checkpointing scheduling strategies
     that checkpoint every 1h, and the LANL workload on
-    Cielo.\label{fig:bb:avsysbw:1h}}
+    Cielo.\label{fig:bb:avsysbw:fixed}}
 \end{figure}
 
 \begin{figure}
@@ -1294,7 +1320,7 @@ checkpoint at a fixed period of 1h.
   \caption{Waste, with and without burst buffer, as a function of the system MTBF for the
     Checkpointing scheduling strategies 
     that checkpoint every 1h, and the LANL workload on
-    Cielo.\label{fig:bb:mtbf:1h}}
+    Cielo.\label{fig:bb:mtbf:fixed}}
 \end{figure}
 
 \begin{figure}
