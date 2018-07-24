@@ -1,0 +1,75 @@
+\documentclass[a4paper, 10pt, singlespacing]{article}
+
+\usepackage{graphicx}
+\usepackage[paper=a4paper, top=3cm,left=3cm,right=3cm,foot=1cm,bottom=3cm]{geometry}
+\pagestyle{empty}
+
+\usepackage[utf8]{inputenc}
+\usepackage[american]{babel}
+\usepackage{enumerate}
+\usepackage{paralist}
+\usepackage{url}
+\usepackage{xspace}
+\usepackage{subfigure}
+
+%\newcommand\AB{\mbox{Anne Benoit}\xspace}
+%\newcommand\AC{\mbox{Aurélien Cavelan}\xspace}
+%\newcommand\YR{\mbox{Yves Robert}\xspace}
+%\newcommand\HS{\mbox{Hongyang Sun}\xspace}
+
+\usepackage[ruled,vlined]{algorithm2e}
+
+\usepackage{multirow}
+
+
+\newcommand{\ignore}[1]{}
+\newcommand{\todo}[1]{~\\\noindent{\color{red}\rule[-.1cm]{.5cm}{.5cm}~~{\color{red}{#1}}}}
+
+\title{Optimal Cooperative Checkpointing\\ 
+for
+Shared High-Performance Computing Platforms}
+
+\date{}
+
+\begin{document}
+\thispagestyle{empty}
+\maketitle
+\thispagestyle{empty}
+
+\noindent {Dear APDCM organizers,}\\
+
+\noindent
+Please find enclosed our submission ``Checkpointing Strategies for
+Shared High-Performance Computing Platforms" that we submit to IJNC.
+This manuscript is intended for the APDCM 2018 special issue.
+
+\bigskip
+\noindent
+A shorter version of this work has appeared in the proceedings of
+APDCM 2018 under the title ``Optimal Cooperative Checkpointing for
+Shared High-Performance Computing Platforms''.  
+
+\bigskip
+\noindent
+We have considerably extended the
+latter version by considering the integration of burst buffers into
+the machine architecture. 
+First, we have provided a new section (Section 5) to extend the model
+and modify all scheduling strategies to account for these additional hardware resources.
+Second, we have thoroughly extended the simulations (new Section 7.3) to take burst buffers
+into account and demonstrate how they impact the contention
+issue and provide an alternative solution to scheduling of I/Os due
+to periodical checkpointing.
+
+\bigskip
+\noindent
+Altogether, the current manuscript extends the workshop paper with more than $30\%$ of new material.
+We have updated the title of the paper to reflect the changes.
+
+\bigskip
+\noindent
+With regards,\\
+Thomas Herault (on behalf of all authors)
+
+\end{document}
+
