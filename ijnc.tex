@@ -157,9 +157,9 @@ University of Tennessee, Knoxville, TN, USA
 \begin{abstract}
 In high-performance computing environments, input/output (I/O) from various
 sources often contend for scarce available bandwidth. Adding to the I/O
-operations inherent to the failure-free execution of an application, I/O
-from checkpoint/restart (CR) operations (used to ensure progress in the presence
-of failures) place an additional burden since it increases I/O contention,
+operations inherent to the failure-free execution of an application, I/O transfers
+from checkpoint/restart (CR) operations are used to ensure progress in the presence
+of failures. They place an additional burden, since they increases I/O contention,
 leading to degraded performance.  In this work, we consider scheduling
 policies and hardware that optimize the
 overall performance of concurrently executing CR-based applications which share
@@ -171,12 +171,12 @@ Young/Daly, despite providing a sensible metric for a single application, is not
 sufficient to optimally address resource contention at the platform scale.  We
 therefore show that combining optimal checkpointing periods with I/O scheduling
 strategies can provide a significant improvement on the overall application
-performance, thereby maximizing platform throughput. We then consider
-how specialized hardware (namely burst buffers) may impact the I/O
-contention problem, and evaluate if they are an alternative solution
+performance, thereby maximizing platform throughput. Finally, we consider
+how specialized hardware, namely burst buffers, may help to mitigate the I/O
+contention problem, and evaluate if they represent an alternative solution
 to I/O scheduling.
 Overall, these results provide critical analysis and direct guidance on checkpointing
-large-scale workloads in the presence of competing I/O while minimizing the impact
+large-scale workloads in the presence of competing I/O, while minimizing the impact
 on application performance.
 \end{abstract}
 
