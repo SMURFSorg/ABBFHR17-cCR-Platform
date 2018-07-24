@@ -762,7 +762,7 @@ we readily derive that
 \label{eq.daly}
 \end{equation}
 where $\mu_{i}$ is the MTBF of  class $\app{i}$ applications, and we retrieve the Daly period
-$\period{i} = \period{Daly}(J_{i})$.
+$\period{i} = \period{Daly}(J_{i})$ (see~\cite{springer-monograph} for further details).
 
 However, I/O constraints may impose the use of sub-optimal periods. If each job
 of class $\app{i}$ checkpoints in time $\ckpt{i}$ during its period $\period{i}$ (hence
@@ -783,7 +783,9 @@ Hence the optimization problem is to minimize:
 \label{eq.totalwaste}
 \end{equation}
 subject to Equation~\eqref{eq.IOconstraint}.
-Using the Karush-Kuhn-Tucker conditions~\cite{Boyd2004}, we know that there exists a nonnegative constant
+Because the upper bound in Equation~\eqref{eq.IOconstraint} may well be strict, we cannot simply use 
+the method of Lagrange multipliers. However, 
+using the Karush-Kuhn-Tucker conditions~\cite{Boyd2004}, we know that there exists a nonnegative constant
 $\lambda$
 such that
 $$- \frac{\delta \wasteplat}{\delta \period{i}} = \lambda \frac{\delta \ioconstraint}{\delta \period{i}}$$
@@ -826,10 +828,10 @@ waste.
 
 This section extends the framework to the case where each platform
 node is equipped with a (private) burst buffer. Multiple architectures
-are being considered to integrate these components into the
-supercomputers to serve as distributed scalable storage mechanisms and
-reduce the I/O contention (see~\cite{amm2014} extended
-in~\cite{ammecp2018} for a taxonomy of envisionned architectures). We
+are being considered to integrate these components into
+supercomputer nodes, in order to serve as distributed scalable storage mechanisms and
+reduce the I/O contention (see~\cite{amm2014}, extended
+in~\cite{ammecp2018}, for a taxonomy of envisioned architectures). We
 investigate scenarios under which burst buffers help to mitigate I/O
 contention when several applications are checkpointing.
 
@@ -862,7 +864,7 @@ the file directly to the parallel filesystem.  Again, we wrote
 application perspective, but the checkpoint is not valid until it has
 reached the parallel filesystem.
  
-Transfers from the nodes burst buffers to the parallel
+Transfers from the node burst buffers to the parallel
 filesystem can be orchestrated according to some global scheduling
 policy, as we did for the case of concurrent direct I/O to the
 filesystem. We review below the policies that we used before assuming
@@ -886,12 +888,12 @@ simultaneously.
 \item[\leastwaste] No change.
 \end{description}
 
-In the experiments, we assume that the burst buffer are limited in
+In the experiments, we assume that the burst buffers are limited in
 size, and dedicated to checkpointing. Staging is not provided by the
 job scheduling system, and, as a consequence, input and output I/O
 operations of the applications do not use the burst buffers, because
 they could fill them up and prevent their use for checkpoints and
-regular in-computation I/O activities (the latter decrease the
+regular in-computation I/O activities (the latter decreases the
 available bandwidth to/from the filesystem, just as before).
 
 \section{Simulation Framework}
