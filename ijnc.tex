@@ -181,33 +181,33 @@ University of Tennessee, Knoxville, TN, USA
 % Primary: George & Dorian
 
 %space sharing but not quite
-\emph{Space-sharing} high-performance computing (HPC) platforms for the
-concurrent execution of multiple parallel applications is the prevalent usage
-pattern in today's HPC centers.  In fact, space-sharing in this fashion is more
-common than \emph{capability} workloads that span the entire
-platform~\cite{Weidner2016}. Furthermore, while computational nodes are
-dedicated to a particular application instance, the interconnect links and
-storage partition are typically shared amongst application instances.
-Therefore, without careful consideration, network and storage contention can
-reduce individual application and overall system
+\emph{Space-sharing} high-performance computing (HPC) platforms for the concurrent
+execution of multiple parallel applications is the prevalent usage strategy in
+today's HPC centers.  In fact, space-sharing in this fashion is more common than
+\emph{capability} workloads that span the entire
+platform~\cite{Weidner2016}. Furthermore, while computational nodes are dedicated to
+application instances, the interconnect links and storage partition are
+typically shared amongst application instances.  Without careful consideration,
+network and storage contention can reduce individual application and overall system
 performance~\cite{Bhatele:2013:Neighborhood}.
 
 On these platforms, checkpoint/restart (CR) is the most common strategy
 employed to protect applications from underlying faults and failures.
-Generally, CR periodically outputs snapshots (\ie checkpoints) of its global,
-distributed state to some stable storage device. When an application failure
-occurs, the last stored checkpoint is retrieved and used to restart the
+Generally, CR protocols periodically snapshot (\ie checkpoint) global
+(distributed) application state to stable storage. When an application failure
+occurs, the stored checkpoints can be retrieved and used to restart the
 application.  Typically, concurrently executing applications independently
-decide when to take their own checkpoints.
+decide when to take checkpoint their state.
 
 There are two widely-used approaches to determine when an application should
 \emph{commit} a checkpoint: (i)~using a fixed checkpoint period (typically one
-or a few hours) for each application; and (ii)~using platform and
-application-specific metrics to determine its optimal checkpoint period. In the
+or a few hours) for each application; and (ii)~using an optimal
+checkpoint period determined by platform and
+application-specific metrics. In the
 second approach, the well-known Young/Daly formula~\cite{young74,daly04} yields
 an application optimal checkpoint period, $\sqrt{2 \mu C}$ seconds, where $C$
 is the time to commit a checkpoint and $\mu$ the application Mean Time Between
-Failures (MTBF) of the platform.  In most cases, $\mu = \frac{\muind}{q}$,
+Failures (MTBF) for the given platform.  In most cases, $\mu = \frac{\muind}{q}$,
 where $q$ is the number of processors enrolled by the application and $\muind$
 is the MTBF of an individual processor~\cite{springer-monograph}. Therefore,
 both $\mu$ and $C$ in the Young/Daly formula are application-dependent, and
@@ -221,9 +221,9 @@ There are two major reasons for this:
 \begin{compactitem}
         
 \item \emph{Application-CR I/O contention}: On many systems, the I/O subsystem
-does not have enough available usable bandwidth to meet the requirements of the
+does not have enough available bandwidth to meet the requirements of the
 concurrent application workloads~\cite{Luu:2015:Multiplatform}. This congestion
-is expected to worsen going forward with the increased prevelance of data
+is expected to worsen with the increased prevelance of data
 intensive workflows in HPC.  Let $\bandtotal$ be the total filesystem I/O
 bandwidth.  Concurrently executing applications typically perform regular
 (non-CR) I/O operations throughout their execution, so that only a fraction
@@ -245,46 +245,38 @@ checkpoint commit time, effciency will decrease.}.
 
 \end{compactitem}
 
-In this work, we develop and investigate a cooperative CR scheduling strategy
-for concurrently executing HPC applications.  Our objective is to assess the
-impact of such interferences, and to design scheduling algorithms that optimize
-I/O bandwidth availability for CR activity.  Using these cooperative
-algorithms, applications checkpoint sequentially, with a dynamic,
-priority-dependent frequency dictated by a cooperative scheduler.  When enough
-I/O bandwidth is available, each application checkpoints with its optimal,
-Young/Daly, period.  However, when I/O bandwidth is scarce, our scheduling
-algorithm provides an optimal checkpoint period that maximizes overall platform
-throughput. This cooperative checkpoint process is calculated such that there
-is no I/O interference and minimal re-work to be done when failures
-occur.
+In this work, we develop and investigate a cooperative CR scheduling strategy for
+concurrently executing HPC applications.  Our objective is to assess the impact of
+such interferences and to design scheduling algorithms that optimize I/O bandwidth
+availability for CR activity.  Using these cooperative algorithms, applications
+checkpoint sequentially, with a dynamic, priority-dependent frequency dictated by a
+cooperative scheduler.  When enough I/O bandwidth is available, each application
+checkpoints with its optimal, Young/Daly, period.  However, when I/O bandwidth is
+scarce, our scheduling algorithm provides an optimal checkpoint period that maximizes
+overall platform throughput. This cooperative checkpoint process is calculated such
+that there is no I/O interference and minimal re-work when failures occur.  We also
+consider how the integration of specialized hardware, burst buffers, may admit more
+opportunities to overlap I/O and computational operations, therefore redefining the
+I/O contention problem.
 
-Last, an alternative approach that has been proposed consists in
-adding specialized hardware, the burst buffers, to the computing nodes,
-in order to provide an efficient way to overlap I/O operations with
-computing operations. In this work, we also consider how the
-integration of such components redefines the I/O contention problem.
 
 Altogether, the main contributions of this paper are the following:
 
 \begin{itemize}
 
-\item Development of a model allowing for the quantification of the
-  I/O interference of checkpointing applications sharing a common
-  underlying I/O substrate.
+\item development of a model for quantifying the I/O interference of checkpointing
+  applications sharing a common underlying I/O substrate,
 
-\item Investigation of the costs of various I/O-aware scheduling
-  strategies through both steady-state analysis as well as detailed
-  simulations.
+\item investigation of the costs of various I/O-aware scheduling strategies using
+  steady-state analysis and detailed simulations,
 
-\item Investigation of the impact of burst buffers with respect to
-  checkpointing strategies for multiple applications sharing the same
-  high performance computing infrastructure.
+\item investigation of the impact of burst buffers on checkpointing strategies for
+  space-shared application instances, and
 
-\item A detailed survey of a number scheduling strategies: from
-  oblivious algorithms similar to those currently deployed on many
-  large-scale platforms, to ones which exploit application knowledge
-  in an effort to minimize the total system waste by scheduling the
-  application with the most critical I/O needs.
+\item a detailed survey of a number scheduling strategies: from oblivious algorithms
+  similar to those currently deployed on many large-scale platforms, to ones which
+  exploit application knowledge in an effort to minimize the total system waste by
+  scheduling the application with the most critical I/O needs.
 
 \end{itemize}
 
@@ -298,20 +290,17 @@ Altogether, the main contributions of this paper are the following:
 % - simulation
 % - results
 
-The rest of the paper is organized as follows. Our model is described
-in \Cref{sec:model}, followed by a description of the various
-scheduling strategies in \Cref{sec:algorithms}. \Cref{sec:lowerbound}
-presents a theoretical analysis of the model under a steady-state
-scenario, and provides a lower bound of the optimal platform
-waste. \Cref{sec:burstbuffers} introduces how we model burst buffers
-in this context, and \Cref{sec:simulator} describes the discrete event
-simulator used to quantitatively compare the different scheduling
-strategies.  \Cref{sec:results} presents the results of the
-simulation, providing guidance on the necessary I/O bandwidth for
-current and future systems, and assessing the impact of burst buffers on the
-overall contention. We conclude with related work
-described in \Cref{sec:related}, followed by a summary and future
-directions outlined in \Cref{sec:conclusion}.
+The rest of the paper is organized as follows. Our model is described in
+\Cref{sec:model}, followed by a description of the various scheduling strategies in
+\Cref{sec:algorithms}. \Cref{sec:lowerbound} presents a theoretical analysis of the
+model under a steady-state scenario and provides a lower bound of the optimal
+platform waste. \Cref{sec:burstbuffers} introduces our burst buffers model and
+\Cref{sec:simulator} describes the discrete event simulator used to quantitatively
+compare the scheduling strategies.  \Cref{sec:results} presents the results of the
+simulation, providing guidance on the necessary I/O bandwidth for current and future
+systems, and assessing the impact of burst buffers on the overall contention. We
+conclude with related work described in \Cref{sec:related}, followed by a summary and
+future directions outlined in \Cref{sec:conclusion}.
 
 % - Section~\ref{sec:model} describe the scenario under investigation
 % - Section~\ref{sec:algorithms} describe the different I/O scheduling
