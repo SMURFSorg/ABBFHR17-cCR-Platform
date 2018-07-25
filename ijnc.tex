@@ -810,75 +810,67 @@ waste.
 \section{Burst Buffers}
 \label{sec:burstbuffers}
 
-This section extends the framework to the case where each platform
-node is equipped with a (private) burst buffer. Multiple architectures
-are being considered to integrate these components into
-supercomputer nodes, in order to serve as distributed scalable storage mechanisms and
-reduce the I/O contention (see~\cite{amm2014}, extended
-in~\cite{ammecp2018}, for a taxonomy of envisioned architectures). We
-investigate scenarios under which burst buffers help to mitigate I/O
-contention when several applications are checkpointing.
+We extend our framework to consider the case where each platform node is equipped
+with a (private) burst buffer.  Burst buffer integration is being considered in many
+future HPC architectures for scalable distributed storage mechanisms and to reduce
+I/O contention~\cite{amm2014,ammecp2018}.  Here, we study burst buffers as a
+mechanism to mitigate CR I/O contention from concurrent application instances.
 
-The model with burst buffers is as follows. Burst buffers enable each
-application to take its checkpoint asynchronously: the application
-writes its checkpoint file into the burst buffer and proceeds with its
-computations. The time it takes to write the checkpoint file onto
-stable storage is no longer a concern for the application, which can
-progress as soon as its checkpoint file has been sent to the burst
-buffer. However, the checkpoint is not actually saved until it has
-been transferred from the burst buffer to the parallel filesystem. As
-a consequence, it is possible that the application tries to start a
-new checkpoint before the transfer from the burst buffer to the shared
-filesystem is complete. If the previous checkpoint transfer did not
-start, the application just overwrites the checkpoint with the new one
-in the burst buffer. If the previous transfer already started, the
-burst buffer fails to overwrite it with the new checkpoint, making
-the application skip this new checkpoint and resume computing.
+In our model, burst buffers allow each application to take checkpoints
+asynchronously: the application writes its checkpoint file into the burst buffer and
+proceeds with its computations. Since the application can progress as soon as the
+checkpoint file has been written to the burst buffer, the time to write the
+checkpoint file onto stable storage is no longer a concern.  However, the checkpoint
+is not actually comitted until it has been transferred from the burst buffer to the
+parallel filesystem.
+
+An application may try to create a new checkpoint before the transfer of the previous
+checkpoint from the burst buffer to the shared filesystem has completed. If the
+previous checkpoint transfer has not yet started, the application overwrites the
+previous checkpoint in the burst buffer with the new one. If the previous transfer
+has already started, the the application simply forgoes the new checkpoint and
+resumes its computation.
  
-The \emph{apparent} time for an application $\app{i}$ to checkpoint a
-file of size $\size{i}$ is
-$\ckpt{i} = \frac{\size{i}}{\nbnodes{i} \bwbb}$, where $\bwbb$ is the
-bandwidth of the burst buffer. This is assuming that each of the
-$\nbnodes{i}$ nodes enrolled by the application is writing its share
-of the checkpoint file into its private burst buffer. This checkpoint
-time is likely to be much smaller than
-$\frac{\size{i}}{\bandtotal}$, the time that was needed when dumping
-the file directly to the parallel filesystem.  Again, we wrote
-\emph{apparent} time because this is the time to checkpoint from the
-application perspective, but the checkpoint is not valid until it has
-reached the parallel filesystem.
+The \emph{apparent} time for an application $\app{i}$ to checkpoint a file of size
+$\size{i}$ is $\ckpt{i} = \frac{\size{i}}{\nbnodes{i} \bwbb}$, where $\bwbb$ is the
+bandwidth of the burst buffer. This is assuming that each of the $\nbnodes{i}$ nodes
+enrolled by the application writes its share of the checkpoint file into its private
+burst buffer. This checkpoint time is likely to be much smaller than
+$\frac{\size{i}}{\bandtotal}$, the time needed to write the same checkpoint file
+directly to the parallel filesystem.  Again, we wrote \emph{apparent} time because
+this is the time to checkpoint from the application perspective, but the checkpoint
+is not valid (usable) until it has reached the parallel filesystem.
+%DCA: integrated from below ...
+Optimistically, we assume that burst buffers are of unlimited size and dedicated to
+checkpointing. This mitigates potential burst buffer contention between application
+and CR I/O.
  
-Transfers from the node burst buffers to the parallel
+Transfers from the nodes' burst buffers to the parallel
 filesystem can be orchestrated according to some global scheduling
-policy, as we did for the case of concurrent direct I/O to the
-filesystem. We review below the policies that we used before assuming
-the presence of burst buffers, and discuss what changes and what
-does not. 
+policy, for example, as we did for concurrent direct I/O to the
+filesystem. We review our previous policies and how they change in 
+the presence of burst buffers. 
 %TODO: don't get the next sentence
-Beforehand, we state that the burst buffers of all nodes of
-a given application are always processed identically and
+All of an application's nodes' burst buffers are processed identically and
 simultaneously.
 
 \begin{description}
 
-\item[\nocoop] The strategy becomes non-blocking for the
-  applications. Burst-buffers are emptied in parallel when multiple
-  files are present in several burst-buffers.
-\item[\fifoblock] The strategy becomes non-blocking for the
-  applications. Burst-buffers are emptied one application after the
-  other.
-\item[\fifononblock] The strategy now collapses with \fifoblock. No
-  change.
+\item[\nocoop] This strategy becomes non-blocking for the applications: burst-buffers
+  are emptied in parallel when multiple files are present in several burst-buffers.
+\item[\fifoblock] This strategy becomes non-blocking for the applications:
+  burst-buffers are emptied one application after the other.
+\item[\fifononblock] This strategy reduces to \fifoblock. No change.
 \item[\leastwaste] No change.
 \end{description}
 
-In the experiments, we assume that the burst buffers are limited in
-size, and dedicated to checkpointing. Staging is not provided by the
-job scheduling system, and, as a consequence, input and output I/O
-operations of the applications do not use the burst buffers, because
-they could fill them up and prevent their use for checkpoints and
-regular in-computation I/O activities (the latter decreases the
-available bandwidth to/from the filesystem, just as before).
+%In our experiments, we assume that burst buffers are of unlimited 
+%size and dedicated to checkpointing. Staging is not provided by the
+%job scheduling system, and, as a consequence, I/O
+%operations of the applications do not use the burst buffers, because
+%they could fill them up and prevent their use for checkpoints and
+%regular in-computation I/O activities (the latter decreases the
+%available bandwidth to/from the filesystem, just as before).
 
 \section{Simulation Framework}
 \label{sec:simulator}
@@ -974,22 +966,19 @@ if a failure hits the job, it may have to re-execute from a checkpoint far in
 its past if it has  not been granted access to the filesystem for an extended
 period of time.
 
-A different situation can happen with the burst buffer versions of the
-different scheduling algorithms: a checkpoint that was only apparently
-completed (\emph{i.e.} transferred to the burst buffer, but not yet
-entirely to the filesystem) may become concurrent with the application
-final output or another checkpoint. As stated above, we prevent two
-checkpoints of the same application to compete for the same I/O by
-skipping checkpoints that want to start before the previous one is
-completed. This may force the application to restart earlier in its
-history than it would assume, because the I/O
-contentions prevented the use of the desired checkpointing period.
-Similarly, we prevent the final output from competing with a
-checkpoint, and if a checkpoint transfer from the burst buffer to the
-filesystem is not complete by the time the application enters its
-final output, the checkpoint transfer is cancelled (risking, in the
-case of a failure hitting during the final output, to rollback earlier in
-the execution).
+With burst buffers, however, a checkpoint written to the burst buffer but not yet
+written entirely to the filesystem may become concurrent with final application
+output or another checkpoint.  As previously stated, we prevent I/O contention
+between two checkpoints of the same application by forgoing subsequent checkpoints
+before previous ones are completed.
+%This may force the application to restart earlier in its
+%history than it would assume, because the I/O
+%contentions prevented the use of the desired checkpointing period.
+Similarly, when final application output and a checkpoint transfer from the burst
+buffer potentially contend for filesystem I/O, we avoid this contention by cancelling
+the checkpoint transfer. (The preceding checkpoint would be used to recover from any
+subsequent failure.)
+
 
 \paragraph*{Method of statistics collection from simulations}
 We compute the distribution of performance of each strategy using the
