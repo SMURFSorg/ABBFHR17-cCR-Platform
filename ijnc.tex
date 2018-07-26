@@ -677,6 +677,31 @@ Finally, we select the job $J_{i} \in \Catiocat \cup \Catckptcat$
 whose waste $\wap{i}$ is minimal. 
 
 
+\subsection{Feasibility of Cooperative Strategies}
+\label{sec:feasibility}
+
+The cooperative strategies (\fifoblock, \fifononblock, and
+\leastwaste) require a form of synchronization to be implemented. This
+synchronization can happen at the filesystem level for \fifoblock:
+metadata servers in the filesystem can select which I/O stream is
+given the priority, and in the extreme case, give access to the I/O
+storage nodes only to a given application (\eg by using the technology
+proposed in CALCioM,~\cite{Dorier2015}); however, \fifononblock and
+\leastwaste cannot be implemented without modifying the applications,
+as work must continue until the access is granted.
+Operating and runtime systems should provide these strategies at the level 
+of the checkpoint library (\eg inside SCR or FTI). These libraries already provide APIs for the
+applications to get informed when a checkpoint is desirable, and
+applications that use these libraries regularly poll the system to
+decide if a checkpoint should be started.
+
+Moreover, checkpointing libraries try to take advantage of the memory
+hierarchy to checkpoint first the process memory on unreliable (but
+fast) media, and then to upload the checkpoints in the background,
+while the application proceeds to compute. As the I/O Interference
+scheduling strategies rely on knowing when a checkpoint is started and
+when it is complete, implementing that strategy at the checkpointing
+library level is thus the natural place.
 
 %\input{steady-state.tex}
 % !TEX root =  ipdps18.tex
