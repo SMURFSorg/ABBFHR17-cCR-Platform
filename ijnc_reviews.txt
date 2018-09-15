@@ -1,0 +1,107 @@
+Paper ID: 27
+Title: Checkpointing Strategies for Shared High-Performance Computing Platforms
+
+When revising your paper, please make sure to follow the reviewers' comments and suggestions.
+
+We use Easychair for re-submission. Please login Easychair (http://www.easychair.org/conferences/?conf=apdcm2018), and submit PDF of a revised version of your paper from "New Submission".
+
+Also, along with your manuscript, please submit a letter (DOC, PDF or TXT) informing how and where (in the manuscript) each of the reviewer's comments/requests were addressed.
+
+The re-submission due is October 26, 2018. The paper will be reviewed again and accepted papers will be published in January 2019 issue of IJNC.
+
+In case you have any questions, please do not hesitate in contacting us.
+
+Best regards,
+
+Akihiro Fujiwara
+Susumu Matsumae
+
+
+----------------------- REVIEW 1 ---------------------
+PAPER: 27
+TITLE: Checkpointing Strategies for Shared High-Performance Computing Platforms
+AUTHORS: Thomas Herault, Yves Robert, Aurelien Bouteiller, Dorian Arnold, Kurt Ferreira, George Bosilca and Jack Dongarra
+
+Overall evaluation: 2 (accept)
+Reviewer's confidence: 4 ((high))
+Originality: 4 (good)
+Soundness of methods: 3 (fair)
+Significance of results: 4 (good)
+Clarity of presentation: 4 (good)
+Relevance to workshop: 4 (good)
+
+----------- Summary -----------
+This paper proposed checkpointing Strategies and hardware for shared High-Performance Computing Platforms that optimize the overall performance of concurrently executing CR-based applications. It showed that by combining optimal checkpointing periods with contention-aware I/O scheduling strategies, the platform throughput and overall application performance could be significantly improved. It also showed that specialized burst buffers might help to mitigate the I/O contention problem.
+
+----------- Positive aspects -----------
+The authors provided a theoretical model and a set of necessary constraints to minimize the global waste on a given platform. They derived a theoretical lower-bound of platform waste for I/O constrained checkpointing workloads and demonstrated the effectiveness of their Least-Waste I/O scheduling.
+
+----------- Negative aspects -----------
+In proposed the strategies,  application knowledge,  small job size, code refactoring are required for minimizing the platform waste, which in many cases is not practical.
+
+
+----------------------- REVIEW 2 ---------------------
+PAPER: 27
+TITLE: Checkpointing Strategies for Shared High-Performance Computing Platforms
+AUTHORS: Thomas Herault, Yves Robert, Aurelien Bouteiller, Dorian Arnold, Kurt Ferreira, George Bosilca and Jack Dongarra
+
+Overall evaluation: 2 (accept)
+Reviewer's confidence: 3 ((medium))
+Originality: 4 (good)
+Soundness of methods: 4 (good)
+Significance of results: 5 (excellent)
+Clarity of presentation: 4 (good)
+Relevance to workshop: 4 (good)
+
+----------- Summary -----------
+This extended work proposes an optimal checkpointing strategy with respect to limited I/O bandwidth in HPC systems with shared file system. As extended content the integration of burst buffers are considered. The simulations were also extended with burst buffers. They show that burst buffers has a dramatic impact on the performance and even simple schedulers with burst buffer are much better than complex ones (from the previous shorter paper) without.
+
+----------- Positive aspects -----------
+- The added new content of burst buffer seems to make a lot of sense and is well described. The results are very impressive in this context.
+
+----------- Negative aspects -----------
+- Nothing has been added to the related work on the new topic burst buffers
+
+----------- Other comments -----------
+- The lines of "oblivious-fixed and "oblivious-fixed with burst-buffer" in Fig 4 and 6 are both depicted in (a different kind of) red, please adjust this
+
+
+----------------------- REVIEW 3 ---------------------
+PAPER: 27
+TITLE: Checkpointing Strategies for Shared High-Performance Computing Platforms
+AUTHORS: Thomas Herault, Yves Robert, Aurelien Bouteiller, Dorian Arnold, Kurt Ferreira, George Bosilca and Jack Dongarra
+
+Overall evaluation: 2 (accept)
+Reviewer's confidence: 3 ((medium))
+Originality: 3 (fair)
+Soundness of methods: 4 (good)
+Significance of results: 4 (good)
+Clarity of presentation: 4 (good)
+Relevance to workshop: 4 (good)
+
+----------- Summary -----------
+This work considers the scheduling policies and hardware that optimize the overall performance of concurrently executing checkpoint/restart-based applications that share I/O resources. The proposed Least-Waste algorithm was efficient over existing algorithms. However, with local burst buffers that enables the applications asynchronous checkpoints, traditional algorithms (Oblivious-Fixed and Oblivious-Dally) outperform other I/O scheduling algorithms.
+
+----------- Positive aspects -----------
+This work focuses on a practically important aspect of the contemporary systems.
+This manuscript is readable and well-constructed.
+The manuscript is updated and enhanced from its APDCM version; mainly Sections 5 and 7.3 with additional reference items.
+
+----------- Negative aspects -----------
+Abstract should be totally rewritten, because it is vague. It presents the background and purpose of this work, while it does not show any of the important results and findings.
+
+----------- Other comments -----------
+Page 6, Eq.(1)  This reviewer could not follow the induction of Eq.(1).
+Modify or add the explanation.
+
+W_i is the sum of W_i(j) of C_IO and C_Ckpt.
+Sum{W_i(j) in C_IO} = q_j (d_j +v_i)
+Sum{W_i(j) in C_Ckpt} = v_i q_j^2 / mu_ind (xxxxx)
+So, W_i should be Sigma{W_i(j) in C_IO} + v_i Sigma{ q_j^2 / mu_ind (xxxxx)}.
+However. Eq(1) shows that W_i = v_i (Sigma{W_i(j) in C_IO} + Sigma{ q_j^2 / mu_ind (xxxxx)}.
+BTW, there is no discrepancy between Eq(1) and Eq(2).
+
+It is also recommended to add [units] to each symbol. It would help the readers to follow the logic and calculation.
+
+Figures 8 and 9: there are lines with/without variances. What are the differences?
+Can you explain or modify the explanations or graphs?
