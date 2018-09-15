@@ -219,7 +219,7 @@ scarce resource, namely available I/O bandwidth~\cite{Luu:2015:Multiplatform}.
 There are two major reasons for this:
 
 \begin{compactitem}
-        
+
 \item \emph{Application-CR I/O contention}: On many systems, the I/O subsystem
 does not have enough available bandwidth to meet the requirements of the
 concurrent application workloads~\cite{Luu:2015:Multiplatform}. This congestion
@@ -428,7 +428,7 @@ $\nbnodesplat$ nodes. Application class $\app{i}$ specifies:
 \item $\ckpt{i}$ and $\reco{i}$: the checkpoint and recovery durations for each job in $\app{i}$ when there is no interference with other I/O operations.
 \end{compactitem}
 
-Jobs inherit their characteristics from their classes. To simplify notations, 
+Jobs inherit their characteristics from their classes. To simplify notations,
 for a job $J_j$, we use $\nbnodes{j}, \period{j}, \ckpt{j}$ and
 $\reco{j}$ to denote respectfully the number of nodes, checkpoint
 period, and checkpoint and recovery durations of the application class
@@ -595,7 +595,7 @@ the three strategies \nocoop, \fifoblock and \fifononblock. In
 \Cref{sec:simulator}, we instantiate each strategy with two variants. The first
 variant uses a fixed checkpointing period for each job, while the second
 variant uses the Daly period of each job.
- 
+
 \subsection{\leastwaste Algorithm}
 \label{sec:least-waste}
 
@@ -674,7 +674,7 @@ of Equation~\eqref{eq.selection} for its waste $\wap{i}$:
 \end{equation}
 
 Finally, we select the job $J_{i} \in \Catiocat \cup \Catckptcat$
-whose waste $\wap{i}$ is minimal. 
+whose waste $\wap{i}$ is minimal.
 
 
 \subsection{Feasibility of Cooperative Strategies}
@@ -689,7 +689,7 @@ storage nodes only to a given application (\eg by using the technology
 proposed in CALCioM,~\cite{Dorier2015}); however, \fifononblock and
 \leastwaste cannot be implemented without modifying the applications,
 as work must continue until the access is granted.
-Operating and runtime systems should provide these strategies at the level 
+Operating and runtime systems should provide these strategies at the level
 of the checkpoint library (\eg inside SCR or FTI). These libraries already provide APIs for the
 applications to get informed when a checkpoint is desirable, and
 applications that use these libraries regularly poll the system to
@@ -760,7 +760,7 @@ it uses:
 
 In the absence of I/O constraints, the checkpointing period can be minimized
 for each job independently. Indeed, the optimal period for a job
-of class $\app{i}$ is obtained by minimizing $\wasteapp{i}$ in 
+of class $\app{i}$ is obtained by minimizing $\wasteapp{i}$ in
 Equation~\eqref{eq.wasteAi}.
 
 Differentiating and solving
@@ -792,8 +792,8 @@ Hence the optimization problem is to minimize:
 \label{eq.totalwaste}
 \end{equation}
 subject to Equation~\eqref{eq.IOconstraint}.
-Because the upper bound in Equation~\eqref{eq.IOconstraint} may well be strict, we cannot simply use 
-the method of Lagrange multipliers. However, 
+Because the upper bound in Equation~\eqref{eq.IOconstraint} may well be strict, we cannot simply use
+the method of Lagrange multipliers. However,
 using the Karush-Kuhn-Tucker conditions~\cite{Boyd2004}, we know that there exists a nonnegative constant
 $\lambda$
 such that
@@ -855,7 +855,7 @@ previous checkpoint transfer has not yet started, the application overwrites the
 previous checkpoint in the burst buffer with the new one. If the previous transfer
 has already started, the the application simply forgoes the new checkpoint and
 resumes its computation.
- 
+
 The \emph{apparent} time for an application $\app{i}$ to checkpoint a file of size
 $\size{i}$ is $\ckpt{i} = \frac{\size{i}}{\nbnodes{i} \bwbb}$, where $\bwbb$ is the
 bandwidth of the burst buffer. This is assuming that each of the $\nbnodes{i}$ nodes
@@ -869,12 +869,12 @@ is not valid (usable) until it has reached the parallel filesystem.
 Optimistically, we assume that burst buffers are of unlimited size and dedicated to
 checkpointing. This mitigates potential burst buffer contention between application
 and CR I/O.
- 
+
 Transfers from the nodes' burst buffers to the parallel
 filesystem can be orchestrated according to some global scheduling
 policy, for example, as we did for concurrent direct I/O to the
-filesystem. We review our previous policies and how they change in 
-the presence of burst buffers. 
+filesystem. We review our previous policies and how they change in
+the presence of burst buffers.
 %TODO: don't get the next sentence
 All of an application's nodes' burst buffers are processed identically and
 simultaneously.
@@ -889,7 +889,7 @@ simultaneously.
 \item[\leastwaste] No change.
 \end{description}
 
-%In our experiments, we assume that burst buffers are of unlimited 
+%In our experiments, we assume that burst buffers are of unlimited
 %size and dedicated to checkpointing. Staging is not provided by the
 %job scheduling system, and, as a consequence, I/O
 %operations of the applications do not use the burst buffers, because
@@ -1021,7 +1021,7 @@ first day, jobs may be synchronized artificially because a subset
 starts at the same date, and during the last day, large amounts of
 resources may not be used, because new jobs are no longer added to the workload.
 For each aggregate measurement, we compute and show mean, first and
-ninth decile, and first and third quartile statistics. 
+ninth decile, and first and third quartile statistics.
 
 %\input{results.tex}
 % !TEX root =  ipdps18.tex
@@ -1044,7 +1044,7 @@ other platforms. In later sections, we consider similar workloads on a more
 modern platform. Last, we consider the case of burst buffers.
 
 \begin{table}
-\begin{tabular}{|l|c|c|c|c|}
+\centering\begin{tabular}{|l|c|c|c|c|}
 \hline
  Workflow & EAP & LAP & Silverton & VPIC \\\hline
 Workload percentage & 66 & 5.5 & 16.5 & 12 \\\hline
@@ -1212,7 +1212,7 @@ conditions.
 %
 We vary system MTBF; and for each strategy, we find the required aggregated
 practical bandwidth necessary to provide a sustained 80\% efficiency of the
-system.  This 80\% target efficiency is viewed by many programs (\eg 
+system.  This 80\% target efficiency is viewed by many programs (\eg
 The Exascale Computing Project\footnote{\url{https://exascaleproject.org}}) as a
 reasonable cost for resilience activities.
 %
@@ -1248,7 +1248,7 @@ benefits from not blocking when the filesystem is not available.
 This is sufficient, when failures are rare, to obtain a significant
 performance gain. % 4.9TB/s at 24 years
 All Daly-based strategies benefit from reduced I/O pressure, and reach the
-target efficiency with around half the bandwidth needed by \propfixed. 
+target efficiency with around half the bandwidth needed by \propfixed.
 We also observe that \fifodaly and \leastwaste remain the most efficient strategies
 for the whole MTBF spectrum. These
 results highlight that checkpoint-based strategies can scale to
@@ -1285,7 +1285,7 @@ period of 1h.
     \resizebox{1.05\linewidth}{!}{\input{sim/figures/cielo-bb-comp-1hMTBF-daly.tex}}
   \end{center}
   \caption{Waste, with and without burst buffers, as a function of the system bandwidth for the
-    checkpointing scheduling strategies 
+    checkpointing scheduling strategies
     that checkpoint according to their optimal checkpointing interval,
     and the LANL workload on Cielo. \label{fig:bb:avsysbw:daly}}
 \end{figure}
@@ -1314,7 +1314,7 @@ checkpoint at a fixed period of 1h.
     \resizebox{1.05\linewidth}{!}{\input{sim/figures/cielo-bb-comp-40gbs-1h.tex}}
   \end{center}
   \caption{Waste, with and without burst buffers, as a function of the system MTBF for the
-    checkpointing scheduling strategies 
+    checkpointing scheduling strategies
     that checkpoint every 1h, and the LANL workload on
     Cielo.\label{fig:bb:mtbf:fixed}}
 \end{figure}
@@ -1324,7 +1324,7 @@ checkpoint at a fixed period of 1h.
     \resizebox{1.05\linewidth}{!}{\input{sim/figures/cielo-bb-comp-40gbs-daly.tex}}
   \end{center}
   \caption{Waste, with and without burst buffers, as a function of the system MTBF for the
-    checkpointing scheduling strategies 
+    checkpointing scheduling strategies
     that checkpoint according to their optimal checkpointing interval,
     and the LANL workload on Cielo. \label{fig:bb:mtbf:daly}}
 \end{figure}
@@ -1388,10 +1388,10 @@ configurations of the Cielo platform. There are
 cases where the scheduling strategy can impact significantly the waste
 of the system only when, at the same time, the
 available shared filesystem bandwidth is low (under 60GB/s), and the
-system is very unreliable (the system MTBF is under 1h), 
+system is very unreliable (the system MTBF is under 1h),
 If the system MTBF is higher than or equal to 3h, the inclusion
 of burst buffers and the simplest I/O scheduling strategy is
-sufficient to raise the performance to a level that would be achievable 
+sufficient to raise the performance to a level that would be achievable
 only by the
 best theoretical scheduling strategy.
 
@@ -1597,18 +1597,18 @@ the performance gain is so significant that considering complex I/O
 scheduling strategies can only enable additional gains in extreme
 circumstances.
 %TODO: review this. which systems? what do we have to say in more details in such cases?
- Note however that, presumably for cost reasons, 
-some systems have seen the deployment 
-of shared burst buffers (e.g., OLCF Summit). Shared burst buffers 
-may still be subject to write contention, depending on the sharing level; 
-such contentions may be greatly mitigated (or worsened) by an I/O aware 
-allocation strategy and job mapping, but possibly at the expense of 
-communication efficiency on the high performance network (e.g., a strategy 
-that spreads the allocation on as many compute cabinets as possible so as to 
-avoid I/O contention on shared buffers would maximize long distance high 
-performance messaging). In addition, given that the resource hosting the 
+ Note however that, presumably for cost reasons,
+some systems have seen the deployment
+of shared burst buffers (e.g., OLCF Summit). Shared burst buffers
+may still be subject to write contention, depending on the sharing level;
+such contentions may be greatly mitigated (or worsened) by an I/O aware
+allocation strategy and job mapping, but possibly at the expense of
+communication efficiency on the high performance network (e.g., a strategy
+that spreads the allocation on as many compute cabinets as possible so as to
+avoid I/O contention on shared buffers would maximize long distance high
+performance messaging). In addition, given that the resource hosting the
 shared burst buffer may itself be subject to failures, one would have to
-incorporate that failure probability into the expectation of the 
+incorporate that failure probability into the expectation of the
 rollback amount per fault. Such considerations are left for future work.
 
 We considered in this study performance from the platform utilization

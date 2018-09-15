@@ -12,16 +12,16 @@ ls_simple_bb_daly=11
 ls_no_bb_fixed=12
 ls_no_bb_daly=13
 
-set style line ls_cooperative linetype 1 linecolor rgb '#8b2992' linewidth 2 pointtype 13 pointsize .3
-set style line ls_propfixed linetype 2 linecolor rgb '#d95319' linewidth 2 pointtype 5 pointsize .3
-set style line ls_propdaly linetype 1 linecolor rgb '#edb120' linewidth 2 pointtype 5 pointsize .3
-set style line ls_fifofixed linetype 2 linecolor rgb '#0072bd' linewidth 2 pointtype 7 pointsize .3
-set style line ls_fifodaly linetype 1 linecolor rgb '#4dbeee' linewidth 2 pointtype 7 pointsize .3
-set style line ls_bfifofixed linetype 2 linecolor rgb '#1c5618' linewidth 2 pointtype 9 pointsize .3
-set style line ls_bfifodaly linetype 1 linecolor rgb '#77ac30' linewidth 2 pointtype 9 pointsize .3
-set style line ls_model linetype 1 linecolor rgb '#000000' linewidth 2 pointtype 1 pointsize .3
-set style line ls_whitepoint=9 linetype 1 linecolor rgb '#ffffff' linewidth 2 pointtype 12 pointsize 1
-set style line ls_simple_bb_fixed linetype 2 linecolor rgb "#ff0000" linewidth 2 pointtype 6 pointsize .3
-set style line ls_simple_bb_daly linetype 1 linecolor rgb "#ff5050" linewidth 2 pointtype 8 pointsize .3
-set style line ls_no_bb_fixed linetype 2 linecolor rgb "#33cccc" linewidth 2 pointtype 6 pointsize .3
-set style line ls_no_bb_daly linetype 1 linecolor rgb "#00ffff" linewidth 2 pointtype 8 pointsize .3
+set style line ls_cooperative linetype 1 linecolor rgb '#8b2992' linewidth 3 pointtype 13 pointsize .3
+set style line ls_propfixed linetype 2 linecolor rgb '#9a9900' linewidth 3 pointtype 5 pointsize .3
+set style line ls_propdaly linetype 1 linecolor rgb '#edb120' linewidth 3 pointtype 5 pointsize .3
+set style line ls_fifofixed linetype 2 linecolor rgb '#0072bd' linewidth 3 pointtype 7 pointsize .3
+set style line ls_fifodaly linetype 1 linecolor rgb '#4dbeee' linewidth 3 pointtype 7 pointsize .3
+set style line ls_bfifofixed linetype 2 linecolor rgb '#1c5618' linewidth 3 pointtype 9 pointsize .3
+set style line ls_bfifodaly linetype 1 linecolor rgb '#77ac30' linewidth 3 pointtype 9 pointsize .3
+set style line ls_model linetype 1 linecolor rgb '#000000' linewidth 3 pointtype 1 pointsize .3
+set style line ls_whitepoint=9 linetype 1 linecolor rgb '#ffffff' linewidth 3 pointtype 12 pointsize 1
+set style line ls_simple_bb_fixed linetype 2 linecolor rgb "#ff0000" linewidth 3 pointtype 6 pointsize .3
+set style line ls_simple_bb_daly linetype 1 linecolor rgb "#ff5050" linewidth 3 pointtype 8 pointsize .3
+set style line ls_no_bb_fixed linetype 2 linecolor rgb "#33cccc" linewidth 3 pointtype 6 pointsize .3
+set style line ls_no_bb_daly linetype 1 linecolor rgb "#00ffff" linewidth 3 pointtype 8 pointsize .3
