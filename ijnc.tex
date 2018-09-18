@@ -661,9 +661,9 @@ $$\wap{i} = \sum_{J_{j} \in \Catiocat, j\neq i} \wapp{i}{j} + \sum_{J_{j} \in \C
 We obtain
 \begin{equation}
 \label{eq.selection}
-\begin{array}{ll}
- \wap{i} = & v_{i} \times \left( \sum_{1 \leq j \leq r, j\neq i} q_{j} (d_{j} + v_{i}) \right.\\
-& + \left. \sum_{r+1 \leq j \leq r+s}   \frac{q^{2}_{j}}{\muind} (\reco{j} + d_{j} + \frac{v_{i}}{2}) \right)
+\begin{array}{rl}
+ \wap{i} = & \sum_{1 \leq j \leq r, j\neq i} q_{j} (d_{j} + v_{i}) \\
++ & v_{i} \times \sum_{r+1 \leq j \leq r+s}   \frac{q^{2}_{j}}{\muind} (\reco{j} + d_{j} + \frac{v_{i}}{2})
  \end{array}
 \end{equation}
 
@@ -673,9 +673,9 @@ seconds for $J_{i} \in \Catiocat$. We directly obtain the counterpart
 of Equation~\eqref{eq.selection} for its waste $\wap{i}$:
  \begin{equation}
 \label{eq.selection2}
- \begin{array}{ll}
- \wap{i} = & \ckpt{i} \times \left( \sum_{1 \leq j \leq r} q_{j} (d_{j} + \ckpt{i}) \right.\\
-& + \left. \sum_{r+1 \leq j \leq r+s, j\neq i}   \frac{q^{2}_{j}}{\muind} (\reco{j} + d_{j} + \frac{C_{i}}{2}) \right)
+ \begin{array}{rl}
+ \wap{i} = & \sum_{1 \leq j \leq r} q_{j} (d_{j} + \ckpt{i}) \\
+ + & \ckpt{i} \times \sum_{r+1 \leq j \leq r+s, j\neq i}   \frac{q^{2}_{j}}{\muind} (\reco{j} + d_{j} + \frac{C_{i}}{2})
  \end{array}
 \end{equation}
 
