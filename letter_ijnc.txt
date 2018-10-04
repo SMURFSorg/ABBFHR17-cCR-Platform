@@ -1,0 +1,60 @@
+Dear Editor,
+
+Please find attached our manuscript named "Combining Checkpointing and Replication for Reliable Execution of Linear Workflows with Fail-Stop and Silent Errors" that we submit to IJNC.
+
+We have addressed the following comments from the reviewers:
+
+===Reviewer 1===
+
+- Section 2.3: 
+    It is assumed that verification is much faster
+    than re-computing.  Please give some examples that fall in
+    such a class of problems.
+    (I agree if the problem is a combinatric decision problem such
+    as SAT and a solution is quickly verified with a variable
+    assignments. But I cannot imagine other examples.)
+
+Answer: we have added an example of such applications (data-oriented kernels using checksums for verification, ABFT).
+
+- Section 2.6: 
+    The problem statement is too intuitive. Please describe the problem
+    formally: The problem is to decide, for each T_i, (1) it is
+    checkpointed or not, (2) it is replicated or not (we have 4^n
+    possible combinations) such that the expected make span is
+    the smallest, etc... 
+
+Answer: we have added a few more sentences to explain  the problem formally.
+
+- Figure 1 (and 7):
+    Please add explanation what this figure stands for.
+    (Please explain a painting rule.)
+    Does a yellow point means that Checkpointing+Replication give
+    the minimum (optimal) makespan? 
+
+Answer: a yellow point means that the optimal solution uses checkpoints and replicas, a purple point means that the optimal uses no checkpoints nor replicas, and so on. We made  it clearer in the new version.
+    
+- p.12, l.16. "(on the left of the black line), the optimal solution does
+      not use replication"
+    Is this statement correct?
+    There is an yellow point just left of the black line (top-center)
+    in Fig 1.
+
+Answer: right, it is slightly incorrect and we have added the missing information. Thank you for pointing this out.
+
+===Reviewer 2===
+
+1. No justification of the simulation parameters (experimental setup, section 5.1.1) is provided.  For example the work span of 10,000 second has been chosen, there is no explanation. One can argue why not 10 sec or 10 million sec. I am not arguing the 10,000 sec is an invalid assumption, but how the authors chose this value. Is it the length of typical workflows, such value has been used in other published literature, is it and educated assumption, or it has been randomly picked. Same comment applies to the distribution of lengths of the tasks in the chain.
+
+Answer: the work span of 10,000 seconds is not very important. What matters is the size of the tasks compared to the error rate, because we cannot checkpoint inside tasks. For example, with tasks of duration 500 seconds and an error rate of 5x10^(-4), the probability of having a failure during the execution of the task is 22%, and it goes up to 39% with an error rate of 0.001.
+For the distributions, the goal was to be as exhaustive as possible to show that our algorithm provides better solution with the use of replication on any chain.
+
+2. Minor point: There is no description of how the simulation experiments were performed. Did the authors coded there solutions or used any math software? Few line explaining would make the paper better.
+
+Answer: we have added a sentence to explain that we used no math library, everything has been coded by us.
+
+3. The authors considered only linear workflows, but in practice there are many workflows which are non-linear. Obviously the optimal solution for non-linear case would be more complex.  In my opinion a suboptimal heuristic solution would be more useful than an optimal solution for linear workflow only.
+
+Answer: this is an interesting research direction and it is already included in our future work. However, chains are present in numerous real workflows and it is also good to have partial optimal solutions.
+
+Yours sincerely,
+Anne Benoit, Aurélien Cavelan, Florina M. Ciorba, Valentin Le Fèvre, Yves Robert
