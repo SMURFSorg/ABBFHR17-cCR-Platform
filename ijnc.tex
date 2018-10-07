@@ -161,8 +161,8 @@ University of Tennessee, Knoxville, TN, USA
   application progress in failure-prone environments.  However, CR I/O alongside
   an application's normal, requisite I/O can increase I/O contention and might
   negatively impact performance. In this work, we consider different aspects
-  (system-level scheduling policies and hardware) that optimize the {\bf overall
-  performance} of concurrently executing CR-based applications that share I/O
+  (system-level scheduling policies and hardware) that optimize the overall
+  performance of concurrently executing CR-based applications that share I/O
   resources. We provide a theoretical model and derive a set of necessary
   constraints to minimize the global \emph{waste} on a given platform.
   %
@@ -174,7 +174,7 @@ University of Tennessee, Knoxville, TN, USA
   performance and maximize the platform throughput. Finally, we evaluate how
   specialized hardware, namely burst buffers, may help to mitigate the I/O
   contention problem.  Overall, these results provide critical analysis and
-  direct guidance on how to design efficient, CR ready, large scale platforms
+  direct guidance on how to design efficient, CR ready, large -scale platforms
   without a large investment in the I/O subsystem.
 %  checkpoint large scale workloads in the presence of
 %  competing I/O while minimizing the impact on application performance.
@@ -260,12 +260,15 @@ cooperative scheduler.  When enough I/O bandwidth is available, each application
 checkpoints with its optimal, Young/Daly, period.  However, when I/O bandwidth is
 scarce, our scheduling algorithm provides an optimal checkpoint period that maximizes
 overall platform throughput. This cooperative checkpoint process is calculated such
-that there is no I/O interference and minimal re-work when failures occur.  We also
+that there is no I/O interference and minimal re-work when failures occur.  
+This approach cannot be implemented without modifying the applications,
+as work must continue until I/O access is granted. Operating and runtime systems should provide these strategies at the level
+of the checkpoint library (\eg inside SCR~\cite{Moody10SCR} or FTI~\cite{Bautista-Gomez11_FTI}, see Section~\ref{sec:feasibility} for details).
+
+In addition, we also
 consider how the integration of specialized hardware, burst buffers, may admit more
 opportunities to overlap I/O and computational operations, therefore redefining the
 I/O contention problem.
-
-
 Altogether, the main contributions of this paper are the following:
 
 \begin{itemize}
@@ -433,7 +436,7 @@ $\nbnodesplat$ nodes. Application class $\app{i}$ specifies:
 \item $\period{i}$: the checkpoint period of each job in $\app{i}$, and
 \item $\ckpt{i}$ and $\reco{i}$: the checkpoint and recovery durations for each job in $\app{i}$ when there is no interference with other I/O operations.
 \end{compactitem}
-
+Unless otherwise specified, $\period{i}$, $\ckpt{i}$ and $\reco{i}$ are expressed in seconds.
 Jobs inherit their characteristics from their classes. To simplify notations,
 for a job $J_j$, we use $\nbnodes{j}, \period{j}, \ckpt{j}$ and
 $\reco{j}$ to denote respectfully the number of nodes, checkpoint
@@ -637,25 +640,25 @@ Then  $J_{i}$ will use the I/O resource for $v_{i}$ seconds.
 \begin{compactitem}
 %
   \item Every other job $J_{j} \in \Catiocat$ will stay idle for $v_{i}$
-  additional seconds, hence its waste $\wapp{i}{j}$ is $$\wapp{i}{j} = q_{j}
+  additional seconds, hence its wasted time $\wapp{i}{j}$ (expressed in seconds) is $$\wapp{i}{j} = q_{j}
   (d_{j} + v_{i})$$ since there are $q_{j}$ processors enrolled in $J_{j}$ that
   remain idle for $d_{j} + v_{i}$ seconds. Note that for $J_{j} \in \Catiocat$, the
-  waste $\wapp{i}{j}$ is deterministic.
+  wasted time $\wapp{i}{j}$ is deterministic.
 %
   \item Every job $J_{j} \in \Catckptcat$ will continue executing for
   $v_{i}$ additional seconds, hence will be exposed to the risk of a failure
   that will strike within $v_{i}/2$ seconds on average. The probability of such
   a failure is $v_{i}/\mu_{j}$, where $\mu_{j} =
-  \muind/q_{j}$. With this
-  probability, the $q_{j}$ processors will have to recover and re-execute $d_{j} +
-  v_{i}/2$ seconds of work, hence the waste $\wapp{i}{j}$ is $$\wapp{i}{j} =
-  \frac{v_{i}}{\mu_{j} } q_{j} (\reco{j} + d_{j} + \frac{v_{i}}{2}) =
+  \muind/q_{j}$. With this probability,
+ the $q_{j}$ processors will have to recover and re-execute $d_{j} +
+  v_{i}/2$ seconds of work, hence the wasted time $\wapp{i}{j}$ is $$\wapp{i}{j} =
+q_{j}  \frac{v_{i}}{\mu_{j} }  (\reco{j} + d_{j} + \frac{v_{i}}{2}) =
   \frac{v_{i}}{\muind} q^{2}_{j} (\reco{j} + d_{j} + \frac{v_{i}}{2})$$ where
   $\reco{j}$ is the recovery time for $J_{j}$. Note that for $J_{j} \in
-  \Catckptcat$, the waste $\wapp{i}{j}$ is probabilistic.
+  \Catckptcat$, the wasted time $\wapp{i}{j}$ is probabilistic.
 %
  \end{compactitem}
- Altogether, the expected waste $\wap{i}$ incurred
+ Altogether, the expected wasted time $\wap{i}$ incurred
 to the other $r+s-1$ candidate jobs is
 $$\wap{i} = \sum_{J_{j} \in \Catiocat, j\neq i} \wapp{i}{j} + \sum_{J_{j} \in \Catckptcat} \wapp{i}{j}$$
 We obtain
@@ -670,7 +673,7 @@ We obtain
 Assume now that the selected job $J_{i} \in \Catckptcat$. Then $J_{i}$
 will use the I/O resource for $\ckpt{i}$ seconds instead of $v_{i}$
 seconds for $J_{i} \in \Catiocat$. We directly obtain the counterpart
-of Equation~\eqref{eq.selection} for its waste $\wap{i}$:
+of Equation~\eqref{eq.selection} for its wasted time$\wap{i}$:
  \begin{equation}
 \label{eq.selection2}
  \begin{array}{rl}
@@ -680,7 +683,7 @@ of Equation~\eqref{eq.selection} for its waste $\wap{i}$:
 \end{equation}
 
 Finally, we select the job $J_{i} \in \Catiocat \cup \Catckptcat$
-whose waste $\wap{i}$ is minimal.
+whose wasted time $\wap{i}$ is minimal.
 
 
 \subsection{Feasibility of Cooperative Strategies}
@@ -1532,6 +1535,22 @@ Finally, a number of works have investigated utilizing recorded system reliabili
 information~\cite{Oliner:2006:Cooperative} and the statistical properties of these
 failures~\cite{Tiwari:2014:Lazy} to determine effective checkpoint intervals for the
 portion of the system used by the workload.
+
+\paragraph*{Burst buffers}
+
+Many architectural studies discuss whether burst buffers 
+should be centralized~\cite{Schenck2017,Mubarak2017}
+or distributed~\cite{Kimpe2012,Tang2017} over the platform.
+More relavant to our study is to decide 
+how burst buffers should be shared across the applications.
+We refer to~\cite{CaoSB17,AupyBE18} for an interesting discussion of various 
+possible strategies, ranging from the privatization of the burst buffers to given compute nodes
+and/or given applications, to the flat sharing of every resource.
+
+In this study, we focus on the simple model where each application has access to a private burst buffer,
+which acts as a cache to the parallel filesystem.
+
+
 
 \paragraph*{Summary}
 
