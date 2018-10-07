@@ -1,4 +1,5 @@
 \documentclass[two]{article}
+
 \usepackage{IJNC}
 
 \setcounter{page}{1}
@@ -260,7 +261,7 @@ cooperative scheduler.  When enough I/O bandwidth is available, each application
 checkpoints with its optimal, Young/Daly, period.  However, when I/O bandwidth is
 scarce, our scheduling algorithm provides an optimal checkpoint period that maximizes
 overall platform throughput. This cooperative checkpoint process is calculated such
-that there is no I/O interference and minimal re-work when failures occur.  
+that there is no I/O interference and minimal re-work when failures occur.
 This approach cannot be implemented without modifying the applications,
 as work must continue until I/O access is granted. Operating and runtime systems should provide these strategies at the level
 of the checkpoint library (\eg inside SCR~\cite{Moody10SCR} or FTI~\cite{Bautista-Gomez11_FTI}, see Section~\ref{sec:feasibility} for details).
@@ -1538,12 +1539,12 @@ portion of the system used by the workload.
 
 \paragraph*{Burst buffers}
 
-Many architectural studies discuss whether burst buffers 
+Many architectural studies discuss whether burst buffers
 should be centralized~\cite{Schenck2017,Mubarak2017}
 or distributed~\cite{Kimpe2012,Tang2017} over the platform.
-More relavant to our study is to decide 
+More relevant to our study is to decide
 how burst buffers should be shared across the applications.
-We refer to~\cite{CaoSB17,AupyBE18} for an interesting discussion of various 
+We refer to~\cite{CaoSB17,AupyBE18} for an interesting discussion of various
 possible strategies, ranging from the privatization of the burst buffers to given compute nodes
 and/or given applications, to the flat sharing of every resource.
 
