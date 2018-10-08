@@ -32,6 +32,8 @@ for intvl in t['ckpt_intvl'].unique():
 
                 no_bb = v[ v.method=="No_bb" ]
                 simple_bb = v[ v.method=="Simple_bb" ]
+                if( len(no_bb.index) < 3 or len(simple_bb.index) < 3 ):
+                    print("Not enough data with " + str(intvl) + ", System BW of " + str(bw) + ", Burst Buffer BW of " + str(bb_bw) + ", and System MTBF of " +str(mtbf) + " to generate statistics");
                 d0 = simple_bb['Waste Ratio'].quantile(q=.1) - no_bb['Waste Ratio'].quantile(q=.1)
                 d1 = simple_bb['Waste Ratio'].mean() - no_bb['Waste Ratio'].mean()
                 d2 = simple_bb['Waste Ratio'].quantile(q=.9) - no_bb['Waste Ratio'].quantile(q=.9)

@@ -1,6 +1,5 @@
 Dear Editor,
 
-<<<<<<< .mine
 Please find attached the revision of our manuscript entitled 
 "Checkpointing Strategies for Shared High-Performance Computing Platforms" 
 that we submit for possible publication in the IJNC's special issue of the APDCM Workshop 2018.
@@ -52,4 +51,7 @@ Answer: added that all symboles (period, checkpoint, recovery, wasted time) are 
 - Figures 8 and 9: there are lines with/without variances. What are the differences?
 Can you explain or modify the explanations or graphs?
 
-Answer: Thomas.
+Answer: We thank the reviewer for pointing this out. The scripts we
+used generated too few runs for the two curves to compute
+statistics. We fixed the scripts, generated more runs, and included
+the corrected curves in the amended version of the paper.
