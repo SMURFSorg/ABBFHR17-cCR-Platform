@@ -54,4 +54,4 @@ Can you explain or modify the explanations or graphs?
 Answer: We thank the reviewer for pointing this out. The scripts we
 used generated too few runs for the two curves to compute
 statistics. We fixed the scripts, generated more runs, and included
-the corrected curves in the amended version of the paper.
+the corrected curves in the revised version of the paper.
